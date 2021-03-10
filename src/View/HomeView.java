@@ -42,7 +42,6 @@ public class HomeView implements ActionListener {
     private JPanel materialsPanel;
     private JPanel batchesPanel;
     private JPanel formulasPanel;
-    private JPanel productsPanel;
     private JPanel vendorsPanel;
     private JPanel testingPanel;
 
