@@ -14,6 +14,8 @@ import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 
+import static javax.swing.BorderFactory.createEmptyBorder;
+
 
 public class HomeView implements ActionListener {
 
@@ -42,6 +44,7 @@ public class HomeView implements ActionListener {
     private JPanel formulasPanel;
     private JPanel productsPanel;
     private JPanel vendorsPanel;
+    private JPanel testingPanel;
 
     /*
      *
@@ -234,8 +237,31 @@ public class HomeView implements ActionListener {
     private JTextField VvContactField;
     private JButton clearVendorsSelectionButton;
     private JButton deleteVendorButton;
-    private JPanel testingPanel;
     private JTable VvTable;
+
+    /*
+     *
+     *      TESTING
+     *
+     */
+
+    private JComboBox AtFormulaComboBox;
+    private JPanel VtTablePanel;
+    private JPanel VtPanel;
+    private JTextField AtTestIdField;
+    private JButton addTestButton;
+    private JTable VtTable;
+
+    /*
+     *
+     *      STANDARD SPECIFICATION
+     *
+     */
+
+    private JTextField AsSpecificationIdField;
+    private JPanel VsTablePanel;
+    private JPanel VsPanel;
+    private JTable VsTable;
 
     /*
      *  ------------------------
@@ -293,6 +319,8 @@ public class HomeView implements ActionListener {
         VbTablePanel.add(new JScrollPane(VbTable));
         VfTablePanel.add(new JScrollPane(VfTable));
         VvTablePanel.add(new JScrollPane(VvTable));
+        VtTablePanel.add(new JScrollPane(VtTable));
+        VsTablePanel.add(new JScrollPane(VsTable));
     }
 
     public void addActionListeners(SystemController controller) {
@@ -992,12 +1020,14 @@ public class HomeView implements ActionListener {
 
         CbFormulaComboBox.removeAllItems();
         CbFormulaComboBox.addItem("Select Formula");
+        AtFormulaComboBox.addItem("Select Formula");
 
         while (formulas.next()) {
             for (int i = 0 ; i < columnCount ; i++) {
                 data[formulas.getRow() - 1][i] = formulas.getString(i + 1);
             }
             CbFormulaComboBox.addItem(formulas.getString(1));
+            AtFormulaComboBox.addItem(formulas.getString(1));
         }
         VfTable = new JTable(data, columnNames);
         VfTable.setAutoCreateRowSorter(true);
