@@ -1167,8 +1167,6 @@ public class SystemController implements ActionListener, TableModelListener, Pro
             getFormulas();
         } else if (e.getSource() == view.getHomeView().getDeleteFormulaButton()) {
             deleteFormula();
-        } else if (e.getSource() == view.getHomeView().getUpdatePricesButton()) {
-            updateFormulasPrice();
         } else if (e.getSource() == view.getHomeView().getAvAddButton()) {
             addVendor();
         } else if (e.getSource() == view.getHomeView().getVvViewButton()) {
