@@ -954,7 +954,6 @@ public class SystemController implements ActionListener, TableModelListener, Pro
     void viewVendors() {
         if (checkViewVendors()) {
             boolean vendorIsSelected = view.getHomeView().getVvVendorRadioButton().isSelected();
-            boolean productIsSelected = view.getHomeView().getVvProductRadioButton().isSelected();
             boolean contactIsSelected = view.getHomeView().getVvContactRadioButton().isSelected();
 
             String query = "";
@@ -962,9 +961,6 @@ public class SystemController implements ActionListener, TableModelListener, Pro
             if (vendorIsSelected) {
                 String vendorName = "'" + view.getHomeView().getVvVendor() + "'";
                 query = "SELECT * FROM public.\"Vendors\" WHERE \"Vendor_name\" = " + vendorName;
-            } else if (productIsSelected) {
-                String product = "'" + view.getHomeView().getVvProduct() + "'";
-                query = "SELECT * FROM \"Vendors\" WHERE \"Vendor_products\" LIKE '%' || " + product + " || '%'";
             } else if (contactIsSelected) {
                 String contactName = "'" + view.getHomeView().getVvContact() + "'";
                 query = "SELECT * FROM public.\"Vendors\" WHERE \"Contact_name\" = " + contactName;
@@ -991,11 +987,6 @@ public class SystemController implements ActionListener, TableModelListener, Pro
                 System.out.println("VvV");
                 flag = false;
                 showMessage("Error viewing vendors", "Please enter a vendor name to filter by.");
-            }
-        } else if (view.getHomeView().getVvProductRadioButton().isSelected()) {
-            if (view.getHomeView().getVvProduct().equals("")) {
-                flag = false;
-                showMessage("Error viewing vendors", "Please enter a product to filter by.");
             }
         } else if (view.getHomeView().getVvContactRadioButton().isSelected()) {
             if (view.getHomeView().getVvContact().equals("")) {

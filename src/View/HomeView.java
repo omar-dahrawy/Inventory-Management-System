@@ -202,7 +202,6 @@ public class HomeView implements ActionListener {
     private JPanel VfTablePanel;
     private JButton VfRefreshButton;
     private JButton deleteFormulaButton;
-    private JButton updatePricesButton;
     private JTable VfTable;
 
     /*
@@ -229,10 +228,8 @@ public class HomeView implements ActionListener {
     private JButton VvViewButton;
     private ButtonGroup VvRadioButtonGroup = new ButtonGroup();
     private JRadioButton VvVendorRadioButton;
-    private JRadioButton VvProductRadioButton;
     private JRadioButton VvContactRadioButton;
     private JTextField VvVendorField;
-    private JTextField VvProductField;
     private JTextField VvContactField;
     private JButton clearVendorsSelectionButton;
     private JButton deleteVendorButton;
@@ -309,7 +306,6 @@ public class HomeView implements ActionListener {
         VbRadioButtonGroup.add(VbFormulaRadioButton);
 
         VvRadioButtonGroup.add(VvVendorRadioButton);
-        VvRadioButtonGroup.add(VvProductRadioButton);
         VvRadioButtonGroup.add(VvContactRadioButton);
 
         VeTablePanel.add(new JScrollPane(VeTable));
@@ -354,12 +350,10 @@ public class HomeView implements ActionListener {
 
         createNewFormulaButton.addActionListener(controller);
         VfRefreshButton.addActionListener(controller);
-        updatePricesButton.addActionListener(controller);
         deleteFormulaButton.addActionListener(controller);
 
         AvAddButton.addActionListener(controller);
         VvVendorRadioButton.addActionListener(this);
-        VvProductRadioButton.addActionListener(this);
         VvContactRadioButton.addActionListener(this);
         VvViewButton.addActionListener(controller);
         clearVendorsSelectionButton.addActionListener(this);
@@ -779,10 +773,6 @@ public class HomeView implements ActionListener {
         return deleteFormulaButton;
     }
 
-    public JButton getUpdatePricesButton() {
-        return updatePricesButton;
-    }
-
     public JTable getVfTable() {
         return VfTable;
     }
@@ -839,20 +829,12 @@ public class HomeView implements ActionListener {
         return VvVendorRadioButton;
     }
 
-    public JRadioButton getVvProductRadioButton() {
-        return VvProductRadioButton;
-    }
-
     public JRadioButton getVvContactRadioButton() {
         return VvContactRadioButton;
     }
 
     public String getVvVendor() {
         return VvVendorField.getText();
-    }
-
-    public String getVvProduct() {
-        return VvProductField.getText();
     }
 
     public String getVvContact() {
@@ -1181,20 +1163,13 @@ public class HomeView implements ActionListener {
 
         else if (e.getSource() == VvVendorRadioButton) {
             VvVendorField.setEnabled(!VvVendorField.isEnabled());
-            VvProductField.setEnabled(false);
-            VvContactField.setEnabled(false);
-        } else if (e.getSource() == VvProductRadioButton) {
-            VvProductField.setEnabled(!VvProductField.isEnabled());
-            VvVendorField.setEnabled(false);
             VvContactField.setEnabled(false);
         } else if (e.getSource() == VvContactRadioButton) {
             VvContactField.setEnabled(!VvContactField.isEnabled());
-            VvProductField.setEnabled(false);
             VvVendorField.setEnabled(false);
         } else if (e.getSource() == clearVendorsSelectionButton) {
             VvRadioButtonGroup.clearSelection();
             VvVendorField.setEnabled(false);
-            VvProductField.setEnabled(false);
             VvContactField.setEnabled(false);
         }
 
