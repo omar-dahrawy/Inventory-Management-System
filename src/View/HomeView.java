@@ -801,16 +801,6 @@ public class HomeView implements ActionListener {
         return AvVendorNameField.getText();
     }
 
-    public String getAvProducts() {
-        String productsString = "";
-        String[] orderIDs = AvProductsArea.getText().split("\n");
-        for (int i = 0; i < orderIDs.length; i++) {
-            String orderID = orderIDs[i];
-            productsString += i != orderIDs.length - 1 ? (orderID + ",") : (orderID);
-        }
-        return productsString;
-    }
-
     public String getAvContactName() {
         return AvContactNameField.getText();
     }

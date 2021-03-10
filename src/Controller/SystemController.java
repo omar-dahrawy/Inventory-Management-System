@@ -902,19 +902,17 @@ public class SystemController implements ActionListener, TableModelListener, Pro
     void addVendor() {
         if (checkAddVendor()) {
             String vendorName = view.getHomeView().getAvVendorName();
-            String products = view.getHomeView().getAvProducts();
             String contactName = view.getHomeView().getAvContactName();
             String contactNumber = view.getHomeView().getAvContactNumber();
             String contactEmail = view.getHomeView().getAvContactEmail();
 
-            String sql = "INSERT INTO \"Vendors\" values (DEFAULT, ?, ?, ?, ?, ?)";
+            String sql = "INSERT INTO \"Vendors\" values (DEFAULT, ?, ?, ?, ?)";
             try {
                 PreparedStatement query = databaseConnection.prepareStatement(sql);
                 query.setString(1, vendorName);
-                query.setString(2, products);
-                query.setString(3, contactName);
-                query.setString(4, contactNumber);
-                query.setString(5, contactEmail);
+                query.setString(2, contactName);
+                query.setString(3, contactNumber);
+                query.setString(4, contactEmail);
                 query.executeUpdate();
                 query.close();
                 showMessage("Operation successful", "New vendor added.");
@@ -933,9 +931,6 @@ public class SystemController implements ActionListener, TableModelListener, Pro
         if (view.getHomeView().getAvVendorName().equals("")) {
             flag = false;
             showMessage("Error adding vendor", "Vendor name cannot be empty.");
-        } else if (view.getHomeView().getAvProducts().equals("")) {
-            flag = false;
-            showMessage("Error adding vendor", "Vendor products cannot be empty.");
         } else if (view.getHomeView().getAvContactName().equals("")) {
             flag = false;
             showMessage("Error adding vendor","Contact name cannot be empty.");

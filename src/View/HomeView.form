@@ -2941,36 +2941,21 @@
                         </constraints>
                         <properties/>
                       </component>
-                      <component id="72006" class="javax.swing.JLabel">
-                        <constraints>
-                          <grid row="5" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                          <gridbag weightx="0.0" weighty="0.0"/>
-                        </constraints>
-                        <properties>
-                          <text value="Vendor products"/>
-                        </properties>
-                      </component>
                       <vspacer id="22123">
                         <constraints>
-                          <grid row="4" column="1" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
+                          <grid row="6" column="1" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
                           <gridbag weightx="0.0" weighty="0.02"/>
                         </constraints>
                       </vspacer>
                       <component id="3098b" class="javax.swing.JButton" binding="AvAddButton">
                         <constraints>
-                          <grid row="9" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                          <grid row="7" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
                           <gridbag weightx="0.0" weighty="0.0"/>
                         </constraints>
                         <properties>
                           <text value="Add vendor"/>
                         </properties>
                       </component>
-                      <vspacer id="74bce">
-                        <constraints>
-                          <grid row="6" column="1" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
-                          <gridbag weightx="0.0" weighty="0.02"/>
-                        </constraints>
-                      </vspacer>
                       <hspacer id="3fc16">
                         <constraints>
                           <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
@@ -2985,7 +2970,7 @@
                       </hspacer>
                       <vspacer id="45811">
                         <constraints>
-                          <grid row="10" column="1" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
+                          <grid row="8" column="1" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
                           <gridbag weightx="0.0" weighty="0.02"/>
                         </constraints>
                       </vspacer>
@@ -2995,24 +2980,27 @@
                           <gridbag weightx="0.0" weighty="0.02"/>
                         </constraints>
                       </vspacer>
-                      <component id="8d21f" class="javax.swing.JTextArea" binding="AvProductsArea">
+                      <component id="1083c" class="javax.swing.JLabel">
                         <constraints>
-                          <grid row="5" column="3" row-span="4" col-span="1" vsize-policy="6" hsize-policy="6" anchor="0" fill="3" indent="0" use-parent-layout="false">
-                            <preferred-size width="150" height="50"/>
+                          <grid row="5" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                          <gridbag weightx="0.0" weighty="0.0"/>
+                        </constraints>
+                        <properties>
+                          <text value="Contact name"/>
+                        </properties>
+                      </component>
+                      <component id="a60d2" class="javax.swing.JTextField" binding="AvContactNameField">
+                        <constraints>
+                          <grid row="5" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
+                            <preferred-size width="150" height="-1"/>
                           </grid>
                           <gridbag weightx="0.0" weighty="0.0"/>
                         </constraints>
                         <properties/>
                       </component>
-                      <vspacer id="31b58">
+                      <vspacer id="8068e">
                         <constraints>
-                          <grid row="7" column="1" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
-                          <gridbag weightx="0.0" weighty="0.02"/>
-                        </constraints>
-                      </vspacer>
-                      <vspacer id="cf7b4">
-                        <constraints>
-                          <grid row="8" column="1" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
+                          <grid row="4" column="1" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
                           <gridbag weightx="0.0" weighty="0.02"/>
                         </constraints>
                       </vspacer>
@@ -3031,24 +3019,9 @@
                           <gridbag weightx="0.02" weighty="0.0"/>
                         </constraints>
                       </hspacer>
-                      <component id="1083c" class="javax.swing.JLabel">
-                        <constraints>
-                          <grid row="2" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                          <gridbag weightx="0.0" weighty="0.0"/>
-                        </constraints>
-                        <properties>
-                          <text value="Contact name"/>
-                        </properties>
-                      </component>
-                      <vspacer id="1883b">
-                        <constraints>
-                          <grid row="3" column="1" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
-                          <gridbag weightx="0.0" weighty="0.02"/>
-                        </constraints>
-                      </vspacer>
                       <component id="48902" class="javax.swing.JLabel">
                         <constraints>
-                          <grid row="4" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                          <grid row="2" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                           <gridbag weightx="0.0" weighty="0.0"/>
                         </constraints>
                         <properties>
@@ -3057,7 +3030,7 @@
                       </component>
                       <component id="24b1e" class="javax.swing.JLabel">
                         <constraints>
-                          <grid row="6" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                          <grid row="4" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                           <gridbag weightx="0.0" weighty="0.0"/>
                         </constraints>
                         <properties>
@@ -3066,7 +3039,7 @@
                       </component>
                       <vspacer id="86017">
                         <constraints>
-                          <grid row="5" column="1" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
+                          <grid row="3" column="1" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
                           <gridbag weightx="0.0" weighty="0.02"/>
                         </constraints>
                       </vspacer>
@@ -3084,13 +3057,13 @@
                       </hspacer>
                       <vspacer id="8b1ad">
                         <constraints>
-                          <grid row="7" column="2" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
+                          <grid row="5" column="2" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
                           <gridbag weightx="0.0" weighty="0.06"/>
                         </constraints>
                       </vspacer>
                       <vspacer id="c57c3">
                         <constraints>
-                          <grid row="8" column="3" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
+                          <grid row="6" column="3" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
                           <gridbag weightx="0.0" weighty="0.03"/>
                         </constraints>
                       </vspacer>
@@ -3100,18 +3073,9 @@
                           <gridbag weightx="0.0" weighty="0.07"/>
                         </constraints>
                       </vspacer>
-                      <component id="a60d2" class="javax.swing.JTextField" binding="AvContactNameField">
-                        <constraints>
-                          <grid row="2" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
-                            <preferred-size width="150" height="-1"/>
-                          </grid>
-                          <gridbag weightx="0.0" weighty="0.0"/>
-                        </constraints>
-                        <properties/>
-                      </component>
                       <component id="a94d1" class="javax.swing.JTextField" binding="AvContactNumberField">
                         <constraints>
-                          <grid row="4" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
+                          <grid row="2" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
                             <preferred-size width="150" height="-1"/>
                           </grid>
                           <gridbag weightx="1.0" weighty="0.0"/>
@@ -3120,7 +3084,7 @@
                       </component>
                       <component id="594c0" class="javax.swing.JTextField" binding="AvContactEmailField">
                         <constraints>
-                          <grid row="6" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
+                          <grid row="4" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
                             <preferred-size width="150" height="-1"/>
                           </grid>
                           <gridbag weightx="0.0" weighty="0.0"/>
@@ -3156,55 +3120,37 @@
                     <children>
                       <hspacer id="ea17">
                         <constraints>
-                          <grid row="11" column="0" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                          <grid row="9" column="0" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
                           <gridbag weightx="0.1" weighty="0.0"/>
                         </constraints>
                       </hspacer>
                       <hspacer id="d23d5">
                         <constraints>
-                          <grid row="11" column="4" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                          <grid row="9" column="4" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
                           <gridbag weightx="0.1" weighty="0.0"/>
                         </constraints>
                       </hspacer>
                       <vspacer id="d9a72">
                         <constraints>
-                          <grid row="6" column="1" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
+                          <grid row="4" column="1" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
                           <gridbag weightx="0.0" weighty="0.03"/>
                         </constraints>
                       </vspacer>
                       <vspacer id="9357f">
                         <constraints>
-                          <grid row="8" column="1" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
+                          <grid row="6" column="1" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
                           <gridbag weightx="0.0" weighty="0.03"/>
                         </constraints>
                       </vspacer>
-                      <hspacer id="11bfd">
-                        <constraints>
-                          <grid row="5" column="2" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
-                          <gridbag weightx="0.0" weighty="0.0"/>
-                        </constraints>
-                      </hspacer>
-                      <component id="538bd" class="javax.swing.JTextField" binding="VvProductField">
-                        <constraints>
-                          <grid row="5" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
-                            <preferred-size width="150" height="-1"/>
-                          </grid>
-                          <gridbag weightx="1.0" weighty="0.0"/>
-                        </constraints>
-                        <properties>
-                          <enabled value="false"/>
-                          <visible value="true"/>
-                        </properties>
-                      </component>
                       <vspacer id="c287a">
                         <constraints>
-                          <grid row="12" column="1" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
+                          <grid row="10" column="1" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
                           <gridbag weightx="0.0" weighty="0.0"/>
                         </constraints>
                       </vspacer>
                       <vspacer id="3a51">
                         <constraints>
-                          <grid row="16" column="1" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
+                          <grid row="14" column="1" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
                           <gridbag weightx="0.0" weighty="0.03"/>
                         </constraints>
                       </vspacer>
@@ -3216,7 +3162,7 @@
                       </vspacer>
                       <component id="1585e" class="javax.swing.JButton" binding="VvViewButton">
                         <constraints>
-                          <grid row="11" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                          <grid row="9" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
                           <gridbag weightx="0.1" weighty="0.0"/>
                         </constraints>
                         <properties>
@@ -3225,7 +3171,7 @@
                       </component>
                       <component id="e7d67" class="javax.swing.JButton" binding="deleteVendorButton">
                         <constraints>
-                          <grid row="15" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                          <grid row="13" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
                           <gridbag weightx="0.1" weighty="0.0"/>
                         </constraints>
                         <properties>
@@ -3234,14 +3180,14 @@
                       </component>
                       <component id="13d28" class="javax.swing.JSeparator">
                         <constraints>
-                          <grid row="13" column="1" row-span="1" col-span="3" vsize-policy="6" hsize-policy="6" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+                          <grid row="11" column="1" row-span="1" col-span="3" vsize-policy="6" hsize-policy="6" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
                           <gridbag weightx="0.0" weighty="0.0"/>
                         </constraints>
                         <properties/>
                       </component>
                       <vspacer id="39008">
                         <constraints>
-                          <grid row="14" column="1" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
+                          <grid row="12" column="1" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
                           <gridbag weightx="0.0" weighty="0.0"/>
                         </constraints>
                       </vspacer>
@@ -3254,18 +3200,9 @@
                           <text value="Vendor name"/>
                         </properties>
                       </component>
-                      <component id="84e85" class="javax.swing.JRadioButton" binding="VvProductRadioButton">
-                        <constraints>
-                          <grid row="5" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                          <gridbag weightx="0.0" weighty="0.0"/>
-                        </constraints>
-                        <properties>
-                          <text value="Product"/>
-                        </properties>
-                      </component>
                       <component id="6a5fe" class="javax.swing.JRadioButton" binding="VvContactRadioButton">
                         <constraints>
-                          <grid row="7" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                          <grid row="5" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                           <gridbag weightx="0.0" weighty="0.0"/>
                         </constraints>
                         <properties>
@@ -3274,7 +3211,7 @@
                       </component>
                       <component id="f2050" class="javax.swing.JButton" binding="clearVendorsSelectionButton">
                         <constraints>
-                          <grid row="9" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                          <grid row="7" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
                           <gridbag weightx="0.1" weighty="0.0"/>
                         </constraints>
                         <properties>
@@ -3283,7 +3220,7 @@
                       </component>
                       <vspacer id="72f29">
                         <constraints>
-                          <grid row="10" column="3" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
+                          <grid row="8" column="3" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
                           <gridbag weightx="0.0" weighty="0.03"/>
                         </constraints>
                       </vspacer>
@@ -3302,12 +3239,6 @@
                           <gridbag weightx="0.0" weighty="0.01"/>
                         </constraints>
                       </vspacer>
-                      <vspacer id="fc1ed">
-                        <constraints>
-                          <grid row="4" column="1" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
-                          <gridbag weightx="0.0" weighty="0.03"/>
-                        </constraints>
-                      </vspacer>
                       <component id="3c9f6" class="javax.swing.JTextField" binding="VvVendorField">
                         <constraints>
                           <grid row="3" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
@@ -3322,7 +3253,7 @@
                       </component>
                       <component id="aa3e5" class="javax.swing.JTextField" binding="VvContactField">
                         <constraints>
-                          <grid row="7" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
+                          <grid row="5" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
                             <preferred-size width="150" height="-1"/>
                           </grid>
                           <gridbag weightx="1.0" weighty="0.0"/>
@@ -3332,6 +3263,12 @@
                           <visible value="true"/>
                         </properties>
                       </component>
+                      <hspacer id="f6769">
+                        <constraints>
+                          <grid row="3" column="2" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                          <gridbag weightx="0.0" weighty="0.0"/>
+                        </constraints>
+                      </hspacer>
                     </children>
                   </grid>
                   <hspacer id="9ab2e">
