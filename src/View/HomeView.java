@@ -971,7 +971,7 @@ public class HomeView implements ActionListener {
                 data[materials.getRow()-1][i] = materials.getString(i+1);
             }
             MeComboBox.addItem(materials.getString(2));
-            materialUnits.add(materials.getString(6));
+            materialUnits.add(materials.getString(5));
             materialIDs.add(materials.getString(1));
         }
 

@@ -2,7 +2,6 @@ package Controller;
 
 import View.SystemView;
 
-import javax.management.InstanceNotFoundException;
 import javax.swing.*;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
@@ -529,21 +528,20 @@ public class SystemController implements ActionListener, TableModelListener, Pro
     }
 
     void updateMaterial(TableModelEvent e) {
-        if (view.getHomeView().getVmTable().getColumnName(e.getColumn()).equals("Available_quantity")) {
-            if (checkUpdatePrivilege()) {
-                int row = e.getFirstRow();
-                int column = e.getColumn();
-                String newValue = view.getHomeView().getVmTable().getValueAt(row, column).toString();
-                String id = view.getHomeView().getVmTable().getValueAt(row, 0).toString();
+        if (checkUpdatePrivilege()) {
+            int row = e.getFirstRow();
+            int column = e.getColumn();
+            String columnName = view.getHomeView().getVmTable().getColumnName(column);
+            String newValue = view.getHomeView().getVmTable().getValueAt(row, column).toString();
+            String id = view.getHomeView().getVmTable().getValueAt(row, 0).toString();
 
-                String query = "UPDATE \"Materials\" SET \"Available_quantity\" = '" + newValue + "' WHERE \"Material_ID\" = " + id;
-                try {
-                    sqlStatement.executeUpdate(query);
-                    showMessage("Update successful", "Item updated successfully.");
-                } catch (SQLException throwables) {
-                    throwables.printStackTrace();
-                    showMessage("Error performing operation", "Could not update item. Please review the new values.");
-                }
+            String query = "UPDATE \"Materials\" SET \"" + columnName + "\" = '" + newValue + "' WHERE \"Material_ID\" = " + id;
+            try {
+                sqlStatement.executeUpdate(query);
+                showMessage("Update successful", "Item updated successfully.");
+            } catch (SQLException throwables) {
+                throwables.printStackTrace();
+                showMessage("Error performing operation", "Could not update item. Please review the new values.");
             }
         }
         getMaterials();
@@ -557,14 +555,13 @@ public class SystemController implements ActionListener, TableModelListener, Pro
 
     void addMaterial() {
         if (checkAddMaterial()) {
-            String sql = "INSERT INTO \"Materials\" values (DEFAULT, ?, ?, ?, ?, ?)";
+            String sql = "INSERT INTO \"Materials\" values (DEFAULT, ?, ?, ?, ?)";
             try {
                 PreparedStatement query = databaseConnection.prepareStatement(sql);
                 query.setString( 1, view.getHomeView().getAmNameField());
                 query.setDouble( 2, 0.0);
                 query.setDate( 3, java.sql.Date.valueOf(new SimpleDateFormat("yyyy-MM-dd").format(new Date())));
-                query.setBoolean( 4, false);
-                query.setString( 5, view.getHomeView().getAmUnitField());
+                query.setString( 4, view.getHomeView().getAmUnitField());
                 query.executeUpdate();
                 query.close();
                 showMessage("Operation successful","New material added.");
@@ -1140,14 +1137,22 @@ public class SystemController implements ActionListener, TableModelListener, Pro
      */
 
     void addMaterials() {
-        String sql = "INSERT INTO \"Materials\" values (DEFAULT, ?, ?, ?, ?, ?)";
+        String delete = "DELETE FROM \"Materials\"";
+        String reset = "ALTER SEQUENCE \"Materials_Material_ID_seq\" RESTART WITH 1";
+        String insert = "INSERT INTO \"Materials\" values (DEFAULT, ?, ?, ?, ?)";
+
+        try {
+            sqlStatement.executeUpdate(delete);
+            sqlStatement.executeUpdate(reset);
+        } catch (SQLException exception) {
+            exception.printStackTrace();
+        }
 
         try (BufferedReader br = new BufferedReader(new FileReader("/Users/omar_aldahrawy/Desktop/Materials.txt"))) {
-            PreparedStatement query = databaseConnection.prepareStatement(sql);
+            PreparedStatement query = databaseConnection.prepareStatement(insert);
             query.setDouble( 2, 0.0);
             query.setDate( 3, java.sql.Date.valueOf(new SimpleDateFormat("yyyy-MM-dd").format(new Date())));
-            query.setBoolean( 4, false);
-            query.setString( 5, "Kg");
+            query.setString( 4, "Kg");
             String line = "";
             while ((line = br.readLine()) != null) {
                 query.setString( 1, line);
@@ -1311,12 +1316,6 @@ public class SystemController implements ActionListener, TableModelListener, Pro
                 if (view.getHomeView().getVoTable().getColumnName(view.getHomeView().getVoTable().getSelectedColumn()).equals("Status")) {
                     showMessage("Editing order status","To edit an order's status, enter the number corresponding\nto the status you want to change to:\n\n" +
                             "1 : Received Order\n2 : In Production\n3 : Preparing for Delivery\n4 : Delivered");
-                }
-            }
-        } else if (evt.getSource() == view.getHomeView().getVmTable()) {
-            if (evt.getPropertyName().equals("tableCellEditor")) {
-                if (!view.getHomeView().getVmTable().getColumnName(view.getHomeView().getVmTable().getSelectedColumn()).equals("Available_quantity")) {
-                    showMessage("Selection cannot be edited","Selected column cannot be updated.\nYou can only update a material's available quantity.");
                 }
             }
         }
