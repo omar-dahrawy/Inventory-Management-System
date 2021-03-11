@@ -58,13 +58,13 @@ public class SystemController implements ActionListener, TableModelListener, Pro
                     currentUserID = Integer.parseInt(users.getString(1));
                     users.close();
                     getMaterials();
+                    viewVendors();
                     viewGeneralExpenses();
                     viewMaterialExpenses();
                     getStatusDomain();
                     viewBatches();
                     viewOrders();
                     getFormulas();
-                    viewVendors();
                     view.goToHome();
                 } else {
                     showMessage("Login Error", "Password is incorrect.");
@@ -132,14 +132,15 @@ public class SystemController implements ActionListener, TableModelListener, Pro
     void addMaterialExpense() {
         if (checkMaterialExpenses()) {
             String materialID = view.getHomeView().getMaterialID();
-            String materialName = view.getHomeView().getMeComboBox().getSelectedItem().toString();
             String materialQuantity = view.getHomeView().getMeQuantity() + ",";
+            String materialInvoice = "'" + view.getHomeView().getMeInvoice() + "'";
+            String vendorID = view.getHomeView().getVendorID();
             String materialUnit = "'" + view.getHomeView().getMaterialUnit() + "',";
             String dateOfEntry = "'" + new SimpleDateFormat("yyyy-MM-dd").format(new Date()) + "',";
-            String dateOfPurchase = "'" + view.getHomeView().getMeDate() + "'";
+            String dateOfPurchase = "'" + view.getHomeView().getMeDate() + "',";
 
             try {
-                String sqlQuery = "insert into public.\"Material_Expenses\" values (DEFAULT," + materialID + "," + materialQuantity + materialUnit + currentUserID + "," + dateOfEntry + dateOfPurchase + ")";
+                String sqlQuery = "insert into public.\"Material_Expenses\" values (DEFAULT," + materialID + "," + materialQuantity + materialUnit + currentUserID + "," + dateOfEntry + dateOfPurchase + vendorID + "," + materialInvoice + ")";
                 sqlStatement.executeUpdate(sqlQuery);
                 showMessage("Operation successful", "General Expense added.");
                 String updateQuery = "UPDATE \"Materials\" SET \"Available_quantity\" = \"Available_quantity\" + " + view.getHomeView().getMeQuantity() + " WHERE \"Material_ID\" = " + view.getHomeView().getMaterialID();
@@ -271,7 +272,7 @@ public class SystemController implements ActionListener, TableModelListener, Pro
         String VeDoeSelected = (view.getHomeView().getVmeDoeRadioButton().isSelected()) ? ((" WHERE \"Date_of_entry\" >= '" + fromDate + "'" ) + (toDate != null ? " AND \"Date_of_entry\" <= '" + toDate + "'" : "")) : "";
         String VeDopSelected = (view.getHomeView().getVmeDopRadioButton().isSelected()) ? ((" WHERE \"Date_of_purchase\" >= '" + fromDate + "'" ) + (toDate != null ? " AND \"Date_of_purchase\" <= '" + toDate + "'" : "")) : "";
 
-        String query = "SELECT * FROM public.\"Material_Expenses\"" + VeDoeSelected + VeDopSelected;
+        String query = "SELECT \"Purchase_ID\", \"Material_ID\", \"Quantity\", \"Unit\", \"Vendor\", \"Invoice_number\", \"User_ID\", \"Date_of_entry\", \"Date_of_purchase\" FROM public.\"Material_Expenses\"" + VeDoeSelected + VeDopSelected;
 
         if (checkViewMaterialExpenses()) {
             try {
@@ -865,42 +866,6 @@ public class SystemController implements ActionListener, TableModelListener, Pro
                 getFormulas();
             }
         }
-    }
-
-    String [] getFormulaMaterials(String formulaDescription) {
-        String [] materials = formulaDescription.split("-");
-        materials[0] = materials[0].substring(0, materials[0].indexOf(':'));
-        for (int i = 1 ; i < materials.length ; i++) {
-            String material = materials[i];
-            materials[i] = material.substring(1, material.indexOf(':'));
-        }
-        return materials;
-    }
-
-    int [] getFormulaQuantities(String formulaDescription) {
-        String [] materials = formulaDescription.split("-");
-        int [] quantities = new int[materials.length];
-        for (int i = 0 ; i < materials.length ; i++) {
-            String material = materials[i].substring(materials[i].indexOf(':') + 2);;
-            for (int j = 1 ; j < material.length() ; j++) {
-                if (material.substring(j, j+1).equals(" ")) {
-                    material = material.substring(0, j);
-                    quantities[i] = Integer.parseInt(material);
-                    break;
-                }
-            }
-        }
-        return quantities;
-    }
-
-    int getMaterialID(String materialName) {
-        int row = 0;
-        for (; row < view.getHomeView().getVmTable().getRowCount() ; row++) {
-            if (view.getHomeView().getVmTable().getValueAt(row, 1).toString().equals(materialName)) {
-                break;
-            }
-        }
-        return Integer.parseInt(view.getHomeView().getVmTable().getValueAt(row, 0).toString());
     }
 
     /*

@@ -60,11 +60,13 @@ public class HomeView implements ActionListener {
      *
      */
 
-    private JComboBox MeComboBox;
+    private JComboBox MeMaterialComboBox;
     private ArrayList<String> materialUnits = new ArrayList<>();
     private ArrayList<String> materialIDs = new ArrayList<>();
     private JLabel MeQuantityLabel;
     private JTextField MeQuantityField;
+    private JComboBox MeVendorComboBox;
+    private JTextField MeInvoiceField;
     private JPanel MeDatePickerPanel;
     private DatePicker MeDatePicker = new DatePicker();
     private JButton MeAddButton;
@@ -239,6 +241,7 @@ public class HomeView implements ActionListener {
     private JPanel VvPanel;
     private JPanel VvTablePanel;
     private JButton VvViewButton;
+    private ArrayList<String> vendorIDs = new ArrayList<>();
     private ButtonGroup VvRadioButtonGroup = new ButtonGroup();
     private JRadioButton VvVendorRadioButton;
     private JRadioButton VvContactRadioButton;
@@ -288,7 +291,8 @@ public class HomeView implements ActionListener {
 
         materialUnits.add("");
         materialIDs.add("");
-        MeComboBox.addItem("Select Material");
+        vendorIDs.add("");
+        MeMaterialComboBox.addItem("Select Material");
 
         VgeButtonGroup.add(VgeDopRadioButton);
         VgeButtonGroup.add(VgeDoeRadioButton);
@@ -344,7 +348,7 @@ public class HomeView implements ActionListener {
     public void addActionListeners(SystemController controller) {
         MeAddButton.addActionListener(controller);
         GeAddButton.addActionListener(controller);
-        MeComboBox.addActionListener(this);
+        MeMaterialComboBox.addActionListener(this);
 
         VgeDopRadioButton.addActionListener(this);
         VgeDoeRadioButton.addActionListener(this);
@@ -437,15 +441,23 @@ public class HomeView implements ActionListener {
      */
 
     public String getMaterialID() {
-        return materialIDs.get(MeComboBox.getSelectedIndex());
+        return materialIDs.get(MeMaterialComboBox.getSelectedIndex());
+    }
+
+    public String getVendorID() {
+        return vendorIDs.get(MeVendorComboBox.getSelectedIndex());
     }
 
     public ArrayList<String> getMaterialIDs() {
         return materialIDs;
     }
 
-    public JComboBox getMeComboBox() {
-        return MeComboBox;
+    public JComboBox getMeMaterialComboBox() {
+        return MeMaterialComboBox;
+    }
+
+    public JComboBox getMeVendorComboBox() {
+        return MeVendorComboBox;
     }
 
     public double getMeQuantity() {
@@ -461,12 +473,16 @@ public class HomeView implements ActionListener {
         return -13.11;
     }
 
+    public String getMeInvoice() {
+        return MeInvoiceField.getText();
+    }
+
     public LocalDate getMeDate() {
         return MeDatePicker.getDate();
     }
 
     public String getMaterialUnit() {
-        return materialUnits.get(MeComboBox.getSelectedIndex());
+        return materialUnits.get(MeMaterialComboBox.getSelectedIndex());
     }
 
     public JButton getMeAddButton() {
@@ -474,7 +490,7 @@ public class HomeView implements ActionListener {
     }
 
     public void clearMaterialExpensesFields() {
-        MeComboBox.setSelectedIndex(0);
+        MeMaterialComboBox.setSelectedIndex(0);
         MeQuantityField.setText("");
     }
 
@@ -900,7 +916,6 @@ public class HomeView implements ActionListener {
 
         VgeTablePanel.repaint();
         VgePanel.repaint();
-        VePanel.repaint();
         expensesPanel.repaint();
     }
 
@@ -914,7 +929,7 @@ public class HomeView implements ActionListener {
         while (results.next()) {
             for (int i = 0 ; i < columnCount ; i++) {
                 if (i == 1) {
-                    data[results.getRow() - 1][i] = (String) MeComboBox.getItemAt(materialIDs.indexOf(results.getString(i + 1)));
+                    data[results.getRow() - 1][i] = (String) MeMaterialComboBox.getItemAt(materialIDs.indexOf(results.getString(i + 1)));
                 } else {
                     data[results.getRow() - 1][i] = results.getString(i + 1);
                 }
@@ -929,7 +944,6 @@ public class HomeView implements ActionListener {
 
         VmeTablePanel.repaint();
         VmePanel.repaint();
-        VePanel.repaint();
         expensesPanel.repaint();
     }
 
@@ -971,14 +985,14 @@ public class HomeView implements ActionListener {
         String[] columnNames = getColumnNames(materials, columnCount);
         String [][] data = new String[rowCount][columnCount];
 
-        MeComboBox.removeAllItems();
-        MeComboBox.addItem("Select Material");
+        MeMaterialComboBox.removeAllItems();
+        MeMaterialComboBox.addItem("Select Material");
 
         while (materials.next()) {
             for (int i = 0 ; i < columnCount ; i++) {
                 data[materials.getRow()-1][i] = materials.getString(i+1);
             }
-            MeComboBox.addItem(materials.getString(2));
+            MeMaterialComboBox.addItem(materials.getString(2));
             materialUnits.add(materials.getString(5));
             materialIDs.add(materials.getString(1));
         }
@@ -1057,10 +1071,15 @@ public class HomeView implements ActionListener {
         String[] columnNames = getColumnNames(vendors, columnCount);
         String [][] data = new String[rowCount][columnCount];
 
+        MeVendorComboBox.removeAllItems();
+        MeVendorComboBox.addItem("Select Vendor");
+
         while (vendors.next()) {
             for (int i = 0 ; i < columnCount ; i++) {
                 data[vendors.getRow() - 1][i] = vendors.getString(i + 1);
             }
+            MeVendorComboBox.addItem(vendors.getString(2));
+            vendorIDs.add(vendors.getString(1));
         }
         VvTable = new JTable(data, columnNames);
         VvTable.setAutoCreateRowSorter(false);
@@ -1124,9 +1143,9 @@ public class HomeView implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        if (e.getSource() == MeComboBox) {
-            if (MeComboBox.getItemCount() > 0) {
-                MeQuantityLabel.setText("Quantity/" + materialUnits.get(MeComboBox.getSelectedIndex()));
+        if (e.getSource() == MeMaterialComboBox) {
+            if (MeMaterialComboBox.getItemCount() > 0) {
+                MeQuantityLabel.setText("Quantity/" + materialUnits.get(MeMaterialComboBox.getSelectedIndex()));
             }
         }
 
