@@ -144,15 +144,6 @@
                           <gridbag weightx="0.0" weighty="0.06"/>
                         </constraints>
                       </vspacer>
-                      <component id="d40f8" class="javax.swing.JLabel">
-                        <constraints>
-                          <grid row="3" column="5" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="4" fill="0" indent="0" use-parent-layout="false"/>
-                          <gridbag weightx="0.0" weighty="0.0"/>
-                        </constraints>
-                        <properties>
-                          <text value="Total price"/>
-                        </properties>
-                      </component>
                       <component id="6cf00" class="javax.swing.JLabel">
                         <constraints>
                           <grid row="3" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
@@ -171,15 +162,6 @@
                         <border type="none"/>
                         <children/>
                       </grid>
-                      <component id="9629" class="javax.swing.JTextField" binding="GePriceField">
-                        <constraints>
-                          <grid row="3" column="7" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
-                            <preferred-size width="150" height="-1"/>
-                          </grid>
-                          <gridbag weightx="0.0" weighty="0.0"/>
-                        </constraints>
-                        <properties/>
-                      </component>
                       <hspacer id="28c0">
                         <constraints>
                           <grid row="1" column="8" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
@@ -241,15 +223,6 @@
                           <gridbag weightx="0.0" weighty="0.06"/>
                         </constraints>
                       </vspacer>
-                      <component id="247e2" class="javax.swing.JLabel">
-                        <constraints>
-                          <grid row="11" column="5" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="4" fill="0" indent="0" use-parent-layout="false"/>
-                          <gridbag weightx="0.0" weighty="0.0"/>
-                        </constraints>
-                        <properties>
-                          <text value="Total price"/>
-                        </properties>
-                      </component>
                       <component id="a863a" class="javax.swing.JLabel">
                         <constraints>
                           <grid row="11" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
@@ -258,15 +231,6 @@
                         <properties>
                           <text value="Date of purchase"/>
                         </properties>
-                      </component>
-                      <component id="beed8" class="javax.swing.JTextField" binding="MePriceField">
-                        <constraints>
-                          <grid row="11" column="7" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
-                            <preferred-size width="150" height="-1"/>
-                          </grid>
-                          <gridbag weightx="0.0" weighty="0.0"/>
-                        </constraints>
-                        <properties/>
                       </component>
                       <vspacer id="39df">
                         <constraints>

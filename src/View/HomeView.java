@@ -14,8 +14,6 @@ import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 
-import static javax.swing.BorderFactory.createEmptyBorder;
-
 
 public class HomeView implements ActionListener {
 
@@ -52,7 +50,6 @@ public class HomeView implements ActionListener {
      */
 
     private JTextField GeItemNameField;
-    private JTextField GePriceField;
     private JTextField GeQuantityField;
     private JPanel GeDatePickerPanel;
     private DatePicker GeDatePicker = new DatePicker();
@@ -69,7 +66,6 @@ public class HomeView implements ActionListener {
     private ArrayList<String> materialIDs = new ArrayList<>();
     private JLabel MeQuantityLabel;
     private JTextField MeQuantityField;
-    private JTextField MePriceField;
     private JPanel MeDatePickerPanel;
     private DatePicker MeDatePicker = new DatePicker();
     private JButton MeAddButton;
@@ -374,19 +370,6 @@ public class HomeView implements ActionListener {
         return GeItemNameField.getText();
     }
 
-    public double getGePrice() {
-        if (!GePriceField.getText().equals("")) {
-            try {
-                return Double.parseDouble(GePriceField.getText());
-            } catch (NumberFormatException e) {
-                e.printStackTrace();
-            }
-        } else {
-            return 0.0;
-        }
-        return -13.11;
-    }
-
     public double getGeQuantity() {
         if (!GeQuantityField.getText().equals("")) {
             try {
@@ -410,7 +393,6 @@ public class HomeView implements ActionListener {
 
     public void clearGeneralExpensesFields() {
         GeItemNameField.setText("");
-        GePriceField.setText("");
         GeQuantityField.setText("");
     }
 
@@ -430,19 +412,6 @@ public class HomeView implements ActionListener {
 
     public JComboBox getMeComboBox() {
         return MeComboBox;
-    }
-
-    public double getMePrice() {
-        if (!MePriceField.getText().equals("")) {
-            try {
-                return Double.parseDouble(MePriceField.getText());
-            } catch (NumberFormatException e) {
-                e.printStackTrace();
-            }
-        } else {
-            return 0.0;
-        }
-        return -13.11;
     }
 
     public double getMeQuantity() {
@@ -472,7 +441,6 @@ public class HomeView implements ActionListener {
 
     public void clearMaterialExpensesFields() {
         MeComboBox.setSelectedIndex(0);
-        MePriceField.setText("");
         MeQuantityField.setText("");
     }
 
@@ -868,9 +836,9 @@ public class HomeView implements ActionListener {
         for (ResultSet expensesSet: results) {
             while (expensesSet.next()) {
                 for (int j = 0 ; j < columnCount ; j++) {
-                    if (j == 2) {
-                        VeTotalExpenses += expensesSet.getDouble(j+1);
-                    }
+//                    if (j == 2) {
+//                        VeTotalExpenses += expensesSet.getDouble(j+1);
+//                    }
                     if (expensesSet.getMetaData().getColumnName(j+1).equals("Material_ID") && j == 1) {
                         data[expensesSet.getRow()+rowCounter-1][j] = (String) MeComboBox.getItemAt(materialIDs.indexOf(expensesSet.getString(j + 1)));
                     } else {

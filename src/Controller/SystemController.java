@@ -85,13 +85,12 @@ public class SystemController implements ActionListener, TableModelListener, Pro
     void addGeneralExpense() {
         if (checkGeneralExpenses()) {
             String itemName = "'" + view.getHomeView().getGeItemName() + "',";
-            String itemPrice = view.getHomeView().getGePrice() + ",";
             String itemQuantity = view.getHomeView().getGeQuantity() + ",";
             String dateOfPurchase = "'" + view.getHomeView().getGeDate() + "'";
             String dateOfEntry = "'" + new SimpleDateFormat("yyyy-MM-dd").format(new Date()) + "',";
 
             try {
-                String sqlQuery = "insert into public.\"General_Expenses\" values (DEFAULT," + itemName + itemPrice + itemQuantity + "null, " + currentUserID + "," + dateOfEntry + dateOfPurchase + ")";
+                String sqlQuery = "insert into public.\"General_Expenses\" values (DEFAULT," + itemName + itemQuantity + "null, " + currentUserID + "," + dateOfEntry + dateOfPurchase + ")";
                 System.out.println(sqlQuery);
                 sqlStatement.executeUpdate(sqlQuery);
                 showMessage("Operation successful", "General Expense added.");
@@ -109,15 +108,9 @@ public class SystemController implements ActionListener, TableModelListener, Pro
         if (view.getHomeView().getGeItemName().equals("")) {
             flag = false;
             showMessage("Error adding expense", "Item name cannot be empty.");
-        } else if (view.getHomeView().getGePrice() == -13.11) {
-            flag = false;
-            showMessage("Error adding expense", "Item price must be a number.");
         } else if (view.getHomeView().getGeQuantity() == -13.11) {
             flag = false;
             showMessage("Error adding expense", "Item quantity must be a number.");
-        } else if (view.getHomeView().getGePrice() == 0) {
-            flag = false;
-            showMessage("Error adding expense", "Item price cannot be 0 or empty.");
         } else if (view.getHomeView().getGeQuantity() == 0) {
             flag = false;
             showMessage("Error adding expense", "Item quantity cannot be 0 or empty.");
@@ -138,14 +131,13 @@ public class SystemController implements ActionListener, TableModelListener, Pro
         if (checkMaterialExpenses()) {
             String materialID = view.getHomeView().getMaterialID();
             String materialName = view.getHomeView().getMeComboBox().getSelectedItem().toString();
-            String materialPrice = view.getHomeView().getMePrice() + ",";
             String materialQuantity = view.getHomeView().getMeQuantity() + ",";
             String materialUnit = "'" + view.getHomeView().getMaterialUnit() + "',";
             String dateOfEntry = "'" + new SimpleDateFormat("yyyy-MM-dd").format(new Date()) + "',";
             String dateOfPurchase = "'" + view.getHomeView().getMeDate() + "'";
 
             try {
-                String sqlQuery = "insert into public.\"Material_Expenses\" values (DEFAULT," + materialID + "," + materialPrice + materialQuantity + materialUnit + currentUserID + "," + dateOfEntry + dateOfPurchase + ")";
+                String sqlQuery = "insert into public.\"Material_Expenses\" values (DEFAULT," + materialID + "," + materialQuantity + materialUnit + currentUserID + "," + dateOfEntry + dateOfPurchase + ")";
                 sqlStatement.executeUpdate(sqlQuery);
                 showMessage("Operation successful", "General Expense added.");
                 String updateQuery = "UPDATE \"Materials\" SET \"Available_quantity\" = \"Available_quantity\" + " + view.getHomeView().getMeQuantity() + " WHERE \"Material_ID\" = " + view.getHomeView().getMaterialID();
@@ -166,12 +158,6 @@ public class SystemController implements ActionListener, TableModelListener, Pro
         if (view.getHomeView().getMaterialID().equals("")) {
             flag = false;
             showMessage("Error adding expense", "Please select a Material.");
-        } else if (view.getHomeView().getMePrice() == -13.11) {
-            flag = false;
-            showMessage("Error adding expense", "Material price must be in numbers only.");
-        } else if (view.getHomeView().getMePrice() == 0) {
-            flag = false;
-            showMessage("Error adding expense", "Material price cannot be 0 or empty.");
         } else if (view.getHomeView().getMeQuantity() == -13.11) {
             flag = false;
             showMessage("Error adding expense", "Material quantity must be in numbers only.");
@@ -230,13 +216,13 @@ public class SystemController implements ActionListener, TableModelListener, Pro
 
         if (generalExpensesSelected) {
             if (materialExpensesSelected) {
-                query1 = "SELECT \"Purchase_ID\", \"Purchased_item\", \"Total_price\", \"Quantity\", \"Unit\", \"Date_of_entry\", \"Date_of_purchase\" FROM public.\"General_Expenses\"" + VeDoeSelected + VeDopSelected;
+                query1 = "SELECT \"Purchase_ID\", \"Purchased_item\", \"Quantity\", \"Unit\", \"Date_of_entry\", \"Date_of_purchase\" FROM public.\"General_Expenses\"" + VeDoeSelected + VeDopSelected;
             } else {
-                query1 = "SELECT \"Purchase_ID\", \"Purchased_item\", \"Total_price\", \"Quantity\", \"Date_of_entry\", \"Date_of_purchase\" FROM public.\"General_Expenses\"" + VeDoeSelected + VeDopSelected;
+                query1 = "SELECT \"Purchase_ID\", \"Purchased_item\", \"Quantity\", \"Date_of_entry\", \"Date_of_purchase\" FROM public.\"General_Expenses\"" + VeDoeSelected + VeDopSelected;
             }
         }
         if (materialExpensesSelected) {
-            query2 = "SELECT \"Purchase_ID\", \"Material_ID\", \"Total_price\", \"Quantity\", \"Unit\", \"Date_of_entry\", \"Date_of_purchase\" FROM public.\"Material_Expenses\"" + VeDoeSelected + VeDopSelected;
+            query2 = "SELECT \"Purchase_ID\", \"Material_ID\", \"Quantity\", \"Unit\", \"Date_of_entry\", \"Date_of_purchase\" FROM public.\"Material_Expenses\"" + VeDoeSelected + VeDopSelected;
         }
 
         if (!query1.equals("")) {
