@@ -35,7 +35,6 @@ public class HomeView implements ActionListener {
      */
 
     private JPanel expensesPanel;
-    private JPanel viewExpensesPanel;
     private JPanel ordersPanel;
     private JPanel materialsPanel;
     private JPanel batchesPanel;
@@ -72,26 +71,44 @@ public class HomeView implements ActionListener {
 
     /*
      *
-     *      VIEW EXPENSES
+     *      VIEW GENERAL EXPENSES
      *
      */
 
-    private JTable VeTable;
-    private JPanel VeTablePanel;
-    private JLabel VeTotalExpensesLabel;
-    private double VeTotalExpenses = 0;
-    private JCheckBox VeGeCheckBox;
-    private JCheckBox VeMeCheckBox;
-    private ButtonGroup VeButtonGroup = new ButtonGroup();
-    private JRadioButton VeDopRadioButton;
-    private JRadioButton VeDoeRadioButton;
-    private JPanel VeFromDatePanel;
-    private JPanel VeToDatePanel;
-    private DatePicker VeFromDatePicker = new DatePicker();
-    private DatePicker VeToDatePicker = new DatePicker();
-    private JButton VeViewButton;
-    private JButton VeClearFilterButton;
-    private JButton VeDeleteButton;
+    private JPanel VePanel;
+    private JPanel VgePanel;
+    private JTable VgeTable;
+    private JPanel VgeTablePanel;
+    private ButtonGroup VgeButtonGroup = new ButtonGroup();
+    private JRadioButton VgeDopRadioButton;
+    private JRadioButton VgeDoeRadioButton;
+    private JPanel VgeFromDatePanel;
+    private JPanel VgeToDatePanel;
+    private DatePicker VgeFromDatePicker = new DatePicker();
+    private DatePicker VgeToDatePicker = new DatePicker();
+    private JButton VgeViewButton;
+    private JButton VgeClearFilterButton;
+    private JButton VgeDeleteButton;
+
+    /*
+     *
+     *      VIEW MATERIAL EXPENSES
+     *
+     */
+
+    private JPanel VmePanel;
+    private JTable VmeTable;
+    private JPanel VmeTablePanel;
+    private ButtonGroup VmeButtonGroup = new ButtonGroup();
+    private JRadioButton VmeDopRadioButton;
+    private JRadioButton VmeDoeRadioButton;
+    private JPanel VmeFromDatePanel;
+    private JPanel VmeToDatePanel;
+    private DatePicker VmeFromDatePicker = new DatePicker();
+    private DatePicker VmeToDatePicker = new DatePicker();
+    private JButton VmeViewButton;
+    private JButton VmeClearFilterButton;
+    private JButton VmeDeleteButton;
 
     /*
      *
@@ -273,14 +290,23 @@ public class HomeView implements ActionListener {
         materialIDs.add("");
         MeComboBox.addItem("Select Material");
 
-        VeButtonGroup.add(VeDopRadioButton);
-        VeButtonGroup.add(VeDoeRadioButton);
+        VgeButtonGroup.add(VgeDopRadioButton);
+        VgeButtonGroup.add(VgeDoeRadioButton);
 
-        VeFromDatePicker.setEnabled(false);
-        VeToDatePicker.setEnabled(false);
+        VgeFromDatePicker.setEnabled(false);
+        VgeToDatePicker.setEnabled(false);
 
-        VeFromDatePanel.add(VeFromDatePicker);
-        VeToDatePanel.add(VeToDatePicker);
+        VgeFromDatePanel.add(VgeFromDatePicker);
+        VgeToDatePanel.add(VgeToDatePicker);
+
+        VmeButtonGroup.add(VmeDopRadioButton);
+        VmeButtonGroup.add(VmeDoeRadioButton);
+
+        VmeFromDatePicker.setEnabled(false);
+        VmeToDatePicker.setEnabled(false);
+
+        VmeFromDatePanel.add(VmeFromDatePicker);
+        VmeToDatePanel.add(VmeToDatePicker);
 
         AoDopPicker.setDateToToday();
         AoDodPicker.setDateToToday();
@@ -304,7 +330,8 @@ public class HomeView implements ActionListener {
         VvRadioButtonGroup.add(VvVendorRadioButton);
         VvRadioButtonGroup.add(VvContactRadioButton);
 
-        VeTablePanel.add(new JScrollPane(VeTable));
+        VgeTablePanel.add(new JScrollPane(VgeTable));
+        VmeTablePanel.add(new JScrollPane(VmeTable));
         VoTablePanel.add(new JScrollPane(VoTable));
         VmTablePanel.add(new JScrollPane(VmTable));
         VbTablePanel.add(new JScrollPane(VbTable));
@@ -318,11 +345,18 @@ public class HomeView implements ActionListener {
         MeAddButton.addActionListener(controller);
         GeAddButton.addActionListener(controller);
         MeComboBox.addActionListener(this);
-        VeDopRadioButton.addActionListener(this);
-        VeDoeRadioButton.addActionListener(this);
-        VeViewButton.addActionListener(controller);
-        VeDeleteButton.addActionListener(controller);
-        VeClearFilterButton.addActionListener(this);
+
+        VgeDopRadioButton.addActionListener(this);
+        VgeDoeRadioButton.addActionListener(this);
+        VgeViewButton.addActionListener(controller);
+        VgeDeleteButton.addActionListener(controller);
+        VgeClearFilterButton.addActionListener(this);
+
+        VmeDopRadioButton.addActionListener(this);
+        VmeDoeRadioButton.addActionListener(this);
+        VmeViewButton.addActionListener(controller);
+        VmeDeleteButton.addActionListener(controller);
+        VmeClearFilterButton.addActionListener(this);
 
         AoAddButton.addActionListener(controller);
         VoViewButton.addActionListener(controller);
@@ -446,44 +480,70 @@ public class HomeView implements ActionListener {
 
     /*
      *
-     *      VIEW EXPENSES
+     *      VIEW GENERAL EXPENSES
      *
      */
 
-    public JButton getVeViewButton() {
-        return VeViewButton;
+    public JButton getVgeViewButton() {
+        return VgeViewButton;
     }
 
-    public JButton getVeDeleteButton() {
-        return VeDeleteButton;
+    public JButton getVgeDeleteButton() {
+        return VgeDeleteButton;
     }
 
-    public LocalDate getVeFromDate() {
-        return VeFromDatePicker.getDate();
+    public LocalDate getVgeFromDate() {
+        return VgeFromDatePicker.getDate();
     }
 
-    public LocalDate getVeToDate() {
-        return VeToDatePicker.getDate();
+    public LocalDate getVgeToDate() {
+        return VgeToDatePicker.getDate();
     }
 
-    public JRadioButton getVeDopRadioButton() {
-        return VeDopRadioButton;
+    public JRadioButton getVgeDopRadioButton() {
+        return VgeDopRadioButton;
     }
 
-    public JRadioButton getVeDoeRadioButton() {
-        return VeDoeRadioButton;
+    public JRadioButton getVgeDoeRadioButton() {
+        return VgeDoeRadioButton;
     }
 
-    public JCheckBox getVeGeCheckBox() {
-        return VeGeCheckBox;
+    public JTable getVgeTable() {
+        return VgeTable;
     }
 
-    public JCheckBox getVeMeCheckBox() {
-        return VeMeCheckBox;
+    /*
+     *
+     *      VIEW MATERIAL EXPENSES
+     *
+     */
+
+    public JButton getVmeViewButton() {
+        return VmeViewButton;
     }
 
-    public JTable getVeTable() {
-        return VeTable;
+    public JButton getVmeDeleteButton() {
+        return VmeDeleteButton;
+    }
+
+    public LocalDate getVmeFromDate() {
+        return VmeFromDatePicker.getDate();
+    }
+
+    public LocalDate getVmeToDate() {
+        return VmeToDatePicker.getDate();
+    }
+
+    public JRadioButton getVmeDopRadioButton() {
+        return VmeDopRadioButton;
+    }
+
+    public JRadioButton getVmeDoeRadioButton() {
+        return VmeDoeRadioButton;
+    }
+
+    public JTable getVmeTable() {
+        return VmeTable;
     }
 
     /*
@@ -819,48 +879,57 @@ public class HomeView implements ActionListener {
     --
      */
 
-    public void showExpenses(ArrayList<ResultSet> results, SystemController controller) throws SQLException {
+    public void showGeneralExpenses(ResultSet results, SystemController controller) throws SQLException {
+        int columnCount = results.getMetaData().getColumnCount();
+        int rowCount = getRowCount(results);
 
-        VeTotalExpenses = 0;
-        int columnCount = results.get(0).getMetaData().getColumnCount();
-        int rowCount = 0;
-        int rowCounter = 0;
-
-        for (ResultSet expensesSet: results) {
-            rowCount += getRowCount(expensesSet);
-        }
-
-        String[] columnNames = getColumnNames(results.get(0), columnCount);
+        String[] columnNames = getColumnNames(results, columnCount);
         String [][] data = new String[rowCount][columnCount];
 
-        for (ResultSet expensesSet: results) {
-            while (expensesSet.next()) {
-                for (int j = 0 ; j < columnCount ; j++) {
-//                    if (j == 2) {
-//                        VeTotalExpenses += expensesSet.getDouble(j+1);
-//                    }
-                    if (expensesSet.getMetaData().getColumnName(j+1).equals("Material_ID") && j == 1) {
-                        data[expensesSet.getRow()+rowCounter-1][j] = (String) MeComboBox.getItemAt(materialIDs.indexOf(expensesSet.getString(j + 1)));
-                    } else {
-                        data[expensesSet.getRow()+rowCounter-1][j] = expensesSet.getString(j+1);
-                    }
+        while (results.next()) {
+            for (int i = 0 ; i < columnCount ; i++) {
+                data[results.getRow()-1][i] = results.getString(i+1);
+            }
+        }
+        VgeTable = new JTable(data, columnNames);
+        setTableFont(VgeTable);
+        VgeTablePanel.remove(0);
+        VgeTablePanel.add(new JScrollPane(VgeTable));
+
+        VgeTable.getModel().addTableModelListener(controller);
+
+        VgeTablePanel.repaint();
+        VgePanel.repaint();
+        VePanel.repaint();
+        expensesPanel.repaint();
+    }
+
+    public void showMaterialExpenses(ResultSet results, SystemController controller) throws SQLException {
+        int columnCount = results.getMetaData().getColumnCount();
+        int rowCount = getRowCount(results);
+
+        String[] columnNames = getColumnNames(results, columnCount);
+        String [][] data = new String[rowCount][columnCount];
+
+        while (results.next()) {
+            for (int i = 0 ; i < columnCount ; i++) {
+                if (i == 1) {
+                    data[results.getRow() - 1][i] = (String) MeComboBox.getItemAt(materialIDs.indexOf(results.getString(i + 1)));
+                } else {
+                    data[results.getRow() - 1][i] = results.getString(i + 1);
                 }
             }
-            expensesSet.last();
-            rowCounter += expensesSet.getRow();
         }
+        VmeTable = new JTable(data, columnNames);
+        setTableFont(VmeTable);
+        VmeTablePanel.remove(0);
+        VmeTablePanel.add(new JScrollPane(VmeTable));
 
-        VeTotalExpensesLabel.setText("Total: " + round(VeTotalExpenses, 2) + " EGP");
+        VmeTable.getModel().addTableModelListener(controller);
 
-        VeTable = new JTable(data, columnNames);
-        setTableFont(VeTable);
-        VeTablePanel.remove(0);
-        VeTablePanel.add(new JScrollPane(VeTable));
-
-        VeTable.getModel().addTableModelListener(controller);
-
-        VeTablePanel.repaint();
-        viewExpensesPanel.repaint();
+        VmeTablePanel.repaint();
+        VmePanel.repaint();
+        VePanel.repaint();
         expensesPanel.repaint();
     }
 
@@ -1061,15 +1130,24 @@ public class HomeView implements ActionListener {
             }
         }
 
-        else if (e.getSource() == VeDoeRadioButton || e.getSource() == VeDopRadioButton) {
-            VeFromDatePicker.setEnabled(true);
-            VeToDatePicker.setEnabled(true);
-        } else if (e.getSource() == VeClearFilterButton) {
-            VeButtonGroup.clearSelection();
-            VeFromDatePicker.clear();
-            VeToDatePicker.clear();
-            VeFromDatePicker.setEnabled(false);
-            VeToDatePicker.setEnabled(false);
+        else if (e.getSource() == VgeDoeRadioButton || e.getSource() == VgeDopRadioButton) {
+            VgeFromDatePicker.setEnabled(true);
+            VgeToDatePicker.setEnabled(true);
+        } else if (e.getSource() == VgeClearFilterButton) {
+            VgeButtonGroup.clearSelection();
+            VgeFromDatePicker.clear();
+            VgeToDatePicker.clear();
+            VgeFromDatePicker.setEnabled(false);
+            VgeToDatePicker.setEnabled(false);
+        } else if (e.getSource() == VmeDoeRadioButton || e.getSource() == VmeDopRadioButton) {
+            VmeFromDatePicker.setEnabled(true);
+            VmeToDatePicker.setEnabled(true);
+        } else if (e.getSource() == VmeClearFilterButton) {
+            VmeButtonGroup.clearSelection();
+            VmeFromDatePicker.clear();
+            VmeToDatePicker.clear();
+            VmeFromDatePicker.setEnabled(false);
+            VmeToDatePicker.setEnabled(false);
         }
 
         else if (e.getSource() == VoDateRadioButton) {
