@@ -752,13 +752,14 @@ public class SystemController implements ActionListener, TableModelListener, Pro
      *
      */
 
-    void createNewFormula(String formulaName, String formulaDescription) {
-        String sql = "INSERT INTO \"Formulas\" values (?, ?, ?)";
+    void createNewFormula(String formulaName, String formulaDescription, String formulaQuantity) {
+        String sql = "INSERT INTO \"Formulas\" values (?, ?, ?, ?)";
         try {
             PreparedStatement query = databaseConnection.prepareStatement(sql);
             query.setString(1, formulaName);
             query.setString(2, formulaDescription);
-            query.setDouble(3, 0.0);
+            query.setString(3, formulaQuantity);
+            query.setDouble(4, 0.0);
             query.executeUpdate();
             query.close();
             showMessage("Operation successful","New formula created.");
@@ -781,6 +782,7 @@ public class SystemController implements ActionListener, TableModelListener, Pro
             showMessage("Error creating new formula","Formula name cannot be empty.");
         } else {
             int count = 0;
+            int formulaQuantity = 0;
             for (int i = 0 ; i < checkBoxes.size(); i++) {
                 JCheckBox checkBox = checkBoxes.get(i);
                 if (checkBox.isSelected()) {
@@ -793,7 +795,8 @@ public class SystemController implements ActionListener, TableModelListener, Pro
                         formulaDescription += checkBox.getText();
                         formulaDescription += ": ";
                         formulaDescription += textFields.get(checkBoxes.indexOf(checkBox)).getText();
-                        formulaDescription += " " + view.getHomeView().getVmTable().getValueAt(checkBoxes.indexOf(checkBox), 5).toString();
+                        formulaQuantity += Double.parseDouble(textFields.get(checkBoxes.indexOf(checkBox)).getText());
+                        formulaDescription += " " + view.getHomeView().getVmTable().getValueAt(checkBoxes.indexOf(checkBox), 4).toString();
                         formulaDescription += " - ";
                     }
                 }
@@ -803,7 +806,7 @@ public class SystemController implements ActionListener, TableModelListener, Pro
                     showMessage("Error creating new formula", "Please select at least one material for the new Formula.");
                 } else {
                     formulaDescription = formulaDescription.substring(0, formulaDescription.length() - 3);
-                    createNewFormula(formulaName, formulaDescription);
+                    createNewFormula(formulaName, formulaDescription, formulaQuantity + " Kg");
                 }
             }
         }

@@ -70,7 +70,7 @@ public class CreateFormulaView extends JFrame implements ActionListener {
             checkBox.addActionListener(this);
             checkBoxes.add(checkBox);
 
-            String unit = " " + homeView.getVmTable().getValueAt(i, 5).toString() + "   ";
+            String unit = " " + homeView.getVmTable().getValueAt(i, 4).toString() + "   ";
             JPanel panel2 = new JPanel(new BorderLayout());
             panel2.add(field, BorderLayout.CENTER);
             panel2.add(new JLabel(unit), BorderLayout.EAST);
