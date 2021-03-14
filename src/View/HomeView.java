@@ -30,6 +30,7 @@ public class HomeView implements ActionListener {
 
     private JTabbedPane mainTabbedPane;
     private JTabbedPane expensesTabbedPane;
+    private JTabbedPane materialsTabbedPane;
 
     /*
      *
@@ -38,8 +39,8 @@ public class HomeView implements ActionListener {
      */
 
     private JPanel expensesPanel;
-    private JPanel ordersPanel;
     private JPanel materialsPanel;
+    private JPanel ordersPanel;
     private JPanel batchesPanel;
     private JPanel formulasPanel;
     private JPanel vendorsPanel;
@@ -163,12 +164,13 @@ public class HomeView implements ActionListener {
      *
      */
 
+    private JPanel viewMaterialsPanel;
     private JPanel AmPanel;
     private JTextField AmNameField;
     private JTextField AmUnitField;
     private JButton AmAddButton;
     private JTable VmTable;
-    private JPanel VmTablePanel;
+    private JPanel VmPanel;
     private JButton VmRefreshButton;
 
     /*
@@ -243,7 +245,6 @@ public class HomeView implements ActionListener {
      *
      */
 
-    private JPanel VvPanel;
     private JPanel VvTablePanel;
     private JButton VvViewButton;
     private ArrayList<String> vendorIDs = new ArrayList<>();
@@ -278,6 +279,7 @@ public class HomeView implements ActionListener {
     private JTextField AsSpecificationIdField;
     private JPanel VsTablePanel;
     private JPanel VsPanel;
+    private JPanel VvPanel;
     private JTable VsTable;
 
     /*
@@ -349,7 +351,7 @@ public class HomeView implements ActionListener {
         VgeTablePanel.add(new JScrollPane(VgeTable));
         VmeTablePanel.add(new JScrollPane(VmeTable));
         VoTablePanel.add(new JScrollPane(VoTable));
-        VmTablePanel.add(new JScrollPane(VmTable));
+        VmPanel.add(new JScrollPane(VmTable));
         VpTablePanel.add(new JScrollPane(VpTable));
         VfTablePanel.add(new JScrollPane(VfTable));
         VvTablePanel.add(new JScrollPane(VvTable));
@@ -1024,12 +1026,12 @@ public class HomeView implements ActionListener {
 
         VmTable = new JTable(data, columnNames);
         setTableFont(VmTable);
-        VmTablePanel.remove(0);
-        VmTablePanel.add(new JScrollPane(VmTable));
+        VmPanel.remove(0);
+        VmPanel.add(new JScrollPane(VmTable));
         VmTable.getModel().addTableModelListener(controller);
         VmTable.addPropertyChangeListener(controller);
 
-        VmTablePanel.repaint();
+        VmPanel.repaint();
         materialsPanel.repaint();
     }
 
