@@ -1,5 +1,6 @@
 package Controller;
 
+import Model.Constants;
 import View.SystemView;
 
 import javax.swing.*;
@@ -22,6 +23,7 @@ import java.util.Date;
 public class SystemController implements ActionListener, TableModelListener, PropertyChangeListener {
 
     private SystemView view;
+    private Constants K = new Constants();
 
     private int currentUserID;
 
@@ -62,7 +64,7 @@ public class SystemController implements ActionListener, TableModelListener, Pro
                     viewGeneralExpenses();
                     viewMaterialExpenses();
                     getStatusDomain();
-                    viewBatches();
+                    viewProductions();
                     viewOrders();
                     getFormulas();
                     view.goToHome();
@@ -600,41 +602,45 @@ public class SystemController implements ActionListener, TableModelListener, Pro
 
     /*
      *
-     *      CREATE BATCH
+     *      ADD PRODUCTION
      *
      */
 
-    void createBatch() {
-        if (checkCreateBatch()) {
-            String batchSerial = "'" + view.getHomeView().getCbSerial() + "', '{";
-            String orderIDs = view.getHomeView().getCbOrderIDs();
-            String formula = view.getHomeView().getCbFormula();
+    void addProduction() {
+        if (checkCreateProduction()) {
+            String formula = view.getHomeView().getApFormula();
+            Double quantity = view.getHomeView().getApQuantity();
 
-            String query = "INSERT INTO \"Batches\" values (" + batchSerial;
-            query += orderIDs;
-            query += "'" + formula + "')";
+            String sql = "INSERT INTO \"Production\" values (DEFAULT, ?, ?, ?, ?)";
 
             try {
-                sqlStatement.executeUpdate(query);
-                showMessage("Operation successful", "New batch created.");
-                viewBatches();
+                Array array = databaseConnection.createArrayOf("VARCHAR", view.getHomeView().getApOrderIDs());
+                PreparedStatement query = databaseConnection.prepareStatement(sql);
+                query.setString(1, formula);
+                query.setDouble(2,quantity);
+                query.setArray(3, array);
+                query.setString(4, K.status_1);
+                query.executeUpdate();
+                query.close();
+                showMessage("Operation successful", "New production added.");
+                viewProductions();
             } catch (SQLException throwables) {
-                showMessage("Error performing operation", "New batch could not be created.");
+                showErrorMessage("Error performing operation", "New production could not be added.", throwables.getLocalizedMessage());
                 throwables.printStackTrace();
             }
         }
     }
 
-    boolean checkCreateBatch() {
+    boolean checkCreateProduction() {
         boolean flag = true;
 
-        if (view.getHomeView().getCbSerial().equals("")) {
+        if (view.getHomeView().getApQuantity().equals("")) {
             flag = false;
             showMessage("Error creating batch", "Batch serial cannot be empty.");
-        } else if (view.getHomeView().getCbOrderIDs().equals("")) {
+        } else if (view.getHomeView().getApOrderIDs().equals("")) {
             flag = false;
             showMessage("Error creating batch", "Order IDs cannot be empty.");
-        } else if (view.getHomeView().getCbFormula().equals("Select Formula")) {
+        } else if (view.getHomeView().getApFormula().equals("Select Formula")) {
             showMessage("Error creating batch","Please select a batch formula.");
         }
 
@@ -643,77 +649,84 @@ public class SystemController implements ActionListener, TableModelListener, Pro
 
     /*
      *
-     *      VIEW BATCHES
+     *      VIEW PRODUCTIONS
      *
      */
 
-    void viewBatches() {
+    void viewProductions() {
 
-        if (checkViewBatches()) {
-            boolean batchSerialSelected = view.getHomeView().getVbSerialRadioButton().isSelected();
-            boolean orderIdIsSelected = view.getHomeView().getVbOrderRadioButton().isSelected();
-            boolean formulaIsSelected = view.getHomeView().getVbFormulaRadioButton().isSelected();
+        if (checkViewProductions()) {
+            boolean batchSerialSelected = view.getHomeView().getVpSerialRadioButton().isSelected();
+            boolean orderIdIsSelected = view.getHomeView().getVpOrderRadioButton().isSelected();
+            boolean formulaIsSelected = view.getHomeView().getVpFormulaRadioButton().isSelected();
+            boolean statusIsSelected = view.getHomeView().getVpStatusRadioButton().isSelected();
 
             String query = "";
 
             if (batchSerialSelected) {
-                String serial = "'" + view.getHomeView().getVbSerial() + "'";
-                query = "SELECT * FROM \"Batches\" WHERE \"Batch_serial\" = " + serial;
+                String serial = "'" + view.getHomeView().getVpSerial() + "'";
+                query = "SELECT * FROM \"Production\" WHERE \"Batch_serial\" = " + serial;
             } else if (orderIdIsSelected) {
-                String orderID = view.getHomeView().getVbOrderId();
-                query = "SELECT * FROM \"Batches\" WHERE \"Order_IDs\" @> ARRAY['" + orderID + "']::varchar[]";
+                String orderID = view.getHomeView().getVpOrderId();
+                query = "SELECT * FROM \"Production\" WHERE \"Orders_IDs\" @> ARRAY['" + orderID + "']::varchar[]";
             } else if (formulaIsSelected) {
-                String formula = view.getHomeView().getVbFormula();
-                query = "SELECT * FROM \"Batches\" WHERE \"Formula_ID\" = '" + formula + "'";
+                String formula = view.getHomeView().getVpFormula();
+                query = "SELECT * FROM \"Production\" WHERE \"Batch_formula\" = '" + formula + "'";
+            } else if (statusIsSelected) {
+                String status = view.getHomeView().getVpStatus();
+                query = "SELECT * FROM \"Production\" WHERE \"Production_status\" = '" + status + "'";
             } else {
-                query = "SELECT * FROM \"Batches\"";
+                query = "SELECT * FROM \"Production\"";
             }
-
 
             try {
                 PreparedStatement samplesQuery = databaseConnection.prepareStatement(query, ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
-                ResultSet samples = samplesQuery.executeQuery();
-                view.getHomeView().showBatches(samples, this);
+                ResultSet productions = samplesQuery.executeQuery();
+                view.getHomeView().showBatches(productions, this);
             } catch (SQLException throwables) {
-                showMessage("Error performing operation", "Error viewing batches.");
+                showErrorMessage("Error performing operation", "Error viewing productions.", throwables.getLocalizedMessage());
                 throwables.printStackTrace();
             }
         }
 
     }
 
-    boolean checkViewBatches() {
+    boolean checkViewProductions() {
         boolean flag = true;
 
-        if (view.getHomeView().getVbSerialRadioButton().isSelected()) {
-            if (view.getHomeView().getVbSerial().equals("")) {
+        if (view.getHomeView().getVpSerialRadioButton().isSelected()) {
+            if (view.getHomeView().getVpSerial().equals("")) {
                 flag = false;
                 showMessage("Error viewing batches", "Please enter a batch serial to filter by.");
             }
-        } else if (view.getHomeView().getVbOrderRadioButton().isSelected()) {
-            if (view.getHomeView().getVbOrderId().equals("")) {
+        } else if (view.getHomeView().getVpOrderRadioButton().isSelected()) {
+            if (view.getHomeView().getVpOrderId().equals("")) {
                 flag = false;
                 showMessage("Error viewing batches", "Please enter an Order ID to filter by.");
             }
-        } else if (view.getHomeView().getVbFormulaRadioButton().isSelected()) {
-            if (view.getHomeView().getVbFormula().equals("")) {
+        } else if (view.getHomeView().getVpFormulaRadioButton().isSelected()) {
+            if (view.getHomeView().getVpFormula().equals("")) {
                 flag = false;
                 showMessage("Error viewing batches", "Please enter a Formula to filter by.");
             }
+        } else if (view.getHomeView().getVpStatusRadioButton().isSelected()) {
+            if (view.getHomeView().getVpStatus().equals("")) {
+                flag = false;
+                showMessage("Error viewing batches", "Please enter a Status to filter by.");
+            }
         }
-
         return flag;
     }
 
-    void updateBatch(TableModelEvent e) {
+    void updateProduction(TableModelEvent e) {
         if (checkUpdatePrivilege()) {
             int row = e.getFirstRow();
             int column = e.getColumn();
-            String newValue = view.getHomeView().getVbTable().getValueAt(row, column).toString();
-            String columnName = view.getHomeView().getVbTable().getColumnName(column);
-            String serial = "'" + view.getHomeView().getVbTable().getValueAt(row, 0).toString() + "'";
+            String newValue = view.getHomeView().getVpTable().getValueAt(row, column).toString();
+            String columnName = view.getHomeView().getVpTable().getColumnName(column);
+            String serial = "'" + view.getHomeView().getVpTable().getValueAt(row, 0).toString() + "'";
 
-            String query = "UPDATE \"Batches\" SET \"" + columnName + "\" = '" + newValue + "' WHERE \"Batch_serial\" = " + serial;
+            String query = "UPDATE \"Production\" SET \"" + columnName + "\" = '" + newValue + "' WHERE \"Batch_serial\" = " + serial;
 
             try {
                 sqlStatement.executeUpdate(query);
@@ -723,16 +736,16 @@ public class SystemController implements ActionListener, TableModelListener, Pro
                 throwables.printStackTrace();
             }
         }
-        viewBatches();
+        viewProductions();
     }
 
-    void deleteBatch() {
-        if (view.getHomeView().getVbTable() != null) {
-            if (view.getHomeView().getVbTable().getModel() != null) {
-                int row = view.getHomeView().getVbTable().getSelectedRow();
-                String serial = "'" + view.getHomeView().getVbTable().getValueAt(row, 0).toString() + "'";
+    void deleteProduction() {
+        if (view.getHomeView().getVpTable() != null) {
+            if (view.getHomeView().getVpTable().getModel() != null) {
+                int row = view.getHomeView().getVpTable().getSelectedRow();
+                String serial = "'" + view.getHomeView().getVpTable().getValueAt(row, 0).toString() + "'";
 
-                String query = "DELETE FROM \"Batches\" WHERE \"Batch_serial\" = " + serial;
+                String query = "DELETE FROM \"Production\" WHERE \"Batch_serial\" = " + serial;
 
                 try {
                     sqlStatement.executeUpdate(query);
@@ -741,7 +754,7 @@ public class SystemController implements ActionListener, TableModelListener, Pro
                     showMessage("Error performing operation", "Could not delete batch.");
                     throwables.printStackTrace();
                 }
-                viewBatches();
+                viewProductions();
             }
         }
     }
@@ -1000,7 +1013,7 @@ public class SystemController implements ActionListener, TableModelListener, Pro
         if (view.getHomeView().getVvTable() != null) {
             if (view.getHomeView().getVvTable().getModel() != null) {
                 int row = view.getHomeView().getVvTable().getSelectedRow();
-                String id = view.getHomeView().getVbTable().getValueAt(row, 0).toString();
+                String id = view.getHomeView().getVpTable().getValueAt(row, 0).toString();
 
                 String query = "DELETE FROM \"Vendors\" WHERE \"Vendor_ID\" = " + id;
 
@@ -1119,12 +1132,12 @@ public class SystemController implements ActionListener, TableModelListener, Pro
             deleteOrder();
         } else if (e.getSource() == view.getHomeView().getVmRefreshButton()) {
             getMaterials();
-        } else if (e.getSource() == view.getHomeView().getCbCreateButton()) {
-            createBatch();
-        } else if (e.getSource() == view.getHomeView().getVbViewButton()) {
-            viewBatches();
-        } else if (e.getSource() == view.getHomeView().getDeleteBatchButton()) {
-            deleteBatch();
+        } else if (e.getSource() == view.getHomeView().getApAddButton()) {
+            addProduction();
+        } else if (e.getSource() == view.getHomeView().getVpViewButton()) {
+            viewProductions();
+        } else if (e.getSource() == view.getHomeView().getDeleteProductionButton()) {
+            deleteProduction();
         } else if (e.getSource() == view.getHomeView().getAmAddButton()) {
             addMaterial();
         } else if (e.getSource() == view.getHomeView().getCreateNewFormulaButton()) {
@@ -1178,11 +1191,11 @@ public class SystemController implements ActionListener, TableModelListener, Pro
                     }
                 }
             }
-        } if (view.getHomeView().getVbTable() != null) {
-            if (view.getHomeView().getVbTable().getModel() != null) {
-                if (e.getSource() == view.getHomeView().getVbTable().getModel()) {
+        } if (view.getHomeView().getVpTable() != null) {
+            if (view.getHomeView().getVpTable().getModel() != null) {
+                if (e.getSource() == view.getHomeView().getVpTable().getModel()) {
                     if (e.getType() == TableModelEvent.UPDATE) {
-                        updateBatch(e);
+                        updateProduction(e);
                     }
                 }
             }

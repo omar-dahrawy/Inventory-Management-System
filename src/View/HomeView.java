@@ -1,6 +1,7 @@
 package View;
 
 import Controller.SystemController;
+import Model.Constants;
 import com.github.lgooddatepicker.components.DatePicker;
 
 import javax.swing.*;
@@ -16,6 +17,8 @@ import java.util.ArrayList;
 
 
 public class HomeView implements ActionListener {
+
+    private Constants K = new Constants();
 
     private JPanel homePanel;
 
@@ -170,34 +173,36 @@ public class HomeView implements ActionListener {
 
     /*
      *
-     *      CREATE BATCH
+     *      ADD PRODUCTION
      *
      */
 
-    private JTextField CbSerialField;
-    private JComboBox CbFormulaComboBox;
-    private JTextArea CbOrderIDsArea;
-    private JButton CbCreateButton;
+    private JTextField ApQuantityField;
+    private JComboBox ApFormulasComboBox;
+    private JTextArea ApOrderIDsArea;
+    private JButton ApAddButton;
 
     /*
      *
-     *      VIEW BATCHES
+     *      VIEW PRODUCTIONS
      *
      */
 
-    private JPanel VbPanel;
-    private JTable VbTable;
-    private JPanel VbTablePanel;
-    private ButtonGroup VbRadioButtonGroup = new ButtonGroup();
-    private JRadioButton VbSerialRadioButton;
-    private JRadioButton VbOrderRadioButton;
-    private JTextField VbSerialField;
-    private JTextField VbOrderIdField;
-    private JTextField VbFormulaField;
-    private JButton VbViewButton;
-    private JButton deleteBatchButton;
-    private JButton clearBatchesSelectionButton;
-    private JRadioButton VbFormulaRadioButton;
+    private JPanel VpPanel;
+    private JTable VpTable;
+    private JPanel VpTablePanel;
+    private ButtonGroup VpRadioButtonGroup = new ButtonGroup();
+    private JRadioButton VpSerialRadioButton;
+    private JRadioButton VpOrderRadioButton;
+    private JRadioButton VpFormulaRadioButton;
+    private JRadioButton VpStatusRadioButton;
+    private JTextField VpSerialField;
+    private JTextField VpOrderIdField;
+    private JComboBox VpFormulasComboBox;
+    private JComboBox VpStatusComboBox;
+    private JButton VpViewButton;
+    private JButton deleteProductionButton;
+    private JButton clearProductionSelectionButton;
 
     /*
      *
@@ -257,7 +262,7 @@ public class HomeView implements ActionListener {
      *
      */
 
-    private JComboBox AtFormulaComboBox;
+    private JComboBox AtFormulasComboBox;
     private JPanel VtTablePanel;
     private JPanel VtPanel;
     private JTextField AtTestIdField;
@@ -327,9 +332,16 @@ public class HomeView implements ActionListener {
         VoRadioButtonGroup.add(VoStatusRadioButton);
         VoRadioButtonGroup.add(VoBatchRadioButton);
 
-        VbRadioButtonGroup.add(VbSerialRadioButton);
-        VbRadioButtonGroup.add(VbOrderRadioButton);
-        VbRadioButtonGroup.add(VbFormulaRadioButton);
+        VpRadioButtonGroup.add(VpSerialRadioButton);
+        VpRadioButtonGroup.add(VpOrderRadioButton);
+        VpRadioButtonGroup.add(VpFormulaRadioButton);
+        VpRadioButtonGroup.add(VpStatusRadioButton);
+
+        VpStatusComboBox.addItem("Select Status");
+        VpStatusComboBox.addItem(K.status_1);
+        VpStatusComboBox.addItem(K.status_2);
+        VpStatusComboBox.addItem(K.status_3);
+        VpStatusComboBox.addItem(K.status_4);
 
         VvRadioButtonGroup.add(VvVendorRadioButton);
         VvRadioButtonGroup.add(VvContactRadioButton);
@@ -338,7 +350,7 @@ public class HomeView implements ActionListener {
         VmeTablePanel.add(new JScrollPane(VmeTable));
         VoTablePanel.add(new JScrollPane(VoTable));
         VmTablePanel.add(new JScrollPane(VmTable));
-        VbTablePanel.add(new JScrollPane(VbTable));
+        VpTablePanel.add(new JScrollPane(VpTable));
         VfTablePanel.add(new JScrollPane(VfTable));
         VvTablePanel.add(new JScrollPane(VvTable));
         VtTablePanel.add(new JScrollPane(VtTable));
@@ -374,13 +386,14 @@ public class HomeView implements ActionListener {
         AmAddButton.addActionListener(controller);
         VmRefreshButton.addActionListener(controller);
 
-        CbCreateButton.addActionListener(controller);
-        VbSerialRadioButton.addActionListener(this);
-        VbOrderRadioButton.addActionListener(this);
-        VbFormulaRadioButton.addActionListener(this);
-        VbViewButton.addActionListener(controller);
-        clearBatchesSelectionButton.addActionListener(this);
-        deleteBatchButton.addActionListener(controller);
+        ApAddButton.addActionListener(controller);
+        VpSerialRadioButton.addActionListener(this);
+        VpOrderRadioButton.addActionListener(this);
+        VpFormulaRadioButton.addActionListener(this);
+        VpStatusRadioButton.addActionListener(this);
+        VpViewButton.addActionListener(controller);
+        clearProductionSelectionButton.addActionListener(this);
+        deleteProductionButton.addActionListener(controller);
 
         createNewFormulaButton.addActionListener(controller);
         VfRefreshButton.addActionListener(controller);
@@ -717,72 +730,84 @@ public class HomeView implements ActionListener {
 
     /*
      *
-     *      CREATE BATCH
+     *      ADD PRODUCTION
      *
      */
 
-    public JButton getCbCreateButton() {
-        return CbCreateButton;
+    public JButton getApAddButton() {
+        return ApAddButton;
     }
 
-    public String getCbSerial() {
-        return CbSerialField.getText();
+    public String getApFormula() {
+        return ApFormulasComboBox.getSelectedItem().toString();
     }
 
-    public String getCbOrderIDs() {
-        String ordersString = "";
-        String[] orderIDs = CbOrderIDsArea.getText().split("\n");
-        for (int i = 0; i < orderIDs.length; i++) {
-            String orderID = orderIDs[i];
-            ordersString += i != orderIDs.length - 1 ? ("\"" + orderID + "\",") : ("\"" + orderID + "\"}', ");
+    public Double getApQuantity() {
+        if (!ApQuantityField.getText().equals("")) {
+            try {
+                return Double.parseDouble(ApQuantityField.getText());
+            } catch (NumberFormatException e) {
+                e.printStackTrace();
+            }
+        } else {
+            return 0.0;
         }
-        return ordersString;
+        return -13.11;
     }
 
-    public String getCbFormula() {
-        return CbFormulaComboBox.getSelectedItem().toString();
+    public Object[] getApOrderIDs() {
+        Object[] array = ApOrderIDsArea.getText().split("\n");
+        return array;
     }
 
     /*
      *
-     *      VIEW BATCHES
+     *      VIEW PRODUCTIONS
      *
      */
 
-    public String getVbSerial() {
-        return VbSerialField.getText();
+    public String getVpSerial() {
+        return VpSerialField.getText();
     }
 
-    public String getVbOrderId() {
-        return VbOrderIdField.getText();
+    public String getVpOrderId() {
+        return VpOrderIdField.getText();
     }
 
-    public String getVbFormula() {
-        return VbFormulaField.getText();
+    public String getVpFormula() {
+        return VpFormulasComboBox.getSelectedItem().toString();
     }
 
-    public JRadioButton getVbSerialRadioButton() {
-        return VbSerialRadioButton;
+    public String getVpStatus() {
+        return VpStatusComboBox.getSelectedItem().toString();
     }
 
-    public JRadioButton getVbOrderRadioButton() {
-        return VbOrderRadioButton;
+    public JRadioButton getVpSerialRadioButton() {
+        return VpSerialRadioButton;
     }
 
-    public JRadioButton getVbFormulaRadioButton() {
-        return VbFormulaRadioButton;
+    public JRadioButton getVpOrderRadioButton() {
+        return VpOrderRadioButton;
     }
 
-    public JTable getVbTable() {
-        return VbTable;
+    public JRadioButton getVpFormulaRadioButton() {
+        return VpFormulaRadioButton;
     }
 
-    public JButton getVbViewButton() {
-        return VbViewButton;
+    public JRadioButton getVpStatusRadioButton() {
+        return VpStatusRadioButton;
     }
 
-    public JButton getDeleteBatchButton() {
-        return deleteBatchButton;
+    public JTable getVpTable() {
+        return VpTable;
+    }
+
+    public JButton getVpViewButton() {
+        return VpViewButton;
+    }
+
+    public JButton getDeleteProductionButton() {
+        return deleteProductionButton;
     }
 
     /*
@@ -1020,15 +1045,15 @@ public class HomeView implements ActionListener {
                 data[batches.getRow()-1][i] = batches.getString(i+1);
             }
         }
-        VbTable = new JTable(data, columnNames);
-        setTableFont(VbTable);
-        VbTablePanel.remove(0);
-        VbTablePanel.add(new JScrollPane(VbTable));
+        VpTable = new JTable(data, columnNames);
+        setTableFont(VpTable);
+        VpTablePanel.remove(0);
+        VpTablePanel.add(new JScrollPane(VpTable));
 
-        VbTable.getModel().addTableModelListener(controller);
+        VpTable.getModel().addTableModelListener(controller);
 
-        VbTablePanel.repaint();
-        VbPanel.repaint();
+        VpTablePanel.repaint();
+        VpPanel.repaint();
         batchesPanel.repaint();
         homePanel.repaint();
     }
@@ -1040,16 +1065,20 @@ public class HomeView implements ActionListener {
         String[] columnNames = getColumnNames(formulas, columnCount);
         String [][] data = new String[rowCount][columnCount];
 
-        CbFormulaComboBox.removeAllItems();
-        CbFormulaComboBox.addItem("Select Formula");
-        AtFormulaComboBox.addItem("Select Formula");
+        ApFormulasComboBox.removeAllItems();
+        VpFormulasComboBox.removeAllItems();
+        AtFormulasComboBox.removeAllItems();
+        ApFormulasComboBox.addItem("Select Formula");
+        VpFormulasComboBox.addItem("Select Formula");
+        AtFormulasComboBox.addItem("Select Formula");
 
         while (formulas.next()) {
             for (int i = 0 ; i < columnCount ; i++) {
                 data[formulas.getRow() - 1][i] = formulas.getString(i + 1);
             }
-            CbFormulaComboBox.addItem(formulas.getString(1));
-            AtFormulaComboBox.addItem(formulas.getString(1));
+            ApFormulasComboBox.addItem(formulas.getString(1));
+            VpFormulasComboBox.addItem(formulas.getString(1));
+            AtFormulasComboBox.addItem(formulas.getString(1));
         }
         VfTable = new JTable(data, columnNames);
         VfTable.setAutoCreateRowSorter(true);
@@ -1207,23 +1236,32 @@ public class HomeView implements ActionListener {
             VoCustomerField.setEnabled(false);
         }
 
-        else if (e.getSource() == VbSerialRadioButton) {
-            VbSerialField.setEnabled(!VbSerialField.isEnabled());
-            VbOrderIdField.setEnabled(false);
-            VbFormulaField.setEnabled(false);
-        } else if (e.getSource() == VbOrderRadioButton) {
-            VbOrderIdField.setEnabled(!VbOrderIdField.isEnabled());
-            VbSerialField.setEnabled(false);
-            VbFormulaField.setEnabled(false);
-        } else if (e.getSource() == VbFormulaRadioButton) {
-            VbFormulaField.setEnabled(!VbFormulaField.isEnabled());
-            VbSerialField.setEnabled(false);
-            VbOrderIdField.setEnabled(false);
-        } else if (e.getSource() == clearBatchesSelectionButton) {
-            VbRadioButtonGroup.clearSelection();
-            VbSerialField.setEnabled(false);
-            VbOrderIdField.setEnabled(false);
-            VbFormulaField.setEnabled(false);
+        else if (e.getSource() == VpSerialRadioButton) {
+            VpSerialField.setEnabled(!VpSerialField.isEnabled());
+            VpOrderIdField.setEnabled(false);
+            VpFormulasComboBox.setEnabled(false);
+            VpStatusComboBox.setEnabled(false);
+        } else if (e.getSource() == VpOrderRadioButton) {
+            VpOrderIdField.setEnabled(!VpOrderIdField.isEnabled());
+            VpSerialField.setEnabled(false);
+            VpFormulasComboBox.setEnabled(false);
+            VpStatusComboBox.setEnabled(false);
+        } else if (e.getSource() == VpFormulaRadioButton) {
+            VpFormulasComboBox.setEnabled(!VpFormulasComboBox.isEnabled());
+            VpSerialField.setEnabled(false);
+            VpOrderIdField.setEnabled(false);
+            VpStatusComboBox.setEnabled(false);
+        } else if (e.getSource() == VpStatusRadioButton) {
+            VpStatusComboBox.setEnabled(!VpStatusComboBox.isEnabled());
+            VpSerialField.setEnabled(false);
+            VpOrderIdField.setEnabled(false);
+            VpFormulasComboBox.setEnabled(false);
+        } else if (e.getSource() == clearProductionSelectionButton) {
+            VpRadioButtonGroup.clearSelection();
+            VpSerialField.setEnabled(false);
+            VpOrderIdField.setEnabled(false);
+            VpFormulasComboBox.setEnabled(false);
+            VpStatusComboBox.setEnabled(false);
         }
 
         else if (e.getSource() == VvVendorRadioButton) {
@@ -1241,4 +1279,5 @@ public class HomeView implements ActionListener {
         VoPanel.repaint();
         ordersPanel.repaint();
     }
+
 }
