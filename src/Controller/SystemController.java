@@ -1,6 +1,7 @@
 package Controller;
 
 import Model.Constants;
+import View.AddProductionView;
 import View.SystemView;
 
 import javax.swing.*;
@@ -607,6 +608,9 @@ public class SystemController implements ActionListener, TableModelListener, Pro
      */
 
     void addProduction() {
+
+        new AddProductionView(this, view.getHomeView());
+
         if (checkCreateProduction()) {
             String formula = view.getHomeView().getApFormula();
             Double quantity = view.getHomeView().getApQuantity();
