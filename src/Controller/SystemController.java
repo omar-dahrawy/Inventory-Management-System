@@ -63,7 +63,6 @@ public class SystemController implements ActionListener, TableModelListener, Pro
                     viewVendors();
                     viewGeneralExpenses();
                     viewMaterialExpenses();
-                    getStatusDomain();
                     viewProductions();
                     viewOrders();
                     getFormulas();
@@ -351,18 +350,28 @@ public class SystemController implements ActionListener, TableModelListener, Pro
 
     void addOrder() {
         if (checkAddOrder()) {
-            String customer = "'" + view.getHomeView().getAoCustomer() + "',";
-            String orderDetails = "'" + view.getHomeView().getAoDetails() + "',";
-            String price = view.getHomeView().getAoPrice() + ",";
-            String status = 1 + ",";
-            String DOP = "'" + view.getHomeView().getAoDop() + "',";
-            String DOD = "'" + view.getHomeView().getAoDod() + "',";
-            String DOE = "'" + new SimpleDateFormat("yyyy-MM-dd").format(new Date()) + "'";
+            String customer = view.getHomeView().getAoCustomer();
+            String orderDetails = view.getHomeView().getAoDetails();
+            Double price = view.getHomeView().getAoPrice();
+            String status = K.status_1;
+            java.sql.Date DOP = java.sql.Date.valueOf(view.getHomeView().getAoDop());
+            java.sql.Date DOD = java.sql.Date.valueOf(view.getHomeView().getAoDod());
+            java.sql.Date DOE = java.sql.Date.valueOf(new SimpleDateFormat("yyyy-MM-dd").format(new Date()));
+
+            String sql = "INSERT INTO \"Orders\" values (DEFAULT, ?, ?, ?, ?, ?, ?, ?, ?)";
 
             try {
-                String sqlQuery = "insert into public.\"Orders\" values (DEFAULT," + customer + orderDetails + price +
-                        status + currentUserID + "," + DOP + DOD + DOE + ")";
-                sqlStatement.executeUpdate(sqlQuery);
+                PreparedStatement query = databaseConnection.prepareStatement(sql);
+                query.setString(1, customer);
+                query.setString(2, orderDetails);
+                query.setDouble(3, price);
+                query.setString(4, K.status_1);
+                query.setInt(5, currentUserID);
+                query.setDate(6, DOP);
+                query.setDate(7, DOD);
+                query.setDate(8, DOE);
+                query.executeUpdate();
+                query.close();
                 view.getHomeView().clearAddOrderFields();
                 showMessage("Operation successful", "New order added.");
                 viewOrders();
@@ -427,7 +436,7 @@ public class SystemController implements ActionListener, TableModelListener, Pro
                     query = "SELECT * FROM public.\"Orders\" WHERE \"" + dateType + "\" >= '" + view.getHomeView().getVoFromDate() + "'";
                 }
             } else if (statusSelected) {
-                query = "SELECT * FROM public.\"Orders\" WHERE \"Status\" = " + view.getHomeView().getVoStatus();
+                query = "SELECT * FROM public.\"Orders\" WHERE \"Status\" = '" + view.getHomeView().getVoStatus() + "'";
             } else if (batchSerialSelected) {
                 query = "SELECT * FROM public.\"Orders\" WHERE \"Batch_serial\" = '" + view.getHomeView().getVoSerial() + "'";
             } else {
@@ -454,7 +463,7 @@ public class SystemController implements ActionListener, TableModelListener, Pro
                 showMessage("Error viewing orders", "Please enter a customer to filter by.");
             }
         } else if (view.getHomeView().getVoStatusRadioButton().isSelected()) {
-            if (view.getHomeView().getVoStatus() == 0) {
+            if (view.getHomeView().getVoStatus().equals("Select Status")) {
                 flag = false;
                 showMessage("Error viewing orders", "Please select a status to filter by.");
             }
@@ -474,17 +483,6 @@ public class SystemController implements ActionListener, TableModelListener, Pro
         }
 
         return flag;
-    }
-
-    void getStatusDomain() {
-        String query = "SELECT \"Status\" FROM public.\"Status_domain\"";
-
-        try {
-            ResultSet status = sqlStatement.executeQuery(query);
-            view.getHomeView().getStatus(status);
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
-        }
     }
 
     void updateOrder(TableModelEvent e) {

@@ -231,7 +231,6 @@ public class HomeView implements ActionListener {
      */
 
     private JTextField AvVendorNameField;
-    private JTextArea AvProductsArea;
     private JTextField AvContactNameField;
     private JTextField AvContactNumberField;
     private JTextField AvContactEmailField;
@@ -331,6 +330,12 @@ public class HomeView implements ActionListener {
         VoRadioButtonGroup.add(VoCustomerRadioButton);
         VoRadioButtonGroup.add(VoStatusRadioButton);
         VoRadioButtonGroup.add(VoBatchRadioButton);
+
+        VoStatusComboBox.addItem("Select Status");
+        VoStatusComboBox.addItem(K.status_1);
+        VoStatusComboBox.addItem(K.status_2);
+        VoStatusComboBox.addItem(K.status_3);
+        VoStatusComboBox.addItem(K.status_4);
 
         VpRadioButtonGroup.add(VpSerialRadioButton);
         VpRadioButtonGroup.add(VpOrderRadioButton);
@@ -625,14 +630,6 @@ public class HomeView implements ActionListener {
         AoDetailsArea.setText("");
     }
 
-    public void getStatus(ResultSet status) throws SQLException {
-
-        VoStatusComboBox.addItem("Select status");
-        while (status.next()) {
-            VoStatusComboBox.addItem(status.getString(1));
-        }
-    }
-
     /*
      *
      *      VIEW ORDERS
@@ -651,8 +648,8 @@ public class HomeView implements ActionListener {
         return VoSerialField.getText();
     }
 
-    public int getVoStatus() {
-        return VoStatusComboBox.getSelectedIndex();
+    public String getVoStatus() {
+        return VoStatusComboBox.getSelectedItem().toString();
     }
 
     public String getVoDateType() {
@@ -860,7 +857,6 @@ public class HomeView implements ActionListener {
 
     public void clearAddVendorFields() {
         AvVendorNameField.setText("");
-        AvProductsArea.setText("");
         AvContactNameField.setText("");
         AvContactNumberField.setText("");
         AvContactEmailField.setText("");
@@ -967,12 +963,7 @@ public class HomeView implements ActionListener {
 
         while (orders.next()) {
             for (int i = 0 ; i < columnCount ; i++) {
-                if (orders.getMetaData().getColumnName(i+1).equals("Status")) {
-
-                    data[orders.getRow() - 1][i] = VoStatusComboBox.getItemAt(orders.getInt(i+1)).toString();
-                } else {
-                    data[orders.getRow() - 1][i] = orders.getString(i + 1);
-                }
+                data[orders.getRow() - 1][i] = orders.getString(i + 1);
             }
         }
         VoTable = new JTable(data, columnNames);
