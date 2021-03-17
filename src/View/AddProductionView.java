@@ -6,10 +6,12 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
 
 public class AddProductionView extends JFrame implements ActionListener {
 
     private Dimension screenDimensions = Toolkit.getDefaultToolkit().getScreenSize();
+    private Font font;
 
     private HomeView homeView;
     private SystemController controller;
@@ -22,44 +24,38 @@ public class AddProductionView extends JFrame implements ActionListener {
     private JButton ApAddButton;
 
     private JPanel packagingPanel;
-    private JScrollPane packagingScrollPane;
 
     private JPanel tanksPanel;
-    private JLabel tanksLabel;
-    private JButton addTanksButton;
-
     private JPanel drumsPanel;
-    private JLabel drumsLabel;
-    private JButton addDrumsButton;
-
     private JPanel pailsPanel;
-    private JLabel pailsLabel;
-    private JButton addPailsButton;
-
     private JPanel cartonsPanel;
-    private JLabel cartonsLabel;
-    private JButton addCartonsButton;
-
     private JPanel gallonsPanel;
+
+    private JLabel tanksLabel;
+    private JLabel drumsLabel;
+    private JLabel pailsLabel;
+    private JLabel cartonsLabel;
     private JLabel gallonsLabel;
+
+    private JButton addTanksButton;
+    private JButton addDrumsButton;
+    private JButton addPailsButton;
+    private JButton addCartonsButton;
     private JButton addGallonsButton;
+
+    private ArrayList<JPanel> tanksPanels;
+    private ArrayList<JPanel> drumsPanels;
+    private ArrayList<JPanel> pailsPanels;
+    private ArrayList<JPanel> cartonsPanels;
+    private ArrayList<JPanel> gallonsPanels;
 
 
     public AddProductionView(SystemController controller, HomeView homeView) {
         this.controller = controller;
         this.homeView = homeView;
 
-        add(ApPanel);
-
-        setSize(600,700);
-        setLocation(screenDimensions.width/2 - getSize().width/2, screenDimensions.height/2 - getSize().height/2);
-
-        setResizable(false);
-        setVisible(true);
-
-        ApAddButton.addActionListener(controller);
-
         getFormulas();
+        add(ApPanel);
 
         initializeTanksPanel();
         initializeDrumsPanel();
@@ -67,7 +63,13 @@ public class AddProductionView extends JFrame implements ActionListener {
         initializeCartonsPanel();
         initializeGallonsPanel();
 
-        addPackagingOptions();
+        ApAddButton.addActionListener(controller);
+
+        setSize(600,700);
+        setLocation(screenDimensions.width/2 - getSize().width/2, screenDimensions.height/2 - getSize().height/2);
+
+        setResizable(false);
+        setVisible(true);
     }
 
     private void getFormulas() {
@@ -80,12 +82,8 @@ public class AddProductionView extends JFrame implements ActionListener {
 
     }
 
-    private void addPackagingOptions() {
-
-    }
-
-    public JComboBox getApFormulasComboBox() {
-        return ApFormulasComboBox;
+    public String getApFormula() {
+        return ApFormulasComboBox.getSelectedItem().toString();
     }
 
     public Double getApQuantity() {
@@ -106,103 +104,178 @@ public class AddProductionView extends JFrame implements ActionListener {
         return array;
     }
 
-    public JButton getApAddButton() {
-        return ApAddButton;
-    }
-
     private void initializeTanksPanel() {
         tanksLabel = new JLabel("Tanks");
         tanksLabel.setHorizontalAlignment(JLabel.CENTER);
+        font = new Font(tanksLabel.getFont().getName(), Font.BOLD, tanksLabel.getFont().getSize() + 3);
+        tanksLabel.setFont(font);
 
         addTanksButton = new JButton("Add more tanks");
         addTanksButton.addActionListener(this);
 
+        JPanel panel = new JPanel();
+        panel.add(new JLabel(""));
+        panel.add(addTanksButton);
+        panel.add(new JLabel(""));
+
         tanksPanel.setLayout(new GridLayout(2,1));
         tanksPanel.add(tanksLabel);
-        tanksPanel.add(addTanksButton);
+        tanksPanel.add(panel);
+
+        tanksPanels = new ArrayList<>();
     }
 
     private void initializeDrumsPanel() {
         drumsLabel = new JLabel("Drums");
         drumsLabel.setHorizontalAlignment(JLabel.CENTER);
+        drumsLabel.setFont(font);
 
         addDrumsButton = new JButton("Add more drums");
         addDrumsButton.addActionListener(this);
 
+        JPanel panel = new JPanel();
+        panel.add(new JLabel(""));
+        panel.add(addDrumsButton);
+        panel.add(new JLabel(""));
+
         drumsPanel.setLayout(new GridLayout(2,1));
         drumsPanel.add(drumsLabel);
-        drumsPanel.add(addDrumsButton);
+        drumsPanel.add(panel);
+
+        drumsPanels = new ArrayList<>();
     }
 
     private void initializePailsPanel() {
         pailsLabel = new JLabel("Pails");
         pailsLabel.setHorizontalAlignment(JLabel.CENTER);
+        pailsLabel.setFont(font);
 
         addPailsButton = new JButton("Add more pails");
         addPailsButton.addActionListener(this);
 
+        JPanel panel = new JPanel();
+        panel.add(new JLabel(""));
+        panel.add(addPailsButton);
+        panel.add(new JLabel(""));
+
         pailsPanel.setLayout(new GridLayout(2,1));
         pailsPanel.add(pailsLabel);
-        pailsPanel.add(addPailsButton);
+        pailsPanel.add(panel);
+
+        pailsPanels = new ArrayList<>();
     }
 
     private void initializeCartonsPanel() {
         cartonsLabel = new JLabel("Cartons");
         cartonsLabel.setHorizontalAlignment(JLabel.CENTER);
+        cartonsLabel.setFont(font);
 
         addCartonsButton = new JButton("Add more cartons");
         addCartonsButton.addActionListener(this);
 
+        JPanel panel = new JPanel();
+        panel.add(new JLabel(""));
+        panel.add(addCartonsButton);
+        panel.add(new JLabel(""));
+
         cartonsPanel.setLayout(new GridLayout(2,1));
         cartonsPanel.add(cartonsLabel);
-        cartonsPanel.add(addCartonsButton);
+        cartonsPanel.add(panel);
+
+        cartonsPanels = new ArrayList<>();
     }
 
     private void initializeGallonsPanel() {
         gallonsLabel = new JLabel("Gallons");
         gallonsLabel.setHorizontalAlignment(JLabel.CENTER);
+        gallonsLabel.setFont(font);
 
         addGallonsButton = new JButton("Add more gallons");
         addGallonsButton.addActionListener(this);
 
+        JPanel panel = new JPanel();
+        panel.add(new JLabel(""));
+        panel.add(addGallonsButton);
+        panel.add(new JLabel(""));
+
         gallonsPanel.setLayout(new GridLayout(2,1));
         gallonsPanel.add(gallonsLabel);
-        gallonsPanel.add(addGallonsButton);
+        gallonsPanel.add(panel);
+
+        gallonsPanels = new ArrayList<>();
     }
 
-    private void addMore(JPanel panel) {
+    public ArrayList<JPanel> getTanksPanels() {
+        return tanksPanels;
+    }
+
+    public ArrayList<JPanel> getDrumsPanels() {
+        return drumsPanels;
+    }
+
+    public ArrayList<JPanel> getPailsPanels() {
+        return pailsPanels;
+    }
+
+    public ArrayList<JPanel> getCartonsPanels() {
+        return cartonsPanels;
+    }
+
+    public ArrayList<JPanel> getGallonsPanels() {
+        return gallonsPanels;
+    }
+
+    private JPanel addMoreFields(JPanel panel) {
         GridLayout grid = (GridLayout) panel.getLayout();
-        int rows = grid.getRows();
-        grid.setRows(rows + 1);
+        if (grid.getRows() == 2) {
+            grid.setRows(grid.getRows() + 2);
+            JPanel newPanel = new JPanel(new GridLayout(1,3));
+            JLabel label1 = new JLabel("#");
+            JLabel label2 = new JLabel("Quantity");
+            JLabel label3 = new JLabel("Weight");
+            label1.setHorizontalAlignment(JLabel.CENTER);
+            label2.setHorizontalAlignment(JLabel.CENTER);
+            label3.setHorizontalAlignment(JLabel.CENTER);
+            label1.setFont(new Font(label1.getFont().getName(), Font.BOLD, label1.getFont().getSize()));
+            label2.setFont(new Font(label1.getFont().getName(), Font.BOLD, label1.getFont().getSize()));
+            label3.setFont(new Font(label1.getFont().getName(), Font.BOLD, label1.getFont().getSize()));
+            newPanel.add(label1);
+            newPanel.add(label2);
+            newPanel.add(label3);
 
-        JLabel label1 = new JLabel("Quantity");
+            panel.add(newPanel, 1);
+            packagingPanel.setPreferredSize(new Dimension(0,packagingPanel.getHeight()+70));
+        } else {
+            grid.setRows(grid.getRows() + 1);
+        }
+
+        JLabel label1 = new JLabel((grid.getRows()-3) + "");
         label1.setHorizontalAlignment(JLabel.CENTER);
-        JLabel label2 = new JLabel("Weight");
-        label2.setHorizontalAlignment(JLabel.CENTER);
+        label1.setFont(new Font(label1.getFont().getName(), Font.BOLD, label1.getFont().getSize()));
 
-        JPanel newPanel = new JPanel(new GridLayout(1,4));
+        JPanel newPanel = new JPanel(new GridLayout(1,3));
         newPanel.add(label1);
         newPanel.add(new JTextField());
-        newPanel.add(label2);
         newPanel.add(new JTextField());
+        panel.add(newPanel, grid.getRows()-2);
+        packagingPanel.setPreferredSize(new Dimension(0,packagingPanel.getHeight()+70));
 
-        panel.add(newPanel, rows-1);
+        return newPanel;
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == addTanksButton) {
-            addMore(tanksPanel);
+            tanksPanels.add(addMoreFields(tanksPanel));
         } else if (e.getSource() == addDrumsButton) {
-            addMore(drumsPanel);
+            drumsPanels.add(addMoreFields(drumsPanel));
         } else if (e.getSource() == addPailsButton) {
-            addMore(pailsPanel);
+            pailsPanels.add(addMoreFields(pailsPanel));
         } else if (e.getSource() == addCartonsButton) {
-            addMore(cartonsPanel);
+            cartonsPanels.add(addMoreFields(cartonsPanel));
         } else if (e.getSource() == addGallonsButton) {
-            addMore(gallonsPanel);
+            gallonsPanels.add(addMoreFields(gallonsPanel));
         }
-        packagingPanel.setPreferredSize(new Dimension(0,packagingPanel.getHeight()+40));
         this.validate();
     }
 }

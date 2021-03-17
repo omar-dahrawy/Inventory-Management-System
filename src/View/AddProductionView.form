@@ -69,7 +69,7 @@
           <gridbag weightx="0.0" weighty="0.05"/>
         </constraints>
       </vspacer>
-      <scrollpane id="a2fd" binding="packagingScrollPane">
+      <scrollpane id="a2fd">
         <constraints>
           <grid row="11" column="1" row-span="1" col-span="5" vsize-policy="7" hsize-policy="7" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
           <gridbag weightx="0.0" weighty="0.3"/>
@@ -83,7 +83,7 @@
             <margin top="0" left="0" bottom="0" right="0"/>
             <constraints/>
             <properties>
-              <preferredSize width="0" height="400"/>
+              <preferredSize width="0" height="500"/>
             </properties>
             <border type="none"/>
             <children>

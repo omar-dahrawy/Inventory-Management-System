@@ -179,10 +179,8 @@ public class HomeView implements ActionListener {
      *
      */
 
-    private JTextField ApQuantityField;
-    private JComboBox ApFormulasComboBox;
-    private JTextArea ApOrderIDsArea;
-    private JButton ApAddButton;
+    private JButton addNewProductionButton;
+    private AddProductionView ApView;
 
     /*
      *
@@ -388,7 +386,7 @@ public class HomeView implements ActionListener {
         AmAddButton.addActionListener(controller);
         VmRefreshButton.addActionListener(controller);
 
-        ApAddButton.addActionListener(controller);
+        addNewProductionButton.addActionListener(controller);
         VpSerialRadioButton.addActionListener(this);
         VpOrderRadioButton.addActionListener(this);
         VpFormulaRadioButton.addActionListener(this);
@@ -736,30 +734,16 @@ public class HomeView implements ActionListener {
      *
      */
 
-    public JButton getApAddButton() {
-        return ApAddButton;
+    public void showAddProductionView(SystemController controller) {
+        ApView = new AddProductionView(controller, this);
     }
 
-    public String getApFormula() {
-        return ApFormulasComboBox.getSelectedItem().toString();
+    public JButton getAddNewProductionButton() {
+        return addNewProductionButton;
     }
 
-    public Double getApQuantity() {
-        if (!ApQuantityField.getText().equals("")) {
-            try {
-                return Double.parseDouble(ApQuantityField.getText());
-            } catch (NumberFormatException e) {
-                e.printStackTrace();
-            }
-        } else {
-            return 0.0;
-        }
-        return -13.11;
-    }
-
-    public Object[] getApOrderIDs() {
-        Object[] array = ApOrderIDsArea.getText().split("\n");
-        return array;
+    public AddProductionView getApView() {
+        return ApView;
     }
 
     /*
@@ -1067,10 +1051,8 @@ public class HomeView implements ActionListener {
         String[] columnNames = getColumnNames(formulas, columnCount);
         String [][] data = new String[rowCount][columnCount];
 
-        ApFormulasComboBox.removeAllItems();
         VpFormulasComboBox.removeAllItems();
         AtFormulasComboBox.removeAllItems();
-        ApFormulasComboBox.addItem("Select Formula");
         VpFormulasComboBox.addItem("Select Formula");
         AtFormulasComboBox.addItem("Select Formula");
 
@@ -1078,7 +1060,6 @@ public class HomeView implements ActionListener {
             for (int i = 0 ; i < columnCount ; i++) {
                 data[formulas.getRow() - 1][i] = formulas.getString(i + 1);
             }
-            ApFormulasComboBox.addItem(formulas.getString(1));
             VpFormulasComboBox.addItem(formulas.getString(1));
             AtFormulasComboBox.addItem(formulas.getString(1));
         }

@@ -1,7 +1,6 @@
 package Controller;
 
 import Model.Constants;
-import View.AddProductionView;
 import View.SystemView;
 
 import javax.swing.*;
@@ -608,17 +607,14 @@ public class SystemController implements ActionListener, TableModelListener, Pro
      */
 
     void addProduction() {
-
-        new AddProductionView(this, view.getHomeView());
-
-        if (checkCreateProduction()) {
-            String formula = view.getHomeView().getApFormula();
-            Double quantity = view.getHomeView().getApQuantity();
+        if (checkAddProduction()) {
+            String formula = view.getHomeView().getApView().getApFormula();
+            Double quantity = view.getHomeView().getApView().getApQuantity();
 
             String sql = "INSERT INTO \"Production\" values (DEFAULT, ?, ?, ?, ?)";
 
             try {
-                Array array = databaseConnection.createArrayOf("VARCHAR", view.getHomeView().getApOrderIDs());
+                Array array = databaseConnection.createArrayOf("VARCHAR", view.getHomeView().getApView().getApOrders());
                 PreparedStatement query = databaseConnection.prepareStatement(sql);
                 query.setString(1, formula);
                 query.setDouble(2,quantity);
@@ -627,6 +623,7 @@ public class SystemController implements ActionListener, TableModelListener, Pro
                 query.executeUpdate();
                 query.close();
                 showMessage("Operation successful", "New production added.");
+                view.getHomeView().getApView().dispatchEvent(new WindowEvent(view.getHomeView().getApView(), WindowEvent.WINDOW_CLOSING));
                 viewProductions();
             } catch (SQLException throwables) {
                 showErrorMessage("Error performing operation", "New production could not be added.", throwables.getLocalizedMessage());
@@ -635,20 +632,111 @@ public class SystemController implements ActionListener, TableModelListener, Pro
         }
     }
 
-    boolean checkCreateProduction() {
-        boolean flag = true;
+    boolean checkAddProduction() {
 
-        if (view.getHomeView().getApQuantity().equals("")) {
-            flag = false;
-            showMessage("Error creating batch", "Batch serial cannot be empty.");
-        } else if (view.getHomeView().getApOrderIDs().equals("")) {
-            flag = false;
-            showMessage("Error creating batch", "Order IDs cannot be empty.");
-        } else if (view.getHomeView().getApFormula().equals("Select Formula")) {
-            showMessage("Error creating batch","Please select a batch formula.");
+        if (view.getHomeView().getApView().getApQuantity() == -13.11) {
+            showMessage("Error adding production", "Production quantity must be numbers.");
+            return false;
+        } else if (view.getHomeView().getApView().getApQuantity() == 0) {
+            showMessage("Error adding production", "Production quantity cannot be 0 or empty.");
+            return false;
+        } else if (view.getHomeView().getApView().getApOrders().length == 0) {
+            showMessage("Error adding production", "Order IDs cannot be empty.");
+            return false;
+        } else if (view.getHomeView().getApView().getApFormula().equals("Select Formula")) {
+            showMessage("Error adding production","Please choose a batch formula.");
+            return false;
+        } else {
+            return checkAddProductionFields();
+        }
+    }
+
+    boolean checkAddProductionFields() {
+        int count = 0;
+
+        for (JPanel panel: view.getHomeView().getApView().getTanksPanels()) {
+            count++;
+            Double quantity = parseDouble(((JTextField)panel.getComponent(1)).getText());
+            Double weight = parseDouble(((JTextField)panel.getComponent(2)).getText());
+            if (quantity == 0 || weight == 0) {
+                showMessage("Error adding production","All tanks fields must not be 0 or empty");
+                return false;
+            } else if (quantity == -13.11 || weight == -13.11) {
+                showMessage("Error adding production","All tanks fields must contain numbers");
+                return false;
+            } else {
+
+            }
+        }
+        for (JPanel panel: view.getHomeView().getApView().getDrumsPanels()) {
+            count++;
+            Double quantity = parseDouble(((JTextField)panel.getComponent(1)).getText());
+            Double weight = parseDouble(((JTextField)panel.getComponent(2)).getText());
+            if (quantity == 0 || weight == 0) {
+                showMessage("Error adding production","All drums fields must not be 0 or empty");
+                return false;
+            } else if (quantity == -13.11 || weight == -13.11) {
+                showMessage("Error adding production","All drums fields must contain numbers");
+                return false;
+            }
+        }
+        for (JPanel panel: view.getHomeView().getApView().getPailsPanels()) {
+            count++;
+            Double quantity = parseDouble(((JTextField)panel.getComponent(1)).getText());
+            Double weight = parseDouble(((JTextField)panel.getComponent(2)).getText());
+            if (quantity == 0 || weight == 0) {
+                showMessage("Error adding production","All pails fields must not be 0 or empty");
+                return false;
+            } else if (quantity == -13.11 || weight == -13.11) {
+                showMessage("Error adding production","All pails fields must contain numbers");
+                return false;
+            }
+        }
+        for (JPanel panel: view.getHomeView().getApView().getCartonsPanels()) {
+            count++;
+            Double quantity = parseDouble(((JTextField)panel.getComponent(1)).getText());
+            Double weight = parseDouble(((JTextField)panel.getComponent(2)).getText());
+            if (quantity == 0 || weight == 0) {
+                showMessage("Error adding production","All cartons fields must not be 0 or empty");
+                return false;
+            } else if (quantity == -13.11 || weight == -13.11) {
+                showMessage("Error adding production","All cartons fields must contain numbers");
+                return false;
+            }
+        }
+        for (JPanel panel: view.getHomeView().getApView().getGallonsPanels()) {
+            count++;
+            Double quantity = parseDouble(((JTextField)panel.getComponent(1)).getText());
+            Double weight = parseDouble(((JTextField)panel.getComponent(2)).getText());
+            if (quantity == 0 || weight == 0) {
+                showMessage("Error adding production","All gallons fields must not be 0 or empty");
+                return false;
+            } else if (quantity == -13.11 || weight == -13.11) {
+                showMessage("Error adding production","All gallons fields must contain numbers");
+                return false;
+            }
         }
 
-        return flag;
+        if (count > 0) {
+
+            return true;
+        } else {
+            showMessage("Error adding production","You must add at least one container");
+            return false;
+        }
+    }
+
+    double parseDouble(String string) {
+        if (!string.equals("")) {
+            try {
+                return Double.parseDouble(string);
+            } catch (NumberFormatException e) {
+                e.printStackTrace();
+            }
+        } else {
+            return 0.0;
+        }
+        return -13.11;
     }
 
     /*
@@ -1136,8 +1224,8 @@ public class SystemController implements ActionListener, TableModelListener, Pro
             deleteOrder();
         } else if (e.getSource() == view.getHomeView().getVmRefreshButton()) {
             getMaterials();
-        } else if (e.getSource() == view.getHomeView().getApAddButton()) {
-            addProduction();
+        } else if (e.getSource() == view.getHomeView().getAddNewProductionButton()) {
+            view.getHomeView().showAddProductionView(this);
         } else if (e.getSource() == view.getHomeView().getVpViewButton()) {
             viewProductions();
         } else if (e.getSource() == view.getHomeView().getDeleteProductionButton()) {
@@ -1158,6 +1246,8 @@ public class SystemController implements ActionListener, TableModelListener, Pro
             viewVendors();
         } else if (e.getSource() == view.getHomeView().getDeleteVendorButton()) {
             deleteVendor();
+        } else if (e.getActionCommand().equals("Add Production")) {
+            addProduction();
         }
     }
 
