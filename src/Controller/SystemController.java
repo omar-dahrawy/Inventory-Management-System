@@ -1,6 +1,7 @@
 package Controller;
 
 import Model.Constants;
+import View.HomeView;
 import View.SystemView;
 
 import javax.swing.*;
@@ -23,6 +24,7 @@ import java.util.Date;
 public class SystemController implements ActionListener, TableModelListener, PropertyChangeListener {
 
     private SystemView view;
+    private HomeView homeView;
     private Constants K = new Constants();
 
     private int currentUserID;
@@ -32,6 +34,7 @@ public class SystemController implements ActionListener, TableModelListener, Pro
 
     public SystemController(SystemView view) {
         this.view = view;
+        this.homeView = view.getHomeView();
         this.view.addActionListeners(this);
 
 
@@ -66,6 +69,7 @@ public class SystemController implements ActionListener, TableModelListener, Pro
                     viewProductions();
                     viewOrders();
                     getFormulas();
+                    getStorage();
                     view.goToHome();
                 } else {
                     showMessage("Login Error", "Password is incorrect.");
@@ -87,9 +91,9 @@ public class SystemController implements ActionListener, TableModelListener, Pro
 
     void addGeneralExpense() {
         if (checkGeneralExpenses()) {
-            String itemName = "'" + view.getHomeView().getGeItemName() + "',";
-            String itemQuantity = view.getHomeView().getGeQuantity() + ",";
-            String dateOfPurchase = "'" + view.getHomeView().getGeDate() + "'";
+            String itemName = "'" + homeView.getGeItemName() + "',";
+            String itemQuantity = homeView.getGeQuantity() + ",";
+            String dateOfPurchase = "'" + homeView.getGeDate() + "'";
             String dateOfEntry = "'" + new SimpleDateFormat("yyyy-MM-dd").format(new Date()) + "',";
 
             try {
@@ -97,7 +101,7 @@ public class SystemController implements ActionListener, TableModelListener, Pro
                 System.out.println(sqlQuery);
                 sqlStatement.executeUpdate(sqlQuery);
                 showMessage("Operation successful", "General Expense added.");
-                view.getHomeView().clearGeneralExpensesFields();
+                homeView.clearGeneralExpensesFields();
             } catch (SQLException throwables) {
                 showMessage("Error performing operation", "General Expense could not be added.");
                 throwables.printStackTrace();
@@ -108,16 +112,16 @@ public class SystemController implements ActionListener, TableModelListener, Pro
     boolean checkGeneralExpenses() {
         boolean flag = true;
 
-        if (view.getHomeView().getGeItemName().equals("")) {
+        if (homeView.getGeItemName().equals("")) {
             flag = false;
             showMessage("Error adding expense", "Item name cannot be empty.");
-        } else if (view.getHomeView().getGeQuantity() == -13.11) {
+        } else if (homeView.getGeQuantity() == -13.11) {
             flag = false;
             showMessage("Error adding expense", "Item quantity must be a number.");
-        } else if (view.getHomeView().getGeQuantity() == 0) {
+        } else if (homeView.getGeQuantity() == 0) {
             flag = false;
             showMessage("Error adding expense", "Item quantity cannot be 0 or empty.");
-        } else if (view.getHomeView().getGeDate() == null) {
+        } else if (homeView.getGeDate() == null) {
             flag = false;
             showMessage("Error adding expense", "Date of purchase cannot be empty.");
         }
@@ -132,22 +136,22 @@ public class SystemController implements ActionListener, TableModelListener, Pro
 
     void addMaterialExpense() {
         if (checkMaterialExpenses()) {
-            String materialID = view.getHomeView().getMaterialID();
-            String materialQuantity = view.getHomeView().getMeQuantity() + ",";
-            String materialInvoice = "'" + view.getHomeView().getMeInvoice() + "'";
-            String vendorID = view.getHomeView().getVendorID();
-            String materialUnit = "'" + view.getHomeView().getMaterialUnit() + "',";
+            String materialID = homeView.getMaterialID();
+            String materialQuantity = homeView.getMeQuantity() + ",";
+            String materialInvoice = "'" + homeView.getMeInvoice() + "'";
+            String vendorID = homeView.getVendorID();
+            String materialUnit = "'" + homeView.getMaterialUnit() + "',";
             String dateOfEntry = "'" + new SimpleDateFormat("yyyy-MM-dd").format(new Date()) + "',";
-            String dateOfPurchase = "'" + view.getHomeView().getMeDate() + "',";
+            String dateOfPurchase = "'" + homeView.getMeDate() + "',";
 
             try {
                 String sqlQuery = "insert into public.\"Material_Expenses\" values (DEFAULT," + materialID + "," + materialQuantity + materialUnit + currentUserID + "," + dateOfEntry + dateOfPurchase + vendorID + "," + materialInvoice + ")";
                 sqlStatement.executeUpdate(sqlQuery);
                 showMessage("Operation successful", "General Expense added.");
-                String updateQuery = "UPDATE \"Materials\" SET \"Available_quantity\" = \"Available_quantity\" + " + view.getHomeView().getMeQuantity() + " WHERE \"Material_ID\" = " + view.getHomeView().getMaterialID();
+                String updateQuery = "UPDATE \"Materials\" SET \"Available_quantity\" = \"Available_quantity\" + " + homeView.getMeQuantity() + " WHERE \"Material_ID\" = " + homeView.getMaterialID();
                 sqlStatement.executeUpdate(updateQuery);
                 getMaterials();
-                view.getHomeView().clearMaterialExpensesFields();
+                homeView.clearMaterialExpensesFields();
                 //updateFormulasPrice(materialID,materialName, materialPrice, materialQuantity);
             } catch (SQLException throwables) {
                 showMessage("Error performing operation", "Material Expense could not be added.");
@@ -159,16 +163,16 @@ public class SystemController implements ActionListener, TableModelListener, Pro
     boolean checkMaterialExpenses() {
         boolean flag = true;
 
-        if (view.getHomeView().getMaterialID().equals("")) {
+        if (homeView.getMaterialID().equals("")) {
             flag = false;
             showMessage("Error adding expense", "Please select a Material.");
-        } else if (view.getHomeView().getMeQuantity() == -13.11) {
+        } else if (homeView.getMeQuantity() == -13.11) {
             flag = false;
             showMessage("Error adding expense", "Material quantity must be in numbers only.");
-        } else if (view.getHomeView().getMeQuantity() == 0) {
+        } else if (homeView.getMeQuantity() == 0) {
             flag = false;
             showMessage("Error adding expense", "Material quantity cannot be 0 or empty.");
-        } else if (view.getHomeView().getMeDate() == null) {
+        } else if (homeView.getMeDate() == null) {
             flag = false;
             showMessage("Error adding expense.", "Date of purchase cannot be empty.");
         }
@@ -183,11 +187,11 @@ public class SystemController implements ActionListener, TableModelListener, Pro
 
     void viewGeneralExpenses() {
 
-        LocalDate fromDate = view.getHomeView().getVgeFromDate();
-        LocalDate toDate = view.getHomeView().getVgeToDate();
+        LocalDate fromDate = homeView.getVgeFromDate();
+        LocalDate toDate = homeView.getVgeToDate();
 
-        String VeDoeSelected = (view.getHomeView().getVgeDoeRadioButton().isSelected()) ? ((" WHERE \"Date_of_entry\" >= '" + fromDate + "'" ) + (toDate != null ? " AND \"Date_of_entry\" <= '" + toDate + "'" : "")) : "";
-        String VeDopSelected = (view.getHomeView().getVgeDopRadioButton().isSelected()) ? ((" WHERE \"Date_of_purchase\" >= '" + fromDate + "'" ) + (toDate != null ? " AND \"Date_of_purchase\" <= '" + toDate + "'" : "")) : "";
+        String VeDoeSelected = (homeView.getVgeDoeRadioButton().isSelected()) ? ((" WHERE \"Date_of_entry\" >= '" + fromDate + "'" ) + (toDate != null ? " AND \"Date_of_entry\" <= '" + toDate + "'" : "")) : "";
+        String VeDopSelected = (homeView.getVgeDopRadioButton().isSelected()) ? ((" WHERE \"Date_of_purchase\" >= '" + fromDate + "'" ) + (toDate != null ? " AND \"Date_of_purchase\" <= '" + toDate + "'" : "")) : "";
 
         String query = "SELECT * FROM public.\"General_Expenses\"" + VeDoeSelected + VeDopSelected;
 
@@ -195,7 +199,7 @@ public class SystemController implements ActionListener, TableModelListener, Pro
             try {
                 PreparedStatement expensesQuery = databaseConnection.prepareStatement(query, ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
                 ResultSet results = expensesQuery.executeQuery();
-                view.getHomeView().showGeneralExpenses(results, this);
+                homeView.showGeneralExpenses(results, this);
 
             } catch (SQLException throwables) {
                 showMessage("Error performing operation", "Error viewing expenses.");
@@ -207,11 +211,11 @@ public class SystemController implements ActionListener, TableModelListener, Pro
     boolean checkViewGeneralExpenses() {
         boolean flag = true;
 
-        if (view.getHomeView().getVgeDoeRadioButton().isSelected() || view.getHomeView().getVgeDopRadioButton().isSelected()) {
-            if (view.getHomeView().getVgeFromDate() == null && view.getHomeView().getVgeToDate() == null) {
+        if (homeView.getVgeDoeRadioButton().isSelected() || homeView.getVgeDopRadioButton().isSelected()) {
+            if (homeView.getVgeFromDate() == null && homeView.getVgeToDate() == null) {
                 flag = false;
                 showMessage("Error viewing expenses","Please enter viewing dates.");
-            } else if (view.getHomeView().getVgeFromDate() == null && view.getHomeView().getVgeToDate() != null) {
+            } else if (homeView.getVgeFromDate() == null && homeView.getVgeToDate() != null) {
                 flag = false;
                 showMessage("Error viewing expenses","Please enter a From viewing date.");
             }
@@ -223,9 +227,9 @@ public class SystemController implements ActionListener, TableModelListener, Pro
         if (checkUpdatePrivilege()) {
             int row = e.getFirstRow();
             int column = e.getColumn();
-            String newValue = view.getHomeView().getVgeTable().getValueAt(row, column).toString();
-            String columnName = view.getHomeView().getVgeTable().getColumnName(column);
-            String id = view.getHomeView().getVgeTable().getValueAt(row, 0).toString();
+            String newValue = homeView.getVgeTable().getValueAt(row, column).toString();
+            String columnName = homeView.getVgeTable().getColumnName(column);
+            String id = homeView.getVgeTable().getValueAt(row, 0).toString();
 
             String query = "UPDATE \"General_Expenses\" SET \"" + columnName + "\" = '" + newValue + "' WHERE \"Purchase_ID\" = " + id;
 
@@ -242,10 +246,10 @@ public class SystemController implements ActionListener, TableModelListener, Pro
 
     void deleteGeneralExpense() {
 
-        int[] rows = view.getHomeView().getVgeTable().getSelectedRows();
+        int[] rows = homeView.getVgeTable().getSelectedRows();
 
         for (int i: rows) {
-            String id = view.getHomeView().getVgeTable().getValueAt(i, 0).toString();
+            String id = homeView.getVgeTable().getValueAt(i, 0).toString();
             String query = "DELETE FROM \"General_Expenses\" WHERE \"Purchase_ID\" = " + id;
 
             try {
@@ -267,11 +271,11 @@ public class SystemController implements ActionListener, TableModelListener, Pro
 
     void viewMaterialExpenses() {
 
-        LocalDate fromDate = view.getHomeView().getVmeFromDate();
-        LocalDate toDate = view.getHomeView().getVmeToDate();
+        LocalDate fromDate = homeView.getVmeFromDate();
+        LocalDate toDate = homeView.getVmeToDate();
 
-        String VeDoeSelected = (view.getHomeView().getVmeDoeRadioButton().isSelected()) ? ((" WHERE \"Date_of_entry\" >= '" + fromDate + "'" ) + (toDate != null ? " AND \"Date_of_entry\" <= '" + toDate + "'" : "")) : "";
-        String VeDopSelected = (view.getHomeView().getVmeDopRadioButton().isSelected()) ? ((" WHERE \"Date_of_purchase\" >= '" + fromDate + "'" ) + (toDate != null ? " AND \"Date_of_purchase\" <= '" + toDate + "'" : "")) : "";
+        String VeDoeSelected = (homeView.getVmeDoeRadioButton().isSelected()) ? ((" WHERE \"Date_of_entry\" >= '" + fromDate + "'" ) + (toDate != null ? " AND \"Date_of_entry\" <= '" + toDate + "'" : "")) : "";
+        String VeDopSelected = (homeView.getVmeDopRadioButton().isSelected()) ? ((" WHERE \"Date_of_purchase\" >= '" + fromDate + "'" ) + (toDate != null ? " AND \"Date_of_purchase\" <= '" + toDate + "'" : "")) : "";
 
         String query = "SELECT \"Purchase_ID\", \"Material_ID\", \"Quantity\", \"Unit\", \"Vendor\", \"Invoice_number\", \"User_ID\", \"Date_of_entry\", \"Date_of_purchase\" FROM public.\"Material_Expenses\"" + VeDoeSelected + VeDopSelected;
 
@@ -279,7 +283,7 @@ public class SystemController implements ActionListener, TableModelListener, Pro
             try {
                 PreparedStatement expensesQuery = databaseConnection.prepareStatement(query, ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
                 ResultSet results = expensesQuery.executeQuery();
-                view.getHomeView().showMaterialExpenses(results, this);
+                homeView.showMaterialExpenses(results, this);
 
             } catch (SQLException throwables) {
                 showMessage("Error performing operation", "Error viewing expenses.");
@@ -291,11 +295,11 @@ public class SystemController implements ActionListener, TableModelListener, Pro
     boolean checkViewMaterialExpenses() {
         boolean flag = true;
 
-        if (view.getHomeView().getVgeDoeRadioButton().isSelected() || view.getHomeView().getVgeDopRadioButton().isSelected()) {
-            if (view.getHomeView().getVgeFromDate() == null && view.getHomeView().getVgeToDate() == null) {
+        if (homeView.getVgeDoeRadioButton().isSelected() || homeView.getVgeDopRadioButton().isSelected()) {
+            if (homeView.getVgeFromDate() == null && homeView.getVgeToDate() == null) {
                 flag = false;
                 showMessage("Error viewing expenses","Please enter viewing dates.");
-            } else if (view.getHomeView().getVgeFromDate() == null && view.getHomeView().getVgeToDate() != null) {
+            } else if (homeView.getVgeFromDate() == null && homeView.getVgeToDate() != null) {
                 flag = false;
                 showMessage("Error viewing expenses","Please enter a From viewing date.");
             }
@@ -307,9 +311,9 @@ public class SystemController implements ActionListener, TableModelListener, Pro
         if (checkUpdatePrivilege()) {
             int row = e.getFirstRow();
             int column = e.getColumn();
-            String newValue = view.getHomeView().getVmeTable().getValueAt(row, column).toString();
-            String columnName = view.getHomeView().getVmeTable().getColumnName(column);
-            String id = view.getHomeView().getVmeTable().getValueAt(row, 0).toString();
+            String newValue = homeView.getVmeTable().getValueAt(row, column).toString();
+            String columnName = homeView.getVmeTable().getColumnName(column);
+            String id = homeView.getVmeTable().getValueAt(row, 0).toString();
 
             String query = "UPDATE \"Material_Expenses\" SET \"" + columnName + "\" = '" + newValue + "' WHERE \"Material_ID\" = " + id;
 
@@ -325,10 +329,10 @@ public class SystemController implements ActionListener, TableModelListener, Pro
     }
 
     void deleteMaterialExpense() {
-        int[] rows = view.getHomeView().getVmeTable().getSelectedRows();
+        int[] rows = homeView.getVmeTable().getSelectedRows();
 
         for (int i: rows) {
-            String id = view.getHomeView().getVmeTable().getValueAt(i, 0).toString();
+            String id = homeView.getVmeTable().getValueAt(i, 0).toString();
             String query = "DELETE FROM \"Material_Expenses\" WHERE \"Purchase_ID\" = " + id;
 
             try {
@@ -350,12 +354,12 @@ public class SystemController implements ActionListener, TableModelListener, Pro
 
     void addOrder() {
         if (checkAddOrder()) {
-            String customer = view.getHomeView().getAoCustomer();
-            String orderDetails = view.getHomeView().getAoDetails();
-            Double price = view.getHomeView().getAoPrice();
+            String customer = homeView.getAoCustomer();
+            String orderDetails = homeView.getAoDetails();
+            Double price = homeView.getAoPrice();
             String status = K.status_1;
-            java.sql.Date DOP = java.sql.Date.valueOf(view.getHomeView().getAoDop());
-            java.sql.Date DOD = java.sql.Date.valueOf(view.getHomeView().getAoDod());
+            java.sql.Date DOP = java.sql.Date.valueOf(homeView.getAoDop());
+            java.sql.Date DOD = java.sql.Date.valueOf(homeView.getAoDod());
             java.sql.Date DOE = java.sql.Date.valueOf(new SimpleDateFormat("yyyy-MM-dd").format(new Date()));
 
             String sql = "INSERT INTO \"Orders\" values (DEFAULT, ?, ?, ?, ?, ?, ?, ?, ?)";
@@ -372,7 +376,7 @@ public class SystemController implements ActionListener, TableModelListener, Pro
                 query.setDate(8, DOE);
                 query.executeUpdate();
                 query.close();
-                view.getHomeView().clearAddOrderFields();
+                homeView.clearAddOrderFields();
                 showMessage("Operation successful", "New order added.");
                 viewOrders();
             } catch (SQLException throwables) {
@@ -386,25 +390,25 @@ public class SystemController implements ActionListener, TableModelListener, Pro
     boolean checkAddOrder() {
         boolean flag = true;
 
-        if (view.getHomeView().getAoCustomer().equals("")) {
+        if (homeView.getAoCustomer().equals("")) {
             flag = false;
             showMessage("Error adding order", "Order customer cannot be empty.");
-        } else if (view.getHomeView().getAoBatchSerial().equals("")) {
+        } else if (homeView.getAoBatchSerial().equals("")) {
             flag = false;
             showMessage("Error adding order", "Batch serial cannot be empty.");
-        } else if (view.getHomeView().getAoPrice() == 0) {
+        } else if (homeView.getAoPrice() == 0) {
             flag = false;
             showMessage("Error adding order", "Order price cannot be 0 or empty.");
-        } else if (view.getHomeView().getAoPrice() == -13.11) {
+        } else if (homeView.getAoPrice() == -13.11) {
             flag = false;
             showMessage("Error adding order", "Order price must be a number.");
-        } else if (view.getHomeView().getAoDetails().equals("")) {
+        } else if (homeView.getAoDetails().equals("")) {
             flag = false;
             showMessage("Error adding order", "Order details cannot be empty.");
-        } else if (view.getHomeView().getAoDod() == null) {
+        } else if (homeView.getAoDod() == null) {
             flag = false;
             showMessage("Error adding order", "Date of delivery cannot be empty.");
-        } else if (view.getHomeView().getAoDop() == null) {
+        } else if (homeView.getAoDop() == null) {
             flag = false;
             showMessage("Error adding order", "Date of production cannot be empty.");
         }
@@ -419,26 +423,26 @@ public class SystemController implements ActionListener, TableModelListener, Pro
 
     void viewOrders() {
         if (checkViewOrders()) {
-            Boolean customerSelected = view.getHomeView().getVoCustomerRadioButton().isSelected();
-            Boolean DateSelected = view.getHomeView().getVoDateRadioButton().isSelected();
-            Boolean statusSelected = view.getHomeView().getVoStatusRadioButton().isSelected();
-            Boolean batchSerialSelected = view.getHomeView().getVoSerialRadioButton().isSelected();
+            Boolean customerSelected = homeView.getVoCustomerRadioButton().isSelected();
+            Boolean DateSelected = homeView.getVoDateRadioButton().isSelected();
+            Boolean statusSelected = homeView.getVoStatusRadioButton().isSelected();
+            Boolean batchSerialSelected = homeView.getVoSerialRadioButton().isSelected();
 
             String query = "";
 
             if (customerSelected) {
-                query = "SELECT * FROM public.\"Orders\" WHERE \"Customer\" = '" + view.getHomeView().getVoCustomer() + "'";
+                query = "SELECT * FROM public.\"Orders\" WHERE \"Customer\" = '" + homeView.getVoCustomer() + "'";
             } else if (DateSelected) {
-                String dateType = (view.getHomeView().getVoDateType().equals("Date of entry")) ? "Date_of_entry" : (view.getHomeView().getVoDateType().equals("Date of production") ? "Date_of_production" : "Date_of_delivery");
-                if (view.getHomeView().getVoToDate() != null) {
-                    query = "SELECT * FROM public.\"Orders\" WHERE \"" + dateType + "\" >= '" + view.getHomeView().getVoFromDate() + "' AND \"" + dateType + "\" <= '" + view.getHomeView().getVoToDate() + "'";
+                String dateType = (homeView.getVoDateType().equals("Date of entry")) ? "Date_of_entry" : (homeView.getVoDateType().equals("Date of production") ? "Date_of_production" : "Date_of_delivery");
+                if (homeView.getVoToDate() != null) {
+                    query = "SELECT * FROM public.\"Orders\" WHERE \"" + dateType + "\" >= '" + homeView.getVoFromDate() + "' AND \"" + dateType + "\" <= '" + homeView.getVoToDate() + "'";
                 } else {
-                    query = "SELECT * FROM public.\"Orders\" WHERE \"" + dateType + "\" >= '" + view.getHomeView().getVoFromDate() + "'";
+                    query = "SELECT * FROM public.\"Orders\" WHERE \"" + dateType + "\" >= '" + homeView.getVoFromDate() + "'";
                 }
             } else if (statusSelected) {
-                query = "SELECT * FROM public.\"Orders\" WHERE \"Status\" = '" + view.getHomeView().getVoStatus() + "'";
+                query = "SELECT * FROM public.\"Orders\" WHERE \"Status\" = '" + homeView.getVoStatus() + "'";
             } else if (batchSerialSelected) {
-                query = "SELECT * FROM public.\"Orders\" WHERE \"Batch_serial\" = '" + view.getHomeView().getVoSerial() + "'";
+                query = "SELECT * FROM public.\"Orders\" WHERE \"Batch_serial\" = '" + homeView.getVoSerial() + "'";
             } else {
                 query = "SELECT * FROM public.\"Orders\"";
             }
@@ -446,7 +450,7 @@ public class SystemController implements ActionListener, TableModelListener, Pro
             try {
                 PreparedStatement ordersQuery = databaseConnection.prepareStatement(query, ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
                 ResultSet orders = ordersQuery.executeQuery();
-                view.getHomeView().showOrders(orders, this);
+                homeView.showOrders(orders, this);
             } catch (SQLException throwables) {
                 showMessage("Error performing operation", "Error viewing orders.");
                 throwables.printStackTrace();
@@ -457,26 +461,26 @@ public class SystemController implements ActionListener, TableModelListener, Pro
     boolean checkViewOrders() {
         boolean flag = true;
 
-        if (view.getHomeView().getVoCustomerRadioButton().isSelected()) {
-            if (view.getHomeView().getVoCustomer().equals("")) {
+        if (homeView.getVoCustomerRadioButton().isSelected()) {
+            if (homeView.getVoCustomer().equals("")) {
                 flag = false;
                 showMessage("Error viewing orders", "Please enter a customer to filter by.");
             }
-        } else if (view.getHomeView().getVoStatusRadioButton().isSelected()) {
-            if (view.getHomeView().getVoStatus().equals("Select Status")) {
+        } else if (homeView.getVoStatusRadioButton().isSelected()) {
+            if (homeView.getVoStatus().equals("Select Status")) {
                 flag = false;
                 showMessage("Error viewing orders", "Please select a status to filter by.");
             }
-        } else if (view.getHomeView().getVoSerialRadioButton().isSelected()) {
-            if (view.getHomeView().getVoSerial().equals("")) {
+        } else if (homeView.getVoSerialRadioButton().isSelected()) {
+            if (homeView.getVoSerial().equals("")) {
                 flag = false;
                 showMessage("Error viewing orders", "Please enter a batch serial to filter by.");
             }
-        } else if (view.getHomeView().getVoDateRadioButton().isSelected()) {
-            if (view.getHomeView().getVoDateType().equals("Select date type")) {
+        } else if (homeView.getVoDateRadioButton().isSelected()) {
+            if (homeView.getVoDateType().equals("Select date type")) {
                 flag = false;
                 showMessage("Error viewing orders", "Please select a date type to filter by.");
-            } else if (view.getHomeView().getVoFromDate() == null) {
+            } else if (homeView.getVoFromDate() == null) {
                 flag = false;
                 showMessage("Error viewing orders", "Please enter a From date to filter by.");
             }
@@ -489,9 +493,9 @@ public class SystemController implements ActionListener, TableModelListener, Pro
         if (checkUpdatePrivilege()) {
             int row = e.getFirstRow();
             int column = e.getColumn();
-            String newValue = view.getHomeView().getVoTable().getValueAt(row, column).toString();
-            String columnName = view.getHomeView().getVoTable().getColumnName(column);
-            String id = view.getHomeView().getVoTable().getValueAt(row, 0).toString();
+            String newValue = homeView.getVoTable().getValueAt(row, column).toString();
+            String columnName = homeView.getVoTable().getColumnName(column);
+            String id = homeView.getVoTable().getValueAt(row, 0).toString();
 
             String query = "UPDATE \"Orders\" SET \"" + columnName + "\" = '" + newValue + "' WHERE \"Order_ID\" = " + id;
             try {
@@ -506,8 +510,8 @@ public class SystemController implements ActionListener, TableModelListener, Pro
     }
 
     void deleteOrder() {
-        int row = view.getHomeView().getVoTable().getSelectedRow();
-        String id = view.getHomeView().getVoTable().getValueAt(row, 0).toString();
+        int row = homeView.getVoTable().getSelectedRow();
+        String id = homeView.getVoTable().getValueAt(row, 0).toString();
 
         String query = "DELETE FROM \"Orders\" WHERE \"Order_ID\" = " + id;
 
@@ -532,7 +536,7 @@ public class SystemController implements ActionListener, TableModelListener, Pro
         try {
             PreparedStatement materialsQuery = databaseConnection.prepareStatement(query, ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
             ResultSet materials = materialsQuery.executeQuery();
-            view.getHomeView().getMaterials(materials, this);
+            homeView.getMaterials(materials, this);
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
@@ -542,9 +546,9 @@ public class SystemController implements ActionListener, TableModelListener, Pro
         if (checkUpdatePrivilege()) {
             int row = e.getFirstRow();
             int column = e.getColumn();
-            String columnName = view.getHomeView().getVmTable().getColumnName(column);
-            String newValue = view.getHomeView().getVmTable().getValueAt(row, column).toString();
-            String id = view.getHomeView().getVmTable().getValueAt(row, 0).toString();
+            String columnName = homeView.getVmTable().getColumnName(column);
+            String newValue = homeView.getVmTable().getValueAt(row, column).toString();
+            String id = homeView.getVmTable().getValueAt(row, 0).toString();
 
             String query = "UPDATE \"Materials\" SET \"" + columnName + "\" = '" + newValue + "' WHERE \"Material_ID\" = " + id;
             try {
@@ -569,14 +573,14 @@ public class SystemController implements ActionListener, TableModelListener, Pro
             String sql = "INSERT INTO \"Materials\" values (DEFAULT, ?, ?, ?, ?)";
             try {
                 PreparedStatement query = databaseConnection.prepareStatement(sql);
-                query.setString( 1, view.getHomeView().getAmNameField());
+                query.setString( 1, homeView.getAmNameField());
                 query.setDouble( 2, 0.0);
                 query.setDate( 3, java.sql.Date.valueOf(new SimpleDateFormat("yyyy-MM-dd").format(new Date())));
-                query.setString( 4, view.getHomeView().getAmUnitField());
+                query.setString( 4, homeView.getAmUnitField());
                 query.executeUpdate();
                 query.close();
                 showMessage("Operation successful","New material added.");
-                view.getHomeView().clearAddMaterialFields();
+                homeView.clearAddMaterialFields();
                 getMaterials();
             } catch (SQLException throwables) {
                 throwables.printStackTrace();
@@ -588,10 +592,10 @@ public class SystemController implements ActionListener, TableModelListener, Pro
     boolean checkAddMaterial() {
         boolean flag = true;
 
-        if (view.getHomeView().getAmNameField().equals("")) {
+        if (homeView.getAmNameField().equals("")) {
             flag = false;
             showMessage("Error adding material","Material name cannot be empty.");
-        } else if (view.getHomeView().getAmUnitField().equals("")) {
+        } else if (homeView.getAmUnitField().equals("")) {
             flag = false;
             showMessage("Error adding material","Material unit cannot be empty.");
         }
@@ -606,13 +610,13 @@ public class SystemController implements ActionListener, TableModelListener, Pro
 
     void addProduction() {
         if (checkAddProduction()) {
-            String formula = view.getHomeView().getApView().getApFormula();
-            Double quantity = view.getHomeView().getApView().getApQuantity();
+            String formula = homeView.getApView().getApFormula();
+            Double quantity = homeView.getApView().getApQuantity();
 
             String sql = "INSERT INTO \"Production\" values (DEFAULT, ?, ?, ?, ?)";
 
             try {
-                Array array = databaseConnection.createArrayOf("VARCHAR", view.getHomeView().getApView().getApOrders());
+                Array array = databaseConnection.createArrayOf("VARCHAR", homeView.getApView().getApOrders());
                 PreparedStatement query = databaseConnection.prepareStatement(sql);
                 query.setString(1, formula);
                 query.setDouble(2,quantity);
@@ -621,7 +625,7 @@ public class SystemController implements ActionListener, TableModelListener, Pro
                 query.executeUpdate();
                 query.close();
                 showMessage("Operation successful", "New production added.");
-                view.getHomeView().getApView().dispatchEvent(new WindowEvent(view.getHomeView().getApView(), WindowEvent.WINDOW_CLOSING));
+                homeView.getApView().dispatchEvent(new WindowEvent(homeView.getApView(), WindowEvent.WINDOW_CLOSING));
                 viewProductions();
             } catch (SQLException throwables) {
                 showErrorMessage("Error performing operation", "New production could not be added.", throwables.getLocalizedMessage());
@@ -632,16 +636,16 @@ public class SystemController implements ActionListener, TableModelListener, Pro
 
     boolean checkAddProduction() {
 
-        if (view.getHomeView().getApView().getApQuantity() == -13.11) {
+        if (homeView.getApView().getApQuantity() == -13.11) {
             showMessage("Error adding production", "Production quantity must be numbers.");
             return false;
-        } else if (view.getHomeView().getApView().getApQuantity() == 0) {
+        } else if (homeView.getApView().getApQuantity() == 0) {
             showMessage("Error adding production", "Production quantity cannot be 0 or empty.");
             return false;
-        } else if (view.getHomeView().getApView().getApOrders().length == 0) {
+        } else if (homeView.getApView().getApOrders().length == 0) {
             showMessage("Error adding production", "Order IDs cannot be empty.");
             return false;
-        } else if (view.getHomeView().getApView().getApFormula().equals("Select Formula")) {
+        } else if (homeView.getApView().getApFormula().equals("Select Formula")) {
             showMessage("Error adding production","Please choose a batch formula.");
             return false;
         } else {
@@ -652,7 +656,7 @@ public class SystemController implements ActionListener, TableModelListener, Pro
     boolean checkAddProductionFields() {
         int count = 0;
 
-        for (JPanel panel: view.getHomeView().getApView().getTanksPanels()) {
+        for (JPanel panel: homeView.getApView().getTanksPanels()) {
             count++;
             Double quantity = parseDouble(((JTextField)panel.getComponent(1)).getText());
             Double weight = parseDouble(((JTextField)panel.getComponent(2)).getText());
@@ -666,7 +670,7 @@ public class SystemController implements ActionListener, TableModelListener, Pro
 
             }
         }
-        for (JPanel panel: view.getHomeView().getApView().getDrumsPanels()) {
+        for (JPanel panel: homeView.getApView().getDrumsPanels()) {
             count++;
             Double quantity = parseDouble(((JTextField)panel.getComponent(1)).getText());
             Double weight = parseDouble(((JTextField)panel.getComponent(2)).getText());
@@ -678,7 +682,7 @@ public class SystemController implements ActionListener, TableModelListener, Pro
                 return false;
             }
         }
-        for (JPanel panel: view.getHomeView().getApView().getPailsPanels()) {
+        for (JPanel panel: homeView.getApView().getPailsPanels()) {
             count++;
             Double quantity = parseDouble(((JTextField)panel.getComponent(1)).getText());
             Double weight = parseDouble(((JTextField)panel.getComponent(2)).getText());
@@ -690,7 +694,7 @@ public class SystemController implements ActionListener, TableModelListener, Pro
                 return false;
             }
         }
-        for (JPanel panel: view.getHomeView().getApView().getCartonsPanels()) {
+        for (JPanel panel: homeView.getApView().getCartonsPanels()) {
             count++;
             Double quantity = parseDouble(((JTextField)panel.getComponent(1)).getText());
             Double weight = parseDouble(((JTextField)panel.getComponent(2)).getText());
@@ -702,7 +706,7 @@ public class SystemController implements ActionListener, TableModelListener, Pro
                 return false;
             }
         }
-        for (JPanel panel: view.getHomeView().getApView().getGallonsPanels()) {
+        for (JPanel panel: homeView.getApView().getGallonsPanels()) {
             count++;
             Double quantity = parseDouble(((JTextField)panel.getComponent(1)).getText());
             Double weight = parseDouble(((JTextField)panel.getComponent(2)).getText());
@@ -746,24 +750,24 @@ public class SystemController implements ActionListener, TableModelListener, Pro
     void viewProductions() {
 
         if (checkViewProductions()) {
-            boolean batchSerialSelected = view.getHomeView().getVpSerialRadioButton().isSelected();
-            boolean orderIdIsSelected = view.getHomeView().getVpOrderRadioButton().isSelected();
-            boolean formulaIsSelected = view.getHomeView().getVpFormulaRadioButton().isSelected();
-            boolean statusIsSelected = view.getHomeView().getVpStatusRadioButton().isSelected();
+            boolean batchSerialSelected = homeView.getVpSerialRadioButton().isSelected();
+            boolean orderIdIsSelected = homeView.getVpOrderRadioButton().isSelected();
+            boolean formulaIsSelected = homeView.getVpFormulaRadioButton().isSelected();
+            boolean statusIsSelected = homeView.getVpStatusRadioButton().isSelected();
 
             String query = "";
 
             if (batchSerialSelected) {
-                String serial = "'" + view.getHomeView().getVpSerial() + "'";
+                String serial = "'" + homeView.getVpSerial() + "'";
                 query = "SELECT * FROM \"Production\" WHERE \"Batch_serial\" = " + serial;
             } else if (orderIdIsSelected) {
-                String orderID = view.getHomeView().getVpOrderId();
+                String orderID = homeView.getVpOrderId();
                 query = "SELECT * FROM \"Production\" WHERE \"Orders_IDs\" @> ARRAY['" + orderID + "']::varchar[]";
             } else if (formulaIsSelected) {
-                String formula = view.getHomeView().getVpFormula();
+                String formula = homeView.getVpFormula();
                 query = "SELECT * FROM \"Production\" WHERE \"Batch_formula\" = '" + formula + "'";
             } else if (statusIsSelected) {
-                String status = view.getHomeView().getVpStatus();
+                String status = homeView.getVpStatus();
                 query = "SELECT * FROM \"Production\" WHERE \"Production_status\" = '" + status + "'";
             } else {
                 query = "SELECT * FROM \"Production\"";
@@ -772,7 +776,7 @@ public class SystemController implements ActionListener, TableModelListener, Pro
             try {
                 PreparedStatement samplesQuery = databaseConnection.prepareStatement(query, ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
                 ResultSet productions = samplesQuery.executeQuery();
-                view.getHomeView().showBatches(productions, this);
+                homeView.showBatches(productions, this);
             } catch (SQLException throwables) {
                 showErrorMessage("Error performing operation", "Error viewing productions.", throwables.getLocalizedMessage());
                 throwables.printStackTrace();
@@ -784,23 +788,23 @@ public class SystemController implements ActionListener, TableModelListener, Pro
     boolean checkViewProductions() {
         boolean flag = true;
 
-        if (view.getHomeView().getVpSerialRadioButton().isSelected()) {
-            if (view.getHomeView().getVpSerial().equals("")) {
+        if (homeView.getVpSerialRadioButton().isSelected()) {
+            if (homeView.getVpSerial().equals("")) {
                 flag = false;
                 showMessage("Error viewing batches", "Please enter a batch serial to filter by.");
             }
-        } else if (view.getHomeView().getVpOrderRadioButton().isSelected()) {
-            if (view.getHomeView().getVpOrderId().equals("")) {
+        } else if (homeView.getVpOrderRadioButton().isSelected()) {
+            if (homeView.getVpOrderId().equals("")) {
                 flag = false;
                 showMessage("Error viewing batches", "Please enter an Order ID to filter by.");
             }
-        } else if (view.getHomeView().getVpFormulaRadioButton().isSelected()) {
-            if (view.getHomeView().getVpFormula().equals("")) {
+        } else if (homeView.getVpFormulaRadioButton().isSelected()) {
+            if (homeView.getVpFormula().equals("")) {
                 flag = false;
                 showMessage("Error viewing batches", "Please enter a Formula to filter by.");
             }
-        } else if (view.getHomeView().getVpStatusRadioButton().isSelected()) {
-            if (view.getHomeView().getVpStatus().equals("")) {
+        } else if (homeView.getVpStatusRadioButton().isSelected()) {
+            if (homeView.getVpStatus().equals("")) {
                 flag = false;
                 showMessage("Error viewing batches", "Please enter a Status to filter by.");
             }
@@ -812,9 +816,9 @@ public class SystemController implements ActionListener, TableModelListener, Pro
         if (checkUpdatePrivilege()) {
             int row = e.getFirstRow();
             int column = e.getColumn();
-            String newValue = view.getHomeView().getVpTable().getValueAt(row, column).toString();
-            String columnName = view.getHomeView().getVpTable().getColumnName(column);
-            String serial = "'" + view.getHomeView().getVpTable().getValueAt(row, 0).toString() + "'";
+            String newValue = homeView.getVpTable().getValueAt(row, column).toString();
+            String columnName = homeView.getVpTable().getColumnName(column);
+            String serial = "'" + homeView.getVpTable().getValueAt(row, 0).toString() + "'";
 
             String query = "UPDATE \"Production\" SET \"" + columnName + "\" = '" + newValue + "' WHERE \"Batch_serial\" = " + serial;
 
@@ -830,10 +834,10 @@ public class SystemController implements ActionListener, TableModelListener, Pro
     }
 
     void deleteProduction() {
-        if (view.getHomeView().getVpTable() != null) {
-            if (view.getHomeView().getVpTable().getModel() != null) {
-                int row = view.getHomeView().getVpTable().getSelectedRow();
-                String serial = "'" + view.getHomeView().getVpTable().getValueAt(row, 0).toString() + "'";
+        if (homeView.getVpTable() != null) {
+            if (homeView.getVpTable().getModel() != null) {
+                int row = homeView.getVpTable().getSelectedRow();
+                String serial = "'" + homeView.getVpTable().getValueAt(row, 0).toString() + "'";
 
                 String query = "DELETE FROM \"Production\" WHERE \"Batch_serial\" = " + serial;
 
@@ -866,7 +870,7 @@ public class SystemController implements ActionListener, TableModelListener, Pro
             query.executeUpdate();
             query.close();
             showMessage("Operation successful","New formula created.");
-            view.getHomeView().getCfView().dispatchEvent(new WindowEvent(view.getHomeView().getCfView(), WindowEvent.WINDOW_CLOSING));
+            homeView.getCfView().dispatchEvent(new WindowEvent(homeView.getCfView(), WindowEvent.WINDOW_CLOSING));
             getFormulas();
         } catch (SQLException throwables) {
             throwables.printStackTrace();
@@ -875,11 +879,11 @@ public class SystemController implements ActionListener, TableModelListener, Pro
     }
 
     void checkCreateFormula() {
-        String formulaName = view.getHomeView().getCfView().getFormulaName();
+        String formulaName = homeView.getCfView().getFormulaName();
         String formulaDescription = "";
 
-        ArrayList<JCheckBox> checkBoxes = view.getHomeView().getCfView().getCheckBoxes();
-        ArrayList<JTextField> textFields = view.getHomeView().getCfView().getTextFields();
+        ArrayList<JCheckBox> checkBoxes = homeView.getCfView().getCheckBoxes();
+        ArrayList<JTextField> textFields = homeView.getCfView().getTextFields();
 
         if (formulaName.equals("")) {
             showMessage("Error creating new formula","Formula name cannot be empty.");
@@ -899,7 +903,7 @@ public class SystemController implements ActionListener, TableModelListener, Pro
                         formulaDescription += ": ";
                         formulaDescription += textFields.get(checkBoxes.indexOf(checkBox)).getText();
                         formulaQuantity += Double.parseDouble(textFields.get(checkBoxes.indexOf(checkBox)).getText());
-                        formulaDescription += " " + view.getHomeView().getVmTable().getValueAt(checkBoxes.indexOf(checkBox), 4).toString();
+                        formulaDescription += " " + homeView.getVmTable().getValueAt(checkBoxes.indexOf(checkBox), 4).toString();
                         formulaDescription += " - ";
                     }
                 }
@@ -926,7 +930,7 @@ public class SystemController implements ActionListener, TableModelListener, Pro
         try {
             PreparedStatement formulasQuery = databaseConnection.prepareStatement(query, ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
             ResultSet formulas = formulasQuery.executeQuery();
-            view.getHomeView().showFormulas(formulas, this);
+            homeView.showFormulas(formulas, this);
         } catch (SQLException throwables) {
             throwables.printStackTrace();
             showMessage("Error performing operation", "Error viewing formulas.");
@@ -937,9 +941,9 @@ public class SystemController implements ActionListener, TableModelListener, Pro
         if (checkUpdatePrivilege()) {
             int row = e.getFirstRow();
             int column = e.getColumn();
-            String newValue = view.getHomeView().getVfTable().getValueAt(row, column).toString();
-            String columnName = view.getHomeView().getVfTable().getColumnName(column);
-            String id = "'" + view.getHomeView().getVfTable().getValueAt(row, 0).toString() + "'";
+            String newValue = homeView.getVfTable().getValueAt(row, column).toString();
+            String columnName = homeView.getVfTable().getColumnName(column);
+            String id = "'" + homeView.getVfTable().getValueAt(row, 0).toString() + "'";
 
             String query = "UPDATE \"Formulas\" SET \"" + columnName + "\" = '" + newValue + "' WHERE \"Formula_ID\" = " + id;
 
@@ -955,10 +959,10 @@ public class SystemController implements ActionListener, TableModelListener, Pro
     }
 
     void deleteFormula() {
-        if (view.getHomeView().getVfTable() != null) {
-            if (view.getHomeView().getVfTable().getModel() != null) {
-                int row = view.getHomeView().getVfTable().getSelectedRow();
-                String id = "'" + view.getHomeView().getVfTable().getValueAt(row, 0).toString() + "'";
+        if (homeView.getVfTable() != null) {
+            if (homeView.getVfTable().getModel() != null) {
+                int row = homeView.getVfTable().getSelectedRow();
+                String id = "'" + homeView.getVfTable().getValueAt(row, 0).toString() + "'";
 
                 String query = "DELETE FROM \"Formulas\" WHERE \"Formula_ID\" = " + id;
 
@@ -982,10 +986,10 @@ public class SystemController implements ActionListener, TableModelListener, Pro
 
     void addVendor() {
         if (checkAddVendor()) {
-            String vendorName = view.getHomeView().getAvVendorName();
-            String contactName = view.getHomeView().getAvContactName();
-            String contactNumber = view.getHomeView().getAvContactNumber();
-            String contactEmail = view.getHomeView().getAvContactEmail();
+            String vendorName = homeView.getAvVendorName();
+            String contactName = homeView.getAvContactName();
+            String contactNumber = homeView.getAvContactNumber();
+            String contactEmail = homeView.getAvContactEmail();
 
             String sql = "INSERT INTO \"Vendors\" values (DEFAULT, ?, ?, ?, ?)";
             try {
@@ -998,7 +1002,7 @@ public class SystemController implements ActionListener, TableModelListener, Pro
                 query.close();
                 showMessage("Operation successful", "New vendor added.");
                 viewVendors();
-                view.getHomeView().clearAddVendorFields();
+                homeView.clearAddVendorFields();
             } catch (SQLException throwables) {
                 throwables.printStackTrace();
                 showMessage("Operation unsuccessful", "Could not add new vendor.");
@@ -1009,16 +1013,16 @@ public class SystemController implements ActionListener, TableModelListener, Pro
     boolean checkAddVendor() {
         boolean flag = true;
 
-        if (view.getHomeView().getAvVendorName().equals("")) {
+        if (homeView.getAvVendorName().equals("")) {
             flag = false;
             showMessage("Error adding vendor", "Vendor name cannot be empty.");
-        } else if (view.getHomeView().getAvContactName().equals("")) {
+        } else if (homeView.getAvContactName().equals("")) {
             flag = false;
             showMessage("Error adding vendor","Contact name cannot be empty.");
-        } else if (view.getHomeView().getAvContactNumber().equals("")) {
+        } else if (homeView.getAvContactNumber().equals("")) {
             flag = false;
             showMessage("Error adding vendor","Contact number cannot be empty.");
-        } else if (view.getHomeView().getAvContactEmail().equals("")) {
+        } else if (homeView.getAvContactEmail().equals("")) {
             flag = false;
             showMessage("Error adding vendor","Contact email cannot be empty.");
         }
@@ -1034,16 +1038,16 @@ public class SystemController implements ActionListener, TableModelListener, Pro
 
     void viewVendors() {
         if (checkViewVendors()) {
-            boolean vendorIsSelected = view.getHomeView().getVvVendorRadioButton().isSelected();
-            boolean contactIsSelected = view.getHomeView().getVvContactRadioButton().isSelected();
+            boolean vendorIsSelected = homeView.getVvVendorRadioButton().isSelected();
+            boolean contactIsSelected = homeView.getVvContactRadioButton().isSelected();
 
             String query = "";
 
             if (vendorIsSelected) {
-                String vendorName = "'" + view.getHomeView().getVvVendor() + "'";
+                String vendorName = "'" + homeView.getVvVendor() + "'";
                 query = "SELECT * FROM public.\"Vendors\" WHERE \"Vendor_name\" = " + vendorName;
             } else if (contactIsSelected) {
-                String contactName = "'" + view.getHomeView().getVvContact() + "'";
+                String contactName = "'" + homeView.getVvContact() + "'";
                 query = "SELECT * FROM public.\"Vendors\" WHERE \"Contact_name\" = " + contactName;
             } else {
                 query = "SELECT * FROM public.\"Vendors\"";
@@ -1052,7 +1056,7 @@ public class SystemController implements ActionListener, TableModelListener, Pro
             try {
                 PreparedStatement vendorsQuery = databaseConnection.prepareStatement(query, ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
                 ResultSet vendors = vendorsQuery.executeQuery();
-                view.getHomeView().showVendors(vendors, this);
+                homeView.showVendors(vendors, this);
             } catch (SQLException throwables) {
                 throwables.printStackTrace();
                 showMessage("Error performing operation", "Error viewing vendors.");
@@ -1063,14 +1067,14 @@ public class SystemController implements ActionListener, TableModelListener, Pro
     boolean checkViewVendors() {
         boolean flag = true;
 
-        if (view.getHomeView().getVvVendorRadioButton().isSelected()) {
-            if (view.getHomeView().getVvVendor().equals("")) {
+        if (homeView.getVvVendorRadioButton().isSelected()) {
+            if (homeView.getVvVendor().equals("")) {
                 System.out.println("VvV");
                 flag = false;
                 showMessage("Error viewing vendors", "Please enter a vendor name to filter by.");
             }
-        } else if (view.getHomeView().getVvContactRadioButton().isSelected()) {
-            if (view.getHomeView().getVvContact().equals("")) {
+        } else if (homeView.getVvContactRadioButton().isSelected()) {
+            if (homeView.getVvContact().equals("")) {
                 flag = false;
                 showMessage("Error viewing vendors", "Please enter a contact name to filter by.");
             }
@@ -1082,9 +1086,9 @@ public class SystemController implements ActionListener, TableModelListener, Pro
         if (checkUpdatePrivilege()) {
             int row = e.getFirstRow();
             int column = e.getColumn();
-            String newValue = view.getHomeView().getVvTable().getValueAt(row, column).toString();
-            String columnName = view.getHomeView().getVvTable().getColumnName(column);
-            String id = view.getHomeView().getVvTable().getValueAt(row, 0).toString();
+            String newValue = homeView.getVvTable().getValueAt(row, column).toString();
+            String columnName = homeView.getVvTable().getColumnName(column);
+            String id = homeView.getVvTable().getValueAt(row, 0).toString();
 
             String query = "UPDATE \"Vendors\" SET \"" + columnName + "\" = '" + newValue + "' WHERE \"Vendor_ID\" = " + id;
 
@@ -1100,10 +1104,10 @@ public class SystemController implements ActionListener, TableModelListener, Pro
     }
 
     void deleteVendor() {
-        if (view.getHomeView().getVvTable() != null) {
-            if (view.getHomeView().getVvTable().getModel() != null) {
-                int row = view.getHomeView().getVvTable().getSelectedRow();
-                String id = view.getHomeView().getVpTable().getValueAt(row, 0).toString();
+        if (homeView.getVvTable() != null) {
+            if (homeView.getVvTable().getModel() != null) {
+                int row = homeView.getVvTable().getSelectedRow();
+                String id = homeView.getVpTable().getValueAt(row, 0).toString();
 
                 String query = "DELETE FROM \"Vendors\" WHERE \"Vendor_ID\" = " + id;
 
@@ -1116,6 +1120,23 @@ public class SystemController implements ActionListener, TableModelListener, Pro
                 }
                 viewVendors();
             }
+        }
+    }
+
+    /*
+     *
+     *      VIEW STORAGE
+     *
+     */
+
+    void getStorage() {
+        String query = "SELECT * FROM \"Storage\"";
+        try {
+            PreparedStatement materialsQuery = databaseConnection.prepareStatement(query, ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
+            ResultSet items = materialsQuery.executeQuery();
+            homeView.getStoragePanel().getStorageItems(items, this);
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
         }
     }
 
@@ -1202,47 +1223,47 @@ public class SystemController implements ActionListener, TableModelListener, Pro
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == view.getLoginView().getContinueButton()) {
             login();
-        } else if (e.getSource() == view.getHomeView().getMeAddButton()) {
+        } else if (e.getSource() == homeView.getMeAddButton()) {
             addGeneralExpense();
-        } else if (e.getSource() == view.getHomeView().getGeAddButton()) {
+        } else if (e.getSource() == homeView.getGeAddButton()) {
             addMaterialExpense();
-        } else if (e.getSource() == view.getHomeView().getVgeViewButton()) {
+        } else if (e.getSource() == homeView.getVgeViewButton()) {
             viewGeneralExpenses();
-        } else if (e.getSource() == view.getHomeView().getVmeViewButton()) {
+        } else if (e.getSource() == homeView.getVmeViewButton()) {
             viewMaterialExpenses();
-        } else if (e.getSource() == view.getHomeView().getAoAddButton()) {
+        } else if (e.getSource() == homeView.getAoAddButton()) {
             addOrder();
-        } else if (e.getSource() == view.getHomeView().getVoViewButton()) {
+        } else if (e.getSource() == homeView.getVoViewButton()) {
             viewOrders();
-        } else if (e.getSource() == view.getHomeView().getVgeDeleteButton()) {
+        } else if (e.getSource() == homeView.getVgeDeleteButton()) {
             deleteGeneralExpense();
-        } else if (e.getSource() == view.getHomeView().getVmeDeleteButton()) {
+        } else if (e.getSource() == homeView.getVmeDeleteButton()) {
             deleteMaterialExpense();
-        } else if (e.getSource() == view.getHomeView().getDeleteOrderButton()) {
+        } else if (e.getSource() == homeView.getDeleteOrderButton()) {
             deleteOrder();
-        } else if (e.getSource() == view.getHomeView().getVmRefreshButton()) {
+        } else if (e.getSource() == homeView.getVmRefreshButton()) {
             getMaterials();
-        } else if (e.getSource() == view.getHomeView().getAddNewProductionButton()) {
-            view.getHomeView().showAddProductionView(this);
-        } else if (e.getSource() == view.getHomeView().getVpViewButton()) {
+        } else if (e.getSource() == homeView.getAddNewProductionButton()) {
+            homeView.showAddProductionView(this);
+        } else if (e.getSource() == homeView.getVpViewButton()) {
             viewProductions();
-        } else if (e.getSource() == view.getHomeView().getDeleteProductionButton()) {
+        } else if (e.getSource() == homeView.getDeleteProductionButton()) {
             deleteProduction();
-        } else if (e.getSource() == view.getHomeView().getAmAddButton()) {
+        } else if (e.getSource() == homeView.getAmAddButton()) {
             addMaterial();
-        } else if (e.getSource() == view.getHomeView().getCreateNewFormulaButton()) {
-            view.getHomeView().showCreateFormulaView(this);
+        } else if (e.getSource() == homeView.getCreateNewFormulaButton()) {
+            homeView.showCreateFormulaView(this);
         } else if (e.getActionCommand().equals("Create Formula")) {
             checkCreateFormula();
-        } else if (e.getSource() == view.getHomeView().getVfRefreshButton()) {
+        } else if (e.getSource() == homeView.getVfRefreshButton()) {
             getFormulas();
-        } else if (e.getSource() == view.getHomeView().getDeleteFormulaButton()) {
+        } else if (e.getSource() == homeView.getDeleteFormulaButton()) {
             deleteFormula();
-        } else if (e.getSource() == view.getHomeView().getAvAddButton()) {
+        } else if (e.getSource() == homeView.getAvAddButton()) {
             addVendor();
-        } else if (e.getSource() == view.getHomeView().getVvViewButton()) {
+        } else if (e.getSource() == homeView.getVvViewButton()) {
             viewVendors();
-        } else if (e.getSource() == view.getHomeView().getDeleteVendorButton()) {
+        } else if (e.getSource() == homeView.getDeleteVendorButton()) {
             deleteVendor();
         } else if (e.getActionCommand().equals("Add Production")) {
             addProduction();
@@ -1251,57 +1272,57 @@ public class SystemController implements ActionListener, TableModelListener, Pro
 
     @Override
     public void tableChanged(TableModelEvent e) {
-        if (view.getHomeView().getVgeTable() != null) {
-            if (view.getHomeView().getVgeTable().getModel() != null) {
-                if (e.getSource() == view.getHomeView().getVgeTable().getModel()) {
+        if (homeView.getVgeTable() != null) {
+            if (homeView.getVgeTable().getModel() != null) {
+                if (e.getSource() == homeView.getVgeTable().getModel()) {
                     if (e.getType() == TableModelEvent.UPDATE) {
                         updateGeneralExpense(e);
                     }
                 }
             }
-        } if (view.getHomeView().getVmeTable() != null) {
-            if (view.getHomeView().getVmeTable().getModel() != null) {
-                if (e.getSource() == view.getHomeView().getVmeTable().getModel()) {
+        } if (homeView.getVmeTable() != null) {
+            if (homeView.getVmeTable().getModel() != null) {
+                if (e.getSource() == homeView.getVmeTable().getModel()) {
                     if (e.getType() == TableModelEvent.UPDATE) {
                         updateMaterialExpense(e);
                     }
                 }
             }
-        } if (view.getHomeView().getVoTable() != null) {
-            if (view.getHomeView().getVoTable().getModel() != null) {
-                if (e.getSource() == view.getHomeView().getVoTable().getModel()) {
+        } if (homeView.getVoTable() != null) {
+            if (homeView.getVoTable().getModel() != null) {
+                if (e.getSource() == homeView.getVoTable().getModel()) {
                     if (e.getType() == TableModelEvent.UPDATE) {
                         updateOrder(e);
                     }
                 }
             }
-        } if (view.getHomeView().getVmTable() != null) {
-            if (view.getHomeView().getVmTable().getModel() != null) {
-                if (e.getSource() == view.getHomeView().getVmTable().getModel()) {
+        } if (homeView.getVmTable() != null) {
+            if (homeView.getVmTable().getModel() != null) {
+                if (e.getSource() == homeView.getVmTable().getModel()) {
                     if (e.getType() == TableModelEvent.UPDATE) {
                         updateMaterial(e);
                     }
                 }
             }
-        } if (view.getHomeView().getVpTable() != null) {
-            if (view.getHomeView().getVpTable().getModel() != null) {
-                if (e.getSource() == view.getHomeView().getVpTable().getModel()) {
+        } if (homeView.getVpTable() != null) {
+            if (homeView.getVpTable().getModel() != null) {
+                if (e.getSource() == homeView.getVpTable().getModel()) {
                     if (e.getType() == TableModelEvent.UPDATE) {
                         updateProduction(e);
                     }
                 }
             }
-        } if (view.getHomeView().getVfTable() != null) {
-            if (view.getHomeView().getVfTable().getModel() != null) {
-                if (e.getSource() == view.getHomeView().getVfTable().getModel()) {
+        } if (homeView.getVfTable() != null) {
+            if (homeView.getVfTable().getModel() != null) {
+                if (e.getSource() == homeView.getVfTable().getModel()) {
                     if (e.getType() == TableModelEvent.UPDATE) {
                         updateFormula(e);
                     }
                 }
             }
-        } if (view.getHomeView().getVvTable() != null) {
-            if (view.getHomeView().getVvTable().getModel() != null) {
-                if (e.getSource() == view.getHomeView().getVvTable().getModel()) {
+        } if (homeView.getVvTable() != null) {
+            if (homeView.getVvTable().getModel() != null) {
+                if (e.getSource() == homeView.getVvTable().getModel()) {
                     if (e.getType() == TableModelEvent.UPDATE) {
                         updateVendor(e);
                     }
@@ -1312,9 +1333,9 @@ public class SystemController implements ActionListener, TableModelListener, Pro
 
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
-        if (evt.getSource() == view.getHomeView().getVoTable()) {
+        if (evt.getSource() == homeView.getVoTable()) {
             if (evt.getPropertyName().equals("tableCellEditor")) {
-                if (view.getHomeView().getVoTable().getColumnName(view.getHomeView().getVoTable().getSelectedColumn()).equals("Status")) {
+                if (homeView.getVoTable().getColumnName(homeView.getVoTable().getSelectedColumn()).equals("Status")) {
                     showMessage("Editing order status","To edit an order's status, enter the number corresponding\nto the status you want to change to:\n\n" +
                             "1 : Received Order\n2 : In Production\n3 : Preparing for Delivery\n4 : Delivered");
                 }

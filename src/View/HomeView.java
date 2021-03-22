@@ -2,6 +2,7 @@ package View;
 
 import Controller.SystemController;
 import Model.Constants;
+import View.MainPanels.StoragePanel;
 import com.github.lgooddatepicker.components.DatePicker;
 
 import javax.swing.*;
@@ -41,7 +42,7 @@ public class HomeView implements ActionListener {
     private JPanel expensesPanel;
     private JPanel materialsPanel;
     private JPanel ordersPanel;
-    private JPanel batchesPanel;
+    private JPanel productionPanel;
     private JPanel formulasPanel;
     private JPanel vendorsPanel;
     private JPanel testingPanel;
@@ -242,6 +243,7 @@ public class HomeView implements ActionListener {
      *
      */
 
+    private JPanel VvPanel;
     private JPanel VvTablePanel;
     private JButton VvViewButton;
     private ArrayList<String> vendorIDs = new ArrayList<>();
@@ -276,8 +278,16 @@ public class HomeView implements ActionListener {
     private JTextField AsSpecificationIdField;
     private JPanel VsTablePanel;
     private JPanel VsPanel;
-    private JPanel VvPanel;
     private JTable VsTable;
+
+    /*
+     *
+     *      STORAGE
+     *
+     */
+
+    private StoragePanel storagePanel;
+
 
     /*
      *  ------------------------
@@ -288,6 +298,10 @@ public class HomeView implements ActionListener {
      */
 
     public HomeView() {
+
+        storagePanel = new StoragePanel();
+        mainTabbedPane.add("Storage", storagePanel);
+
         GeDatePicker.setDateToToday();
         MeDatePicker.setDateToToday();
         GeDatePickerPanel.add(GeDatePicker);
@@ -897,6 +911,16 @@ public class HomeView implements ActionListener {
     }
 
     /*
+     *
+     *      VIEW STORAGE
+     *
+     */
+
+    public StoragePanel getStoragePanel() {
+        return storagePanel;
+    }
+
+    /*
     --
     --
     --
@@ -1031,7 +1055,7 @@ public class HomeView implements ActionListener {
 
         VpTablePanel.repaint();
         VpPanel.repaint();
-        batchesPanel.repaint();
+        productionPanel.repaint();
         homePanel.repaint();
     }
 
