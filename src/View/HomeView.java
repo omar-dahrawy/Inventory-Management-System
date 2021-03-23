@@ -3,6 +3,7 @@ package View;
 import Controller.SystemController;
 import Model.Constants;
 import View.MainPanels.OrdersPanel;
+import View.MainPanels.ProductionPanel;
 import View.MainPanels.StoragePanel;
 import com.github.lgooddatepicker.components.DatePicker;
 
@@ -42,12 +43,11 @@ public class HomeView implements ActionListener {
 
     private JPanel expensesPanel;
     private JPanel materialsPanel;
-    private JPanel productionPanel;
     private JPanel formulasPanel;
     private JPanel vendorsPanel;
     private OrdersPanel ordersPanel;
     private StoragePanel storagePanel;
-
+    private ProductionPanel productionPanel;
     /*
      *
      *      ADD GENERAL EXPENSE
@@ -135,37 +135,6 @@ public class HomeView implements ActionListener {
 
     /*
      *
-     *      ADD PRODUCTION
-     *
-     */
-
-    private JButton addNewProductionButton;
-    private AddProductionView ApView;
-
-    /*
-     *
-     *      VIEW PRODUCTIONS
-     *
-     */
-
-    private JPanel VpPanel;
-    private JTable VpTable;
-    private JPanel VpTablePanel;
-    private ButtonGroup VpRadioButtonGroup = new ButtonGroup();
-    private JRadioButton VpSerialRadioButton;
-    private JRadioButton VpOrderRadioButton;
-    private JRadioButton VpFormulaRadioButton;
-    private JRadioButton VpStatusRadioButton;
-    private JTextField VpSerialField;
-    private JTextField VpOrderIdField;
-    private JComboBox VpFormulasComboBox;
-    private JComboBox VpStatusComboBox;
-    private JButton VpViewButton;
-    private JButton deleteProductionButton;
-    private JButton clearProductionSelectionButton;
-
-    /*
-     *
      *      CREATE NEW FORMULA
      *
      */
@@ -237,9 +206,11 @@ public class HomeView implements ActionListener {
     public HomeView() {
 
         storagePanel = new StoragePanel();
-        ordersPanel = new OrdersPanel();
+        ordersPanel = new OrdersPanel(this);
+        productionPanel = new ProductionPanel(this);
         mainTabbedPane.add("Storage", storagePanel);
         mainTabbedPane.add("Orders", ordersPanel);
+        mainTabbedPane.add("Production", productionPanel);
 
         GeDatePicker.setDateToToday();
         MeDatePicker.setDateToToday();
@@ -269,24 +240,12 @@ public class HomeView implements ActionListener {
         VmeFromDatePanel.add(VmeFromDatePicker);
         VmeToDatePanel.add(VmeToDatePicker);
 
-        VpRadioButtonGroup.add(VpSerialRadioButton);
-        VpRadioButtonGroup.add(VpOrderRadioButton);
-        VpRadioButtonGroup.add(VpFormulaRadioButton);
-        VpRadioButtonGroup.add(VpStatusRadioButton);
-
-        VpStatusComboBox.addItem("Select Status");
-        VpStatusComboBox.addItem(K.status_1);
-        VpStatusComboBox.addItem(K.status_2);
-        VpStatusComboBox.addItem(K.status_3);
-        VpStatusComboBox.addItem(K.status_4);
-
         VvRadioButtonGroup.add(VvVendorRadioButton);
         VvRadioButtonGroup.add(VvContactRadioButton);
 
         VgeTablePanel.add(new JScrollPane(VgeTable));
         VmeTablePanel.add(new JScrollPane(VmeTable));
         VmPanel.add(new JScrollPane(VmTable));
-        VpTablePanel.add(new JScrollPane(VpTable));
         VfTablePanel.add(new JScrollPane(VfTable));
         VvTablePanel.add(new JScrollPane(VvTable));
         VsTablePanel.add(new JScrollPane(VsTable));
@@ -295,6 +254,7 @@ public class HomeView implements ActionListener {
     public void addActionListeners(SystemController controller) {
         storagePanel.addActionListeners(controller);
         ordersPanel.addActionListeners(controller);
+        productionPanel.addActionListeners(controller);
 
         MeAddButton.addActionListener(controller);
         GeAddButton.addActionListener(controller);
@@ -314,15 +274,6 @@ public class HomeView implements ActionListener {
 
         AmAddButton.addActionListener(controller);
         VmRefreshButton.addActionListener(controller);
-
-        addNewProductionButton.addActionListener(controller);
-        VpSerialRadioButton.addActionListener(this);
-        VpOrderRadioButton.addActionListener(this);
-        VpFormulaRadioButton.addActionListener(this);
-        VpStatusRadioButton.addActionListener(this);
-        VpViewButton.addActionListener(controller);
-        clearProductionSelectionButton.addActionListener(this);
-        deleteProductionButton.addActionListener(controller);
 
         createNewFormulaButton.addActionListener(controller);
         VfRefreshButton.addActionListener(controller);
@@ -543,74 +494,6 @@ public class HomeView implements ActionListener {
 
     /*
      *
-     *      ADD PRODUCTION
-     *
-     */
-
-    public void showAddProductionView(SystemController controller) {
-        ApView = new AddProductionView(controller, this);
-    }
-
-    public JButton getAddNewProductionButton() {
-        return addNewProductionButton;
-    }
-
-    public AddProductionView getApView() {
-        return ApView;
-    }
-
-    /*
-     *
-     *      VIEW PRODUCTIONS
-     *
-     */
-
-    public String getVpSerial() {
-        return VpSerialField.getText();
-    }
-
-    public String getVpOrderId() {
-        return VpOrderIdField.getText();
-    }
-
-    public String getVpFormula() {
-        return VpFormulasComboBox.getSelectedItem().toString();
-    }
-
-    public String getVpStatus() {
-        return VpStatusComboBox.getSelectedItem().toString();
-    }
-
-    public JRadioButton getVpSerialRadioButton() {
-        return VpSerialRadioButton;
-    }
-
-    public JRadioButton getVpOrderRadioButton() {
-        return VpOrderRadioButton;
-    }
-
-    public JRadioButton getVpFormulaRadioButton() {
-        return VpFormulaRadioButton;
-    }
-
-    public JRadioButton getVpStatusRadioButton() {
-        return VpStatusRadioButton;
-    }
-
-    public JTable getVpTable() {
-        return VpTable;
-    }
-
-    public JButton getVpViewButton() {
-        return VpViewButton;
-    }
-
-    public JButton getDeleteProductionButton() {
-        return deleteProductionButton;
-    }
-
-    /*
-     *
      *      CREATE NEW FORMULA
      *
      */
@@ -726,6 +609,10 @@ public class HomeView implements ActionListener {
         return ordersPanel;
     }
 
+    public ProductionPanel getProductionPanel() {
+        return productionPanel;
+    }
+
     /*
     --
     --
@@ -814,31 +701,6 @@ public class HomeView implements ActionListener {
         materialsPanel.repaint();
     }
 
-    public void showBatches(ResultSet batches, SystemController controller) throws SQLException {
-        int columnCount = batches.getMetaData().getColumnCount();
-        int rowCount = getRowCount(batches);
-
-        String[] columnNames = getColumnNames(batches, columnCount);
-        String [][] data = new String[rowCount][columnCount];
-
-        while (batches.next()) {
-            for (int i = 0 ; i < columnCount ; i++) {
-                data[batches.getRow()-1][i] = batches.getString(i+1);
-            }
-        }
-        VpTable = new JTable(data, columnNames);
-        setTableFont(VpTable);
-        VpTablePanel.remove(0);
-        VpTablePanel.add(new JScrollPane(VpTable));
-
-        VpTable.getModel().addTableModelListener(controller);
-
-        VpTablePanel.repaint();
-        VpPanel.repaint();
-        productionPanel.repaint();
-        homePanel.repaint();
-    }
-
     public void showFormulas(ResultSet formulas, SystemController controller) throws SQLException {
         int columnCount = formulas.getMetaData().getColumnCount();
         int rowCount = getRowCount(formulas);
@@ -846,14 +708,11 @@ public class HomeView implements ActionListener {
         String[] columnNames = getColumnNames(formulas, columnCount);
         String [][] data = new String[rowCount][columnCount];
 
-        VpFormulasComboBox.removeAllItems();
-        VpFormulasComboBox.addItem("Select Formula");
 
         while (formulas.next()) {
             for (int i = 0 ; i < columnCount ; i++) {
                 data[formulas.getRow() - 1][i] = formulas.getString(i + 1);
             }
-            VpFormulasComboBox.addItem(formulas.getString(1));
         }
         VfTable = new JTable(data, columnNames);
         VfTable.setAutoCreateRowSorter(true);
@@ -862,9 +721,8 @@ public class HomeView implements ActionListener {
         VfTablePanel.add(new JScrollPane(VfTable));
         VfTable.getModel().addTableModelListener(controller);
 
-        VfTablePanel.repaint();
-        formulasPanel.repaint();
-        homePanel.repaint();
+        homePanel.validate();
+        productionPanel.getFormulas();
     }
 
     public void showVendors(ResultSet vendors, SystemController controller) throws SQLException {
@@ -897,7 +755,6 @@ public class HomeView implements ActionListener {
     }
 
     private String[] getColumnNames(ResultSet set, int columnCount) {
-
         String[] columnNames = new String[columnCount];
 
         for (int i = 0 ; i < columnCount ; i++) {
@@ -916,7 +773,6 @@ public class HomeView implements ActionListener {
     }
 
     int getRowCount(ResultSet set) {
-
         int rowCount = 0;
 
         try {
@@ -969,34 +825,6 @@ public class HomeView implements ActionListener {
             VmeToDatePicker.clear();
             VmeFromDatePicker.setEnabled(false);
             VmeToDatePicker.setEnabled(false);
-        }
-
-        else if (e.getSource() == VpSerialRadioButton) {
-            VpSerialField.setEnabled(!VpSerialField.isEnabled());
-            VpOrderIdField.setEnabled(false);
-            VpFormulasComboBox.setEnabled(false);
-            VpStatusComboBox.setEnabled(false);
-        } else if (e.getSource() == VpOrderRadioButton) {
-            VpOrderIdField.setEnabled(!VpOrderIdField.isEnabled());
-            VpSerialField.setEnabled(false);
-            VpFormulasComboBox.setEnabled(false);
-            VpStatusComboBox.setEnabled(false);
-        } else if (e.getSource() == VpFormulaRadioButton) {
-            VpFormulasComboBox.setEnabled(!VpFormulasComboBox.isEnabled());
-            VpSerialField.setEnabled(false);
-            VpOrderIdField.setEnabled(false);
-            VpStatusComboBox.setEnabled(false);
-        } else if (e.getSource() == VpStatusRadioButton) {
-            VpStatusComboBox.setEnabled(!VpStatusComboBox.isEnabled());
-            VpSerialField.setEnabled(false);
-            VpOrderIdField.setEnabled(false);
-            VpFormulasComboBox.setEnabled(false);
-        } else if (e.getSource() == clearProductionSelectionButton) {
-            VpRadioButtonGroup.clearSelection();
-            VpSerialField.setEnabled(false);
-            VpOrderIdField.setEnabled(false);
-            VpFormulasComboBox.setEnabled(false);
-            VpStatusComboBox.setEnabled(false);
         }
 
         else if (e.getSource() == VvVendorRadioButton) {

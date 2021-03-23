@@ -2,6 +2,7 @@ package View.MainPanels;
 
 import Controller.SystemController;
 import Model.Constants;
+import View.HomeView;
 import com.github.lgooddatepicker.components.DatePicker;
 
 import javax.swing.*;
@@ -16,6 +17,7 @@ import java.time.LocalDate;
 
 public class OrdersPanel extends JPanel implements MainPanel, ActionListener, PropertyChangeListener {
 
+    private HomeView homeView;
     private JPanel ordersPanel;
     private Constants K;
 
@@ -56,7 +58,8 @@ public class OrdersPanel extends JPanel implements MainPanel, ActionListener, Pr
     private JButton clearFiltersButton;
     private JButton deleteOrderButton;
 
-    public OrdersPanel() {
+    public OrdersPanel(HomeView homeView) {
+        this.homeView = homeView;
         K = new Constants();
         initializePanel();
     }
@@ -117,6 +120,7 @@ public class OrdersPanel extends JPanel implements MainPanel, ActionListener, Pr
         setTableFont(ordersTable);
         tablePanel.remove(0);
         tablePanel.add(new JScrollPane(ordersTable));
+
         ordersTable.getModel().addTableModelListener(controller);
         ordersTable.addPropertyChangeListener(this);
 
@@ -229,6 +233,7 @@ public class OrdersPanel extends JPanel implements MainPanel, ActionListener, Pr
 
 
     //  OTHER METHODS
+
 
     void showDropBoxMessage() {
         String[] options = {"Select Status", K.status_1, K.status_2, K.status_3, K.status_4};

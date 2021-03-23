@@ -1,8 +1,10 @@
 package Controller;
 
 import Model.Constants;
+import View.AddProductionView;
 import View.HomeView;
 import View.MainPanels.OrdersPanel;
+import View.MainPanels.ProductionPanel;
 import View.SystemView;
 
 import javax.swing.*;
@@ -11,8 +13,6 @@ import javax.swing.event.TableModelListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
@@ -27,6 +27,7 @@ public class SystemController implements ActionListener, TableModelListener {
     private SystemView view;
     private HomeView homeView;
     private OrdersPanel ordersPanel;
+    private ProductionPanel productionPanel;
 
     private Constants K = new Constants();
 
@@ -39,6 +40,7 @@ public class SystemController implements ActionListener, TableModelListener {
         this.view = view;
         this.homeView = view.getHomeView();
         this.ordersPanel = homeView.getOrdersPanel();
+        this.productionPanel = homeView.getProductionPanel();
         this.view.addActionListeners(this);
 
 
@@ -613,14 +615,16 @@ public class SystemController implements ActionListener, TableModelListener {
      */
 
     void addProduction() {
+        AddProductionView ApView = productionPanel.getAddProductionView();
+
         if (checkAddProduction()) {
-            String formula = homeView.getApView().getApFormula();
-            Double quantity = homeView.getApView().getApQuantity();
+            String formula = ApView.getApFormula();
+            Double quantity = ApView.getApQuantity();
 
             String sql = "INSERT INTO \"Production\" values (DEFAULT, ?, ?, ?, ?)";
 
             try {
-                Array array = databaseConnection.createArrayOf("VARCHAR", homeView.getApView().getApOrders());
+                Array array = databaseConnection.createArrayOf("VARCHAR", ApView.getApOrders());
                 PreparedStatement query = databaseConnection.prepareStatement(sql);
                 query.setString(1, formula);
                 query.setDouble(2,quantity);
@@ -631,7 +635,7 @@ public class SystemController implements ActionListener, TableModelListener {
                 showMessage("Operation successful", "New production added.");
                 viewProductions();
                 addItemsToStorage();
-                homeView.getApView().dispatchEvent(new WindowEvent(homeView.getApView(), WindowEvent.WINDOW_CLOSING));
+                ApView.dispatchEvent(new WindowEvent(ApView, WindowEvent.WINDOW_CLOSING));
             } catch (SQLException throwables) {
                 showErrorMessage("Error performing operation", "New production could not be added.", throwables.getLocalizedMessage());
                 throwables.printStackTrace();
@@ -640,17 +644,18 @@ public class SystemController implements ActionListener, TableModelListener {
     }
 
     boolean checkAddProduction() {
+        AddProductionView ApView = productionPanel.getAddProductionView();
 
-        if (homeView.getApView().getApQuantity() == -13.11) {
+        if (ApView.getApQuantity() == -13.11) {
             showMessage("Error adding production", "Production quantity must be numbers.");
             return false;
-        } else if (homeView.getApView().getApQuantity() == 0) {
+        } else if (ApView.getApQuantity() == 0) {
             showMessage("Error adding production", "Production quantity cannot be 0 or empty.");
             return false;
-        } else if (homeView.getApView().getApOrders().length == 0) {
+        } else if (ApView.getApOrders().length == 0) {
             showMessage("Error adding production", "Order IDs cannot be empty.");
             return false;
-        } else if (homeView.getApView().getApFormula().equals("Select Formula")) {
+        } else if (ApView.getApFormula().equals("Select Formula")) {
             showMessage("Error adding production","Please choose a batch formula.");
             return false;
         } else {
@@ -659,9 +664,10 @@ public class SystemController implements ActionListener, TableModelListener {
     }
 
     boolean checkAddProductionFields() {
+        AddProductionView ApView = productionPanel.getAddProductionView();
         int count = 0;
 
-        for (JPanel panel: homeView.getApView().getTanksPanels()) {
+        for (JPanel panel: ApView.getTanksPanels()) {
             count++;
             Double quantity = parseDouble(((JTextField)panel.getComponent(1)).getText());
             Double weight = parseDouble(((JTextField)panel.getComponent(2)).getText());
@@ -675,7 +681,7 @@ public class SystemController implements ActionListener, TableModelListener {
 
             }
         }
-        for (JPanel panel: homeView.getApView().getDrumsPanels()) {
+        for (JPanel panel: ApView.getDrumsPanels()) {
             count++;
             Double quantity = parseDouble(((JTextField)panel.getComponent(1)).getText());
             Double weight = parseDouble(((JTextField)panel.getComponent(2)).getText());
@@ -687,7 +693,7 @@ public class SystemController implements ActionListener, TableModelListener {
                 return false;
             }
         }
-        for (JPanel panel: homeView.getApView().getPailsPanels()) {
+        for (JPanel panel: ApView.getPailsPanels()) {
             count++;
             Double quantity = parseDouble(((JTextField)panel.getComponent(1)).getText());
             Double weight = parseDouble(((JTextField)panel.getComponent(2)).getText());
@@ -699,7 +705,7 @@ public class SystemController implements ActionListener, TableModelListener {
                 return false;
             }
         }
-        for (JPanel panel: homeView.getApView().getCartonsPanels()) {
+        for (JPanel panel: ApView.getCartonsPanels()) {
             count++;
             Double quantity = parseDouble(((JTextField)panel.getComponent(1)).getText());
             Double weight = parseDouble(((JTextField)panel.getComponent(2)).getText());
@@ -711,7 +717,7 @@ public class SystemController implements ActionListener, TableModelListener {
                 return false;
             }
         }
-        for (JPanel panel: homeView.getApView().getGallonsPanels()) {
+        for (JPanel panel: ApView.getGallonsPanels()) {
             count++;
             Double quantity = parseDouble(((JTextField)panel.getComponent(1)).getText());
             Double weight = parseDouble(((JTextField)panel.getComponent(2)).getText());
@@ -752,26 +758,25 @@ public class SystemController implements ActionListener, TableModelListener {
      */
 
     void viewProductions() {
-
         if (checkViewProductions()) {
-            boolean batchSerialSelected = homeView.getVpSerialRadioButton().isSelected();
-            boolean orderIdIsSelected = homeView.getVpOrderRadioButton().isSelected();
-            boolean formulaIsSelected = homeView.getVpFormulaRadioButton().isSelected();
-            boolean statusIsSelected = homeView.getVpStatusRadioButton().isSelected();
+            boolean batchSerialSelected = productionPanel.getFilterSerialSelected();
+            boolean orderIdSelected = productionPanel.getFilterOrderIdSelected();
+            boolean formulaSelected = productionPanel.getFilterFormulaSelected();
+            boolean statusSelected = productionPanel.getFilterStatusSelected();
 
             String query = "";
 
             if (batchSerialSelected) {
-                String serial = "'" + homeView.getVpSerial() + "'";
+                String serial = "'" + productionPanel.getFilterSerial() + "'";
                 query = "SELECT * FROM \"Production\" WHERE \"Batch_serial\" = " + serial;
-            } else if (orderIdIsSelected) {
-                String orderID = homeView.getVpOrderId();
+            } else if (orderIdSelected) {
+                String orderID = productionPanel.getFilterOrderId();
                 query = "SELECT * FROM \"Production\" WHERE \"Orders_IDs\" @> ARRAY['" + orderID + "']::varchar[]";
-            } else if (formulaIsSelected) {
-                String formula = homeView.getVpFormula();
+            } else if (formulaSelected) {
+                String formula = productionPanel.getFilterFormula();
                 query = "SELECT * FROM \"Production\" WHERE \"Batch_formula\" = '" + formula + "'";
-            } else if (statusIsSelected) {
-                String status = homeView.getVpStatus();
+            } else if (statusSelected) {
+                String status = productionPanel.getFilterStatus();
                 query = "SELECT * FROM \"Production\" WHERE \"Production_status\" = '" + status + "'";
             } else {
                 query = "SELECT * FROM \"Production\"";
@@ -780,7 +785,7 @@ public class SystemController implements ActionListener, TableModelListener {
             try {
                 PreparedStatement samplesQuery = databaseConnection.prepareStatement(query, ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
                 ResultSet productions = samplesQuery.executeQuery();
-                homeView.showBatches(productions, this);
+                productionPanel.showProductions(productions, this);
             } catch (SQLException throwables) {
                 showErrorMessage("Error performing operation", "Error viewing productions.", throwables.getLocalizedMessage());
                 throwables.printStackTrace();
@@ -792,23 +797,23 @@ public class SystemController implements ActionListener, TableModelListener {
     boolean checkViewProductions() {
         boolean flag = true;
 
-        if (homeView.getVpSerialRadioButton().isSelected()) {
-            if (homeView.getVpSerial().equals("")) {
+        if (productionPanel.getFilterSerialSelected()) {
+            if (productionPanel.getFilterSerial().equals("")) {
                 flag = false;
                 showMessage("Error viewing batches", "Please enter a batch serial to filter by.");
             }
-        } else if (homeView.getVpOrderRadioButton().isSelected()) {
-            if (homeView.getVpOrderId().equals("")) {
+        } else if (productionPanel.getFilterOrderIdSelected()) {
+            if (productionPanel.getFilterOrderId().equals("")) {
                 flag = false;
                 showMessage("Error viewing batches", "Please enter an Order ID to filter by.");
             }
-        } else if (homeView.getVpFormulaRadioButton().isSelected()) {
-            if (homeView.getVpFormula().equals("")) {
+        } else if (productionPanel.getFilterFormulaSelected()) {
+            if (productionPanel.getFilterFormula().equals("Select Formula")) {
                 flag = false;
                 showMessage("Error viewing batches", "Please enter a Formula to filter by.");
             }
-        } else if (homeView.getVpStatusRadioButton().isSelected()) {
-            if (homeView.getVpStatus().equals("")) {
+        } else if (productionPanel.getFilterStatusSelected()) {
+            if (productionPanel.getFilterStatus().equals("")) {
                 flag = false;
                 showMessage("Error viewing batches", "Please enter a Status to filter by.");
             }
@@ -817,12 +822,14 @@ public class SystemController implements ActionListener, TableModelListener {
     }
 
     void updateProduction(TableModelEvent e) {
+        JTable productionTable = productionPanel.getProductionTable();
+
         if (checkUpdatePrivilege()) {
             int row = e.getFirstRow();
             int column = e.getColumn();
-            String newValue = homeView.getVpTable().getValueAt(row, column).toString();
-            String columnName = homeView.getVpTable().getColumnName(column);
-            String serial = "'" + homeView.getVpTable().getValueAt(row, 0).toString() + "'";
+            String newValue = productionTable.getValueAt(row, column).toString();
+            String columnName = productionTable.getColumnName(column);
+            String serial = "'" + productionTable.getValueAt(row, 0).toString() + "'";
 
             String query = "UPDATE \"Production\" SET \"" + columnName + "\" = '" + newValue + "' WHERE \"Batch_serial\" = " + serial;
 
@@ -838,10 +845,12 @@ public class SystemController implements ActionListener, TableModelListener {
     }
 
     void deleteProduction() {
-        if (homeView.getVpTable() != null) {
-            if (homeView.getVpTable().getModel() != null) {
-                int row = homeView.getVpTable().getSelectedRow();
-                String serial = "'" + homeView.getVpTable().getValueAt(row, 0).toString() + "'";
+        JTable productionTable = productionPanel.getProductionTable();
+
+        if (productionTable != null) {
+            if (productionTable.getModel() != null) {
+                int row = productionTable.getSelectedRow();
+                String serial = "'" + productionTable.getValueAt(row, 0).toString() + "'";
 
                 String query = "DELETE FROM \"Production\" WHERE \"Batch_serial\" = " + serial;
 
@@ -1111,7 +1120,7 @@ public class SystemController implements ActionListener, TableModelListener {
         if (homeView.getVvTable() != null) {
             if (homeView.getVvTable().getModel() != null) {
                 int row = homeView.getVvTable().getSelectedRow();
-                String id = homeView.getVpTable().getValueAt(row, 0).toString();
+                String id = homeView.getVvTable().getValueAt(row, 0).toString();
 
                 String query = "DELETE FROM \"Vendors\" WHERE \"Vendor_ID\" = " + id;
 
@@ -1134,12 +1143,14 @@ public class SystemController implements ActionListener, TableModelListener {
      */
 
     void addItemsToStorage() {
-        String formulaName = homeView.getApView().getApFormula();
-        ArrayList<JPanel> tanksPanels = homeView.getApView().getTanksPanels();
-        ArrayList<JPanel> pailsPanels = homeView.getApView().getPailsPanels();
-        ArrayList<JPanel> drumsPanels = homeView.getApView().getDrumsPanels();
-        ArrayList<JPanel> cartonsPanels = homeView.getApView().getCartonsPanels();
-        ArrayList<JPanel> gallonsPanels = homeView.getApView().getGallonsPanels();
+        AddProductionView ApView = productionPanel.getAddProductionView();
+
+        String formulaName = ApView.getApFormula();
+        ArrayList<JPanel> tanksPanels = ApView.getTanksPanels();
+        ArrayList<JPanel> pailsPanels = ApView.getPailsPanels();
+        ArrayList<JPanel> drumsPanels = ApView.getDrumsPanels();
+        ArrayList<JPanel> cartonsPanels = ApView.getCartonsPanels();
+        ArrayList<JPanel> gallonsPanels = ApView.getGallonsPanels();
 
         for (JPanel panel : tanksPanels) {
             String sql = "INSERT INTO \"Storage\" values(DEFAULT, ?, ?, ?, ?)";
@@ -1325,11 +1336,11 @@ public class SystemController implements ActionListener, TableModelListener {
             deleteOrder();
         } else if (e.getSource() == homeView.getVmRefreshButton()) {
             getMaterials();
-        } else if (e.getSource() == homeView.getAddNewProductionButton()) {
-            homeView.showAddProductionView(this);
-        } else if (e.getSource() == homeView.getVpViewButton()) {
+        } else if (e.getSource() == productionPanel.getAddNewProductionButton()) {
+            productionPanel.showAddProductionView(this);
+        } else if (e.getSource() == productionPanel.getViewProductionsButton()) {
             viewProductions();
-        } else if (e.getSource() == homeView.getDeleteProductionButton()) {
+        } else if (e.getSource() == productionPanel.getDeleteProductionButton()) {
             deleteProduction();
         } else if (e.getSource() == homeView.getAmAddButton()) {
             addMaterial();
@@ -1386,9 +1397,9 @@ public class SystemController implements ActionListener, TableModelListener {
                     }
                 }
             }
-        } if (homeView.getVpTable() != null) {
-            if (homeView.getVpTable().getModel() != null) {
-                if (e.getSource() == homeView.getVpTable().getModel()) {
+        } if (productionPanel.getProductionTable() != null) {
+            if (productionPanel.getProductionTable().getModel() != null) {
+                if (e.getSource() == productionPanel.getProductionTable().getModel()) {
                     if (e.getType() == TableModelEvent.UPDATE) {
                         updateProduction(e);
                     }
