@@ -24,7 +24,6 @@ public class OrdersPanel extends JPanel implements MainPanel, ActionListener, Pr
     //  ADD ORDER
 
     private JTextField addCustomerField;
-    private JTextField addPriceField;
     private JTextField addBatchSerialField;
     private JTextArea addDetailsArea;
     private DatePicker addDopPicker;
@@ -129,7 +128,6 @@ public class OrdersPanel extends JPanel implements MainPanel, ActionListener, Pr
 
     public void clearAddFields() {
         addCustomerField.setText("");
-        addPriceField.setText("");
         addBatchSerialField.setText("");
         addDetailsArea.setText("");
     }
@@ -140,19 +138,6 @@ public class OrdersPanel extends JPanel implements MainPanel, ActionListener, Pr
 
     public String getAddCustomer() {
         return addCustomerField.getText();
-    }
-
-    public Double getAddPrice() {
-        if (!addPriceField.getText().equals("")) {
-            try {
-                return Double.parseDouble(addPriceField.getText());
-            } catch (NumberFormatException e) {
-                e.printStackTrace();
-            }
-        } else {
-            return 0.0;
-        }
-        return -13.11;
     }
 
     public String getAddBatchSerial() {

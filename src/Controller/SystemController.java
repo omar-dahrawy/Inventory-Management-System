@@ -24,12 +24,12 @@ import java.util.Date;
 
 public class SystemController implements ActionListener, TableModelListener {
 
-    private SystemView view;
-    private HomeView homeView;
-    private OrdersPanel ordersPanel;
-    private ProductionPanel productionPanel;
+    private final SystemView view;
+    private final HomeView homeView;
+    private final OrdersPanel ordersPanel;
+    private final ProductionPanel productionPanel;
 
-    private Constants K = new Constants();
+    private final Constants K = new Constants();
 
     private int currentUserID;
 
@@ -362,24 +362,21 @@ public class SystemController implements ActionListener, TableModelListener {
         if (checkAddOrder()) {
             String customer = ordersPanel.getFilterCustomer();
             String orderDetails = ordersPanel.getAddDetails();
-            Double price = ordersPanel.getAddPrice();
-            String status = K.status_1;
             java.sql.Date DOP = java.sql.Date.valueOf(ordersPanel.getAddDop());
             java.sql.Date DOD = java.sql.Date.valueOf(ordersPanel.getAddDod());
             java.sql.Date DOE = java.sql.Date.valueOf(new SimpleDateFormat("yyyy-MM-dd").format(new Date()));
 
-            String sql = "INSERT INTO \"Orders\" values (DEFAULT, ?, ?, ?, ?, ?, ?, ?, ?)";
+            String sql = "INSERT INTO \"Orders\" values (DEFAULT, ?, ?, ?, ?, ?, ?, ?)";
 
             try {
                 PreparedStatement query = databaseConnection.prepareStatement(sql);
                 query.setString(1, customer);
                 query.setString(2, orderDetails);
-                query.setDouble(3, price);
-                query.setString(4, K.status_1);
-                query.setInt(5, currentUserID);
-                query.setDate(6, DOP);
-                query.setDate(7, DOD);
-                query.setDate(8, DOE);
+                query.setString(3, K.status_1);
+                query.setInt(4, currentUserID);
+                query.setDate(5, DOP);
+                query.setDate(6, DOD);
+                query.setDate(7, DOE);
                 query.executeUpdate();
                 query.close();
                 ordersPanel.clearAddFields();
@@ -402,12 +399,6 @@ public class SystemController implements ActionListener, TableModelListener {
         } else if (ordersPanel.getAddBatchSerial().equals("")) {
             flag = false;
             showMessage("Error adding order", "Batch serial cannot be empty.");
-        } else if (ordersPanel.getAddPrice() == 0) {
-            flag = false;
-            showMessage("Error adding order", "Order price cannot be 0 or empty.");
-        } else if (ordersPanel.getAddPrice() == -13.11) {
-            flag = false;
-            showMessage("Error adding order", "Order price must be a number.");
         } else if (ordersPanel.getAddDetails().equals("")) {
             flag = false;
             showMessage("Error adding order", "Order details cannot be empty.");
@@ -429,12 +420,12 @@ public class SystemController implements ActionListener, TableModelListener {
 
     void viewOrders() {
         if (checkViewOrders()) {
-            Boolean customerSelected = ordersPanel.getFilterCustomerButton().isSelected();
-            Boolean DateSelected = ordersPanel.getFilterDateButton().isSelected();
-            Boolean statusSelected = ordersPanel.getFilterStatusButton().isSelected();
-            Boolean batchSerialSelected = ordersPanel.getFilterBatchSerialButton().isSelected();
+            boolean customerSelected = ordersPanel.getFilterCustomerButton().isSelected();
+            boolean DateSelected = ordersPanel.getFilterDateButton().isSelected();
+            boolean statusSelected = ordersPanel.getFilterStatusButton().isSelected();
+            boolean batchSerialSelected = ordersPanel.getFilterBatchSerialButton().isSelected();
 
-            String query = "";
+            String query;
 
             if (customerSelected) {
                 query = "SELECT * FROM public.\"Orders\" WHERE \"Customer\" = '" + ordersPanel.getFilterCustomer() + "'";
@@ -619,7 +610,7 @@ public class SystemController implements ActionListener, TableModelListener {
 
         if (checkAddProduction()) {
             String formula = ApView.getApFormula();
-            Double quantity = ApView.getApQuantity();
+            double quantity = ApView.getApQuantity();
 
             String sql = "INSERT INTO \"Production\" values (DEFAULT, ?, ?, ?, ?)";
 
@@ -669,22 +660,20 @@ public class SystemController implements ActionListener, TableModelListener {
 
         for (JPanel panel: ApView.getTanksPanels()) {
             count++;
-            Double quantity = parseDouble(((JTextField)panel.getComponent(1)).getText());
-            Double weight = parseDouble(((JTextField)panel.getComponent(2)).getText());
+            double quantity = parseDouble(((JTextField)panel.getComponent(1)).getText());
+            double weight = parseDouble(((JTextField)panel.getComponent(2)).getText());
             if (quantity == 0 || weight == 0) {
                 showMessage("Error adding production","All tanks fields must not be 0 or empty");
                 return false;
             } else if (quantity == -13.11 || weight == -13.11) {
                 showMessage("Error adding production","All tanks fields must contain numbers");
                 return false;
-            } else {
-
             }
         }
         for (JPanel panel: ApView.getDrumsPanels()) {
             count++;
-            Double quantity = parseDouble(((JTextField)panel.getComponent(1)).getText());
-            Double weight = parseDouble(((JTextField)panel.getComponent(2)).getText());
+            double quantity = parseDouble(((JTextField)panel.getComponent(1)).getText());
+            double weight = parseDouble(((JTextField)panel.getComponent(2)).getText());
             if (quantity == 0 || weight == 0) {
                 showMessage("Error adding production","All drums fields must not be 0 or empty");
                 return false;
@@ -695,8 +684,8 @@ public class SystemController implements ActionListener, TableModelListener {
         }
         for (JPanel panel: ApView.getPailsPanels()) {
             count++;
-            Double quantity = parseDouble(((JTextField)panel.getComponent(1)).getText());
-            Double weight = parseDouble(((JTextField)panel.getComponent(2)).getText());
+            double quantity = parseDouble(((JTextField)panel.getComponent(1)).getText());
+            double weight = parseDouble(((JTextField)panel.getComponent(2)).getText());
             if (quantity == 0 || weight == 0) {
                 showMessage("Error adding production","All pails fields must not be 0 or empty");
                 return false;
@@ -707,8 +696,8 @@ public class SystemController implements ActionListener, TableModelListener {
         }
         for (JPanel panel: ApView.getCartonsPanels()) {
             count++;
-            Double quantity = parseDouble(((JTextField)panel.getComponent(1)).getText());
-            Double weight = parseDouble(((JTextField)panel.getComponent(2)).getText());
+            double quantity = parseDouble(((JTextField)panel.getComponent(1)).getText());
+            double weight = parseDouble(((JTextField)panel.getComponent(2)).getText());
             if (quantity == 0 || weight == 0) {
                 showMessage("Error adding production","All cartons fields must not be 0 or empty");
                 return false;
@@ -719,8 +708,8 @@ public class SystemController implements ActionListener, TableModelListener {
         }
         for (JPanel panel: ApView.getGallonsPanels()) {
             count++;
-            Double quantity = parseDouble(((JTextField)panel.getComponent(1)).getText());
-            Double weight = parseDouble(((JTextField)panel.getComponent(2)).getText());
+            double quantity = parseDouble(((JTextField)panel.getComponent(1)).getText());
+            double weight = parseDouble(((JTextField)panel.getComponent(2)).getText());
             if (quantity == 0 || weight == 0) {
                 showMessage("Error adding production","All gallons fields must not be 0 or empty");
                 return false;
@@ -764,7 +753,7 @@ public class SystemController implements ActionListener, TableModelListener {
             boolean formulaSelected = productionPanel.getFilterFormulaSelected();
             boolean statusSelected = productionPanel.getFilterStatusSelected();
 
-            String query = "";
+            String query;
 
             if (batchSerialSelected) {
                 String serial = "'" + productionPanel.getFilterSerial() + "'";
@@ -823,7 +812,6 @@ public class SystemController implements ActionListener, TableModelListener {
 
     void updateProduction(TableModelEvent e) {
         JTable productionTable = productionPanel.getProductionTable();
-
         if (checkUpdatePrivilege()) {
             int row = e.getFirstRow();
             int column = e.getColumn();
@@ -836,12 +824,61 @@ public class SystemController implements ActionListener, TableModelListener {
             try {
                 sqlStatement.executeUpdate(query);
                 showMessage("Update successful", "Batch updated successfully.");
+                if (columnName.equals("Production_status") && newValue.equals(K.status_3)) {
+                    String formulaName = productionTable.getValueAt(row,1).toString();
+                    double quantity = Double.parseDouble(productionTable.getValueAt(row,2).toString());
+                    deductMaterialQuantity(formulaName, quantity);
+                }
             } catch (SQLException throwables) {
                 showMessage("Error performing operation", "Could not update batch. Please review the new values.");
                 throwables.printStackTrace();
             }
         }
         viewProductions();
+    }
+
+    private void deductMaterialQuantity(String formulaName, double formulaQuantity) {
+        int row = 0;
+        for (int i = 0 ; i < productionPanel.getProductionTable().getRowCount() ; i++) {
+            if (productionPanel.getProductionTable().getValueAt(i, 0).toString().equals(formulaName)) {
+                row = i;
+                break;
+            }
+        }
+
+        String formulaDescription = homeView.getVfTable().getValueAt(row, 1).toString();
+        String [] materials = formulaDescription.split(" - ");
+
+        for (String material : materials) {
+            String materialName = material.split(":")[0];
+            double materialQuantity = Double.parseDouble(material.split(":")[1].substring(1, material.split(":")[1].lastIndexOf(" ")));
+            double availableQuantity = 0.0;
+
+            for (int i = 0 ; i < homeView.getVmTable().getRowCount() ; i++) {
+                if (homeView.getVmTable().getValueAt(i, 1).toString().equals(materialName)) {
+                    availableQuantity = Double.parseDouble(homeView.getVmTable().getValueAt(i, 2).toString());
+                }
+            }
+
+            double newQuantity = availableQuantity - (materialQuantity * formulaQuantity);
+
+            if (newQuantity >= 0) {
+                String sql = "UPDATE \"Materials\" SET \"Available_quantity\" = ? WHERE \"Material_name\" = ?";
+                try {
+                    PreparedStatement query = databaseConnection.prepareStatement(sql);
+                    query.setDouble(1, newQuantity);
+                    query.setString(2, materialName);
+                    query.executeUpdate();
+                    query.close();
+                } catch (SQLException throwables) {
+                    throwables.printStackTrace();
+                }
+            } else {
+                showMessage("Error updating material quantities","Not enough material quantities to deduct production materials");
+                break;
+            }
+        }
+        getMaterials();
     }
 
     void deleteProduction() {
@@ -907,16 +944,16 @@ public class SystemController implements ActionListener, TableModelListener {
                 JCheckBox checkBox = checkBoxes.get(i);
                 if (checkBox.isSelected()) {
                     count++;
-                    if (textFields.get(checkBoxes.indexOf(checkBox)).getText().equals("")) {
+                    if (textFields.get(i).getText().equals("")) {
                         showMessage("Error creating new formula", "Please add a quantity for the material " + checkBox.getText());
                         count = -1;
                         break;
                     } else {
                         formulaDescription += checkBox.getText();
                         formulaDescription += ": ";
-                        formulaDescription += textFields.get(checkBoxes.indexOf(checkBox)).getText();
-                        formulaQuantity += Double.parseDouble(textFields.get(checkBoxes.indexOf(checkBox)).getText());
-                        formulaDescription += " " + homeView.getVmTable().getValueAt(checkBoxes.indexOf(checkBox), 4).toString();
+                        formulaDescription += textFields.get(i).getText();
+                        formulaQuantity += Double.parseDouble(textFields.get(i).getText());
+                        formulaDescription += " " + homeView.getVmTable().getValueAt(i, 4).toString();
                         formulaDescription += " - ";
                     }
                 }
@@ -1054,7 +1091,7 @@ public class SystemController implements ActionListener, TableModelListener {
             boolean vendorIsSelected = homeView.getVvVendorRadioButton().isSelected();
             boolean contactIsSelected = homeView.getVvContactRadioButton().isSelected();
 
-            String query = "";
+            String query;
 
             if (vendorIsSelected) {
                 String vendorName = "'" + homeView.getVvVendor() + "'";
@@ -1254,7 +1291,7 @@ public class SystemController implements ActionListener, TableModelListener {
             query.setDouble( 2, 0.0);
             query.setDate( 3, java.sql.Date.valueOf(new SimpleDateFormat("yyyy-MM-dd").format(new Date())));
             query.setString( 4, "Kg");
-            String line = "";
+            String line;
             while ((line = br.readLine()) != null) {
                 query.setString( 1, line);
                 query.executeUpdate();
@@ -1278,8 +1315,6 @@ public class SystemController implements ActionListener, TableModelListener {
             showMessage(title, exception);
         }
     }
-
-    //void sh
 
     boolean checkUpdatePrivilege() {
         boolean flag = false;
