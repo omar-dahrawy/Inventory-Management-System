@@ -629,8 +629,9 @@ public class SystemController implements ActionListener, TableModelListener, Pro
                 query.executeUpdate();
                 query.close();
                 showMessage("Operation successful", "New production added.");
-                homeView.getApView().dispatchEvent(new WindowEvent(homeView.getApView(), WindowEvent.WINDOW_CLOSING));
                 viewProductions();
+                addItemsToStorage();
+                homeView.getApView().dispatchEvent(new WindowEvent(homeView.getApView(), WindowEvent.WINDOW_CLOSING));
             } catch (SQLException throwables) {
                 showErrorMessage("Error performing operation", "New production could not be added.", throwables.getLocalizedMessage());
                 throwables.printStackTrace();
@@ -724,7 +725,6 @@ public class SystemController implements ActionListener, TableModelListener, Pro
         }
 
         if (count > 0) {
-
             return true;
         } else {
             showMessage("Error adding production","You must add at least one container");
@@ -1129,9 +1129,85 @@ public class SystemController implements ActionListener, TableModelListener, Pro
 
     /*
      *
-     *      VIEW STORAGE
+     *      STORAGE
      *
      */
+
+    void addItemsToStorage() {
+        String formulaName = homeView.getApView().getApFormula();
+        ArrayList<JPanel> tanksPanels = homeView.getApView().getTanksPanels();
+        ArrayList<JPanel> pailsPanels = homeView.getApView().getPailsPanels();
+        ArrayList<JPanel> drumsPanels = homeView.getApView().getDrumsPanels();
+        ArrayList<JPanel> cartonsPanels = homeView.getApView().getCartonsPanels();
+        ArrayList<JPanel> gallonsPanels = homeView.getApView().getGallonsPanels();
+
+        for (JPanel panel : tanksPanels) {
+            String sql = "INSERT INTO \"Storage\" values(DEFAULT, ?, ?, ?, ?)";
+            try {
+                PreparedStatement query = databaseConnection.prepareStatement(sql);
+                query.setString(1, formulaName);
+                query.setString(2, "Tank");
+                query.setDouble(3, Double.parseDouble(((JTextField)panel.getComponent(1)).getText()));
+                query.setDouble(4, Double.parseDouble(((JTextField)panel.getComponent(2)).getText()));
+                query.executeUpdate();
+            } catch (SQLException throwables) {
+                throwables.printStackTrace();
+            }
+        }
+        for (JPanel panel : pailsPanels) {
+            String sql = "INSERT INTO \"Storage\" values(DEFAULT, ?, ?, ?, ?)";
+            try {
+                PreparedStatement query = databaseConnection.prepareStatement(sql);
+                query.setString(1, formulaName);
+                query.setString(2, "Pail");
+                query.setDouble(3, Double.parseDouble(((JTextField)panel.getComponent(1)).getText()));
+                query.setDouble(4, Double.parseDouble(((JTextField)panel.getComponent(2)).getText()));
+                query.executeUpdate();
+            } catch (SQLException throwables) {
+                throwables.printStackTrace();
+            }
+        }
+        for (JPanel panel : drumsPanels) {
+            String sql = "INSERT INTO \"Storage\" values(DEFAULT, ?, ?, ?, ?)";
+            try {
+                PreparedStatement query = databaseConnection.prepareStatement(sql);
+                query.setString(1, formulaName);
+                query.setString(2, "Drum");
+                query.setDouble(3, Double.parseDouble(((JTextField)panel.getComponent(1)).getText()));
+                query.setDouble(4, Double.parseDouble(((JTextField)panel.getComponent(2)).getText()));
+                query.executeUpdate();
+            } catch (SQLException throwables) {
+                throwables.printStackTrace();
+            }
+        }
+        for (JPanel panel : cartonsPanels) {
+            String sql = "INSERT INTO \"Storage\" values(DEFAULT, ?, ?, ?, ?)";
+            try {
+                PreparedStatement query = databaseConnection.prepareStatement(sql);
+                query.setString(1, formulaName);
+                query.setString(2, "Carton");
+                query.setDouble(3, Double.parseDouble(((JTextField)panel.getComponent(1)).getText()));
+                query.setDouble(4, Double.parseDouble(((JTextField)panel.getComponent(2)).getText()));
+                query.executeUpdate();
+            } catch (SQLException throwables) {
+                throwables.printStackTrace();
+            }
+        }
+        for (JPanel panel : gallonsPanels) {
+            String sql = "INSERT INTO \"Storage\" values(DEFAULT, ?, ?, ?, ?)";
+            try {
+                PreparedStatement query = databaseConnection.prepareStatement(sql);
+                query.setString(1, formulaName);
+                query.setString(2, "Gallon");
+                query.setDouble(3, Double.parseDouble(((JTextField)panel.getComponent(1)).getText()));
+                query.setDouble(4, Double.parseDouble(((JTextField)panel.getComponent(2)).getText()));
+                query.executeUpdate();
+            } catch (SQLException throwables) {
+                throwables.printStackTrace();
+            }
+        }
+        getStorage();
+    }
 
     void getStorage() {
         String query = "SELECT * FROM \"Storage\"";
