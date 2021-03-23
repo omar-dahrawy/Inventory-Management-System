@@ -8,11 +8,13 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
 
-public class OrdersPanel extends JPanel implements MainPanel, ActionListener {
+public class OrdersPanel extends JPanel implements MainPanel, ActionListener, PropertyChangeListener {
 
     private JPanel ordersPanel;
     private Constants K;
@@ -116,7 +118,7 @@ public class OrdersPanel extends JPanel implements MainPanel, ActionListener {
         tablePanel.remove(0);
         tablePanel.add(new JScrollPane(ordersTable));
         ordersTable.getModel().addTableModelListener(controller);
-        ordersTable.addPropertyChangeListener(controller);
+        ordersTable.addPropertyChangeListener(this);
 
         this.validate();
     }
@@ -228,6 +230,15 @@ public class OrdersPanel extends JPanel implements MainPanel, ActionListener {
 
     //  OTHER METHODS
 
+    void showDropBoxMessage() {
+        String[] options = {"Select Status", K.status_1, K.status_2, K.status_3, K.status_4};
+        String selectedStatus = (String)JOptionPane.showInputDialog(null, " \nChange order status:\n ",
+                "Update status", JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
+
+        int row = ordersTable.getSelectedRow();
+        int column = ordersTable.getSelectedColumn();
+        ordersTable.setValueAt(selectedStatus, row, column);
+    }
 
     @Override
     public int getRowCount(ResultSet set) {
@@ -299,6 +310,17 @@ public class OrdersPanel extends JPanel implements MainPanel, ActionListener {
             filterCustomerField.setEnabled(filterCustomerButton.isSelected());
             filterStatusComboBox.setEnabled(filterStatusButton.isSelected());
             filterSerialField.setEnabled(filterBatchSerialButton.isSelected());
+        }
+    }
+
+    @Override
+    public void propertyChange(PropertyChangeEvent evt) {
+        if (evt.getSource() == ordersTable) {
+            if (evt.getPropertyName().equals("tableCellEditor")) {
+                if (ordersTable.getColumnName(ordersTable.getSelectedColumn()).equals("Status")) {
+                    showDropBoxMessage();
+                }
+            }
         }
     }
 }

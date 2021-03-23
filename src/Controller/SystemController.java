@@ -22,7 +22,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Date;
 
-public class SystemController implements ActionListener, TableModelListener, PropertyChangeListener {
+public class SystemController implements ActionListener, TableModelListener {
 
     private SystemView view;
     private HomeView homeView;
@@ -1268,6 +1268,8 @@ public class SystemController implements ActionListener, TableModelListener, Pro
         }
     }
 
+    //void sh
+
     boolean checkUpdatePrivilege() {
         boolean flag = false;
 
@@ -1406,18 +1408,6 @@ public class SystemController implements ActionListener, TableModelListener, Pro
                     if (e.getType() == TableModelEvent.UPDATE) {
                         updateVendor(e);
                     }
-                }
-            }
-        }
-    }
-
-    @Override
-    public void propertyChange(PropertyChangeEvent evt) {
-        if (evt.getSource() == ordersPanel.getOrdersTable()) {
-            if (evt.getPropertyName().equals("tableCellEditor")) {
-                if (ordersPanel.getOrdersTable().getColumnName(ordersPanel.getOrdersTable().getSelectedColumn()).equals("Status")) {
-                    showMessage("Editing order status","To edit an order's status, enter the number corresponding\nto the status you want to change to:\n\n" +
-                            "1 : Received Order\n2 : In Production\n3 : Preparing for Delivery\n4 : Delivered");
                 }
             }
         }

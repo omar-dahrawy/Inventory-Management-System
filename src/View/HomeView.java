@@ -809,7 +809,6 @@ public class HomeView implements ActionListener {
         VmPanel.remove(0);
         VmPanel.add(new JScrollPane(VmTable));
         VmTable.getModel().addTableModelListener(controller);
-        VmTable.addPropertyChangeListener(controller);
 
         VmPanel.repaint();
         materialsPanel.repaint();
@@ -862,7 +861,6 @@ public class HomeView implements ActionListener {
         VfTablePanel.remove(0);
         VfTablePanel.add(new JScrollPane(VfTable));
         VfTable.getModel().addTableModelListener(controller);
-        VfTable.addPropertyChangeListener(controller);
 
         VfTablePanel.repaint();
         formulasPanel.repaint();
@@ -892,7 +890,6 @@ public class HomeView implements ActionListener {
         VvTablePanel.remove(0);
         VvTablePanel.add(new JScrollPane(VvTable));
         VvTable.getModel().addTableModelListener(controller);
-        VvTable.addPropertyChangeListener(controller);
 
         VvTablePanel.repaint();
         vendorsPanel.repaint();

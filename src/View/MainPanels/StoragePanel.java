@@ -43,7 +43,6 @@ public class StoragePanel extends JPanel implements MainPanel{
         tablePanel.remove(0);
         tablePanel.add(new JScrollPane(storageTable));
         storageTable.getModel().addTableModelListener(controller);
-        storageTable.addPropertyChangeListener(controller);
 
         this.validate();
     }
