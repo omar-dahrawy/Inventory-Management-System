@@ -45,7 +45,6 @@ public class HomeView implements ActionListener {
     private JPanel productionPanel;
     private JPanel formulasPanel;
     private JPanel vendorsPanel;
-    private JPanel testingPanel;
     private OrdersPanel ordersPanel;
     private StoragePanel storagePanel;
 
@@ -218,19 +217,6 @@ public class HomeView implements ActionListener {
 
     /*
      *
-     *      TESTING
-     *
-     */
-
-    private JComboBox AtFormulasComboBox;
-    private JPanel VtTablePanel;
-    private JPanel VtPanel;
-    private JTextField AtTestIdField;
-    private JButton addTestButton;
-    private JTable VtTable;
-
-    /*
-     *
      *      STANDARD SPECIFICATION
      *
      */
@@ -303,7 +289,6 @@ public class HomeView implements ActionListener {
         VpTablePanel.add(new JScrollPane(VpTable));
         VfTablePanel.add(new JScrollPane(VfTable));
         VvTablePanel.add(new JScrollPane(VvTable));
-        VtTablePanel.add(new JScrollPane(VtTable));
         VsTablePanel.add(new JScrollPane(VsTable));
     }
 
@@ -863,16 +848,13 @@ public class HomeView implements ActionListener {
         String [][] data = new String[rowCount][columnCount];
 
         VpFormulasComboBox.removeAllItems();
-        AtFormulasComboBox.removeAllItems();
         VpFormulasComboBox.addItem("Select Formula");
-        AtFormulasComboBox.addItem("Select Formula");
 
         while (formulas.next()) {
             for (int i = 0 ; i < columnCount ; i++) {
                 data[formulas.getRow() - 1][i] = formulas.getString(i + 1);
             }
             VpFormulasComboBox.addItem(formulas.getString(1));
-            AtFormulasComboBox.addItem(formulas.getString(1));
         }
         VfTable = new JTable(data, columnNames);
         VfTable.setAutoCreateRowSorter(true);
