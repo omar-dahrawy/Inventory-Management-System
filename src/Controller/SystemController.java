@@ -2,6 +2,7 @@ package Controller;
 
 import Model.Constants;
 import View.HomeView;
+import View.MainPanels.OrdersPanel;
 import View.SystemView;
 
 import javax.swing.*;
@@ -25,6 +26,8 @@ public class SystemController implements ActionListener, TableModelListener, Pro
 
     private SystemView view;
     private HomeView homeView;
+    private OrdersPanel ordersPanel;
+
     private Constants K = new Constants();
 
     private int currentUserID;
@@ -35,6 +38,7 @@ public class SystemController implements ActionListener, TableModelListener, Pro
     public SystemController(SystemView view) {
         this.view = view;
         this.homeView = view.getHomeView();
+        this.ordersPanel = homeView.getOrdersPanel();
         this.view.addActionListeners(this);
 
 
@@ -354,12 +358,12 @@ public class SystemController implements ActionListener, TableModelListener, Pro
 
     void addOrder() {
         if (checkAddOrder()) {
-            String customer = homeView.getAoCustomer();
-            String orderDetails = homeView.getAoDetails();
-            Double price = homeView.getAoPrice();
+            String customer = ordersPanel.getFilterCustomer();
+            String orderDetails = ordersPanel.getAddDetails();
+            Double price = ordersPanel.getAddPrice();
             String status = K.status_1;
-            java.sql.Date DOP = java.sql.Date.valueOf(homeView.getAoDop());
-            java.sql.Date DOD = java.sql.Date.valueOf(homeView.getAoDod());
+            java.sql.Date DOP = java.sql.Date.valueOf(ordersPanel.getAddDop());
+            java.sql.Date DOD = java.sql.Date.valueOf(ordersPanel.getAddDod());
             java.sql.Date DOE = java.sql.Date.valueOf(new SimpleDateFormat("yyyy-MM-dd").format(new Date()));
 
             String sql = "INSERT INTO \"Orders\" values (DEFAULT, ?, ?, ?, ?, ?, ?, ?, ?)";
@@ -376,7 +380,7 @@ public class SystemController implements ActionListener, TableModelListener, Pro
                 query.setDate(8, DOE);
                 query.executeUpdate();
                 query.close();
-                homeView.clearAddOrderFields();
+                ordersPanel.clearAddFields();
                 showMessage("Operation successful", "New order added.");
                 viewOrders();
             } catch (SQLException throwables) {
@@ -390,25 +394,25 @@ public class SystemController implements ActionListener, TableModelListener, Pro
     boolean checkAddOrder() {
         boolean flag = true;
 
-        if (homeView.getAoCustomer().equals("")) {
+        if (ordersPanel.getAddCustomer().equals("")) {
             flag = false;
             showMessage("Error adding order", "Order customer cannot be empty.");
-        } else if (homeView.getAoBatchSerial().equals("")) {
+        } else if (ordersPanel.getAddBatchSerial().equals("")) {
             flag = false;
             showMessage("Error adding order", "Batch serial cannot be empty.");
-        } else if (homeView.getAoPrice() == 0) {
+        } else if (ordersPanel.getAddPrice() == 0) {
             flag = false;
             showMessage("Error adding order", "Order price cannot be 0 or empty.");
-        } else if (homeView.getAoPrice() == -13.11) {
+        } else if (ordersPanel.getAddPrice() == -13.11) {
             flag = false;
             showMessage("Error adding order", "Order price must be a number.");
-        } else if (homeView.getAoDetails().equals("")) {
+        } else if (ordersPanel.getAddDetails().equals("")) {
             flag = false;
             showMessage("Error adding order", "Order details cannot be empty.");
-        } else if (homeView.getAoDod() == null) {
+        } else if (ordersPanel.getAddDod() == null) {
             flag = false;
             showMessage("Error adding order", "Date of delivery cannot be empty.");
-        } else if (homeView.getAoDop() == null) {
+        } else if (ordersPanel.getAddDop() == null) {
             flag = false;
             showMessage("Error adding order", "Date of production cannot be empty.");
         }
@@ -423,26 +427,27 @@ public class SystemController implements ActionListener, TableModelListener, Pro
 
     void viewOrders() {
         if (checkViewOrders()) {
-            Boolean customerSelected = homeView.getVoCustomerRadioButton().isSelected();
-            Boolean DateSelected = homeView.getVoDateRadioButton().isSelected();
-            Boolean statusSelected = homeView.getVoStatusRadioButton().isSelected();
-            Boolean batchSerialSelected = homeView.getVoSerialRadioButton().isSelected();
+            Boolean customerSelected = ordersPanel.getFilterCustomerButton().isSelected();
+            Boolean DateSelected = ordersPanel.getFilterDateButton().isSelected();
+            Boolean statusSelected = ordersPanel.getFilterStatusButton().isSelected();
+            Boolean batchSerialSelected = ordersPanel.getFilterBatchSerialButton().isSelected();
 
             String query = "";
 
             if (customerSelected) {
-                query = "SELECT * FROM public.\"Orders\" WHERE \"Customer\" = '" + homeView.getVoCustomer() + "'";
+                query = "SELECT * FROM public.\"Orders\" WHERE \"Customer\" = '" + ordersPanel.getFilterCustomer() + "'";
             } else if (DateSelected) {
-                String dateType = (homeView.getVoDateType().equals("Date of entry")) ? "Date_of_entry" : (homeView.getVoDateType().equals("Date of production") ? "Date_of_production" : "Date_of_delivery");
-                if (homeView.getVoToDate() != null) {
-                    query = "SELECT * FROM public.\"Orders\" WHERE \"" + dateType + "\" >= '" + homeView.getVoFromDate() + "' AND \"" + dateType + "\" <= '" + homeView.getVoToDate() + "'";
+                String selectedDateType = ordersPanel.getFilterDateType();
+                String dateType = (selectedDateType.equals("Date of entry")) ? "Date_of_entry" : (selectedDateType.equals("Date of production") ? "Date_of_production" : "Date_of_delivery");
+                if (ordersPanel.getFilterToDate() != null) {
+                    query = "SELECT * FROM public.\"Orders\" WHERE \"" + dateType + "\" >= '" + ordersPanel.getFilterFromDate() + "' AND \"" + dateType + "\" <= '" + ordersPanel.getFilterToDate() + "'";
                 } else {
-                    query = "SELECT * FROM public.\"Orders\" WHERE \"" + dateType + "\" >= '" + homeView.getVoFromDate() + "'";
+                    query = "SELECT * FROM public.\"Orders\" WHERE \"" + dateType + "\" >= '" + ordersPanel.getFilterFromDate() + "'";
                 }
             } else if (statusSelected) {
-                query = "SELECT * FROM public.\"Orders\" WHERE \"Status\" = '" + homeView.getVoStatus() + "'";
+                query = "SELECT * FROM public.\"Orders\" WHERE \"Status\" = '" + ordersPanel.getFilterStatus() + "'";
             } else if (batchSerialSelected) {
-                query = "SELECT * FROM public.\"Orders\" WHERE \"Batch_serial\" = '" + homeView.getVoSerial() + "'";
+                query = "SELECT * FROM public.\"Orders\" WHERE \"Batch_serial\" = '" + ordersPanel.getFilterSerial() + "'";
             } else {
                 query = "SELECT * FROM public.\"Orders\"";
             }
@@ -450,7 +455,7 @@ public class SystemController implements ActionListener, TableModelListener, Pro
             try {
                 PreparedStatement ordersQuery = databaseConnection.prepareStatement(query, ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
                 ResultSet orders = ordersQuery.executeQuery();
-                homeView.showOrders(orders, this);
+                homeView.getOrdersPanel().showOrders(orders, this);
             } catch (SQLException throwables) {
                 showMessage("Error performing operation", "Error viewing orders.");
                 throwables.printStackTrace();
@@ -460,27 +465,26 @@ public class SystemController implements ActionListener, TableModelListener, Pro
 
     boolean checkViewOrders() {
         boolean flag = true;
-
-        if (homeView.getVoCustomerRadioButton().isSelected()) {
-            if (homeView.getVoCustomer().equals("")) {
+        if (ordersPanel.getFilterCustomerButton().isSelected()) {
+            if (ordersPanel.getFilterCustomer().equals("")) {
                 flag = false;
                 showMessage("Error viewing orders", "Please enter a customer to filter by.");
             }
-        } else if (homeView.getVoStatusRadioButton().isSelected()) {
-            if (homeView.getVoStatus().equals("Select Status")) {
+        } else if (ordersPanel.getFilterStatusButton().isSelected()) {
+            if (ordersPanel.getFilterStatus().equals("Select Status")) {
                 flag = false;
                 showMessage("Error viewing orders", "Please select a status to filter by.");
             }
-        } else if (homeView.getVoSerialRadioButton().isSelected()) {
-            if (homeView.getVoSerial().equals("")) {
+        } else if (ordersPanel.getFilterBatchSerialButton().isSelected()) {
+            if (ordersPanel.getFilterSerial().equals("")) {
                 flag = false;
                 showMessage("Error viewing orders", "Please enter a batch serial to filter by.");
             }
-        } else if (homeView.getVoDateRadioButton().isSelected()) {
-            if (homeView.getVoDateType().equals("Select date type")) {
+        } else if (ordersPanel.getFilterDateButton().isSelected()) {
+            if (ordersPanel.getFilterDateType().equals("Select date type")) {
                 flag = false;
                 showMessage("Error viewing orders", "Please select a date type to filter by.");
-            } else if (homeView.getVoFromDate() == null) {
+            } else if (ordersPanel.getFilterFromDate() == null) {
                 flag = false;
                 showMessage("Error viewing orders", "Please enter a From date to filter by.");
             }
@@ -493,9 +497,9 @@ public class SystemController implements ActionListener, TableModelListener, Pro
         if (checkUpdatePrivilege()) {
             int row = e.getFirstRow();
             int column = e.getColumn();
-            String newValue = homeView.getVoTable().getValueAt(row, column).toString();
-            String columnName = homeView.getVoTable().getColumnName(column);
-            String id = homeView.getVoTable().getValueAt(row, 0).toString();
+            String newValue = ordersPanel.getOrdersTable().getValueAt(row, column).toString();
+            String columnName = ordersPanel.getOrdersTable().getColumnName(column);
+            String id = ordersPanel.getOrdersTable().getValueAt(row, 0).toString();
 
             String query = "UPDATE \"Orders\" SET \"" + columnName + "\" = '" + newValue + "' WHERE \"Order_ID\" = " + id;
             try {
@@ -510,8 +514,8 @@ public class SystemController implements ActionListener, TableModelListener, Pro
     }
 
     void deleteOrder() {
-        int row = homeView.getVoTable().getSelectedRow();
-        String id = homeView.getVoTable().getValueAt(row, 0).toString();
+        int row = ordersPanel.getOrdersTable().getSelectedRow();
+        String id = ordersPanel.getOrdersTable().getValueAt(row, 0).toString();
 
         String query = "DELETE FROM \"Orders\" WHERE \"Order_ID\" = " + id;
 
@@ -1231,15 +1235,15 @@ public class SystemController implements ActionListener, TableModelListener, Pro
             viewGeneralExpenses();
         } else if (e.getSource() == homeView.getVmeViewButton()) {
             viewMaterialExpenses();
-        } else if (e.getSource() == homeView.getAoAddButton()) {
+        } else if (e.getSource() == ordersPanel.getAddOrderButton()) {
             addOrder();
-        } else if (e.getSource() == homeView.getVoViewButton()) {
+        } else if (e.getSource() == ordersPanel.getViewOrdersButton()) {
             viewOrders();
         } else if (e.getSource() == homeView.getVgeDeleteButton()) {
             deleteGeneralExpense();
         } else if (e.getSource() == homeView.getVmeDeleteButton()) {
             deleteMaterialExpense();
-        } else if (e.getSource() == homeView.getDeleteOrderButton()) {
+        } else if (e.getSource() == ordersPanel.getDeleteOrderButton()) {
             deleteOrder();
         } else if (e.getSource() == homeView.getVmRefreshButton()) {
             getMaterials();
@@ -1288,9 +1292,9 @@ public class SystemController implements ActionListener, TableModelListener, Pro
                     }
                 }
             }
-        } if (homeView.getVoTable() != null) {
-            if (homeView.getVoTable().getModel() != null) {
-                if (e.getSource() == homeView.getVoTable().getModel()) {
+        } if (ordersPanel.getOrdersTable() != null) {
+            if (ordersPanel.getOrdersTable().getModel() != null) {
+                if (e.getSource() == ordersPanel.getOrdersTable().getModel()) {
                     if (e.getType() == TableModelEvent.UPDATE) {
                         updateOrder(e);
                     }
@@ -1333,9 +1337,9 @@ public class SystemController implements ActionListener, TableModelListener, Pro
 
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
-        if (evt.getSource() == homeView.getVoTable()) {
+        if (evt.getSource() == ordersPanel.getOrdersTable()) {
             if (evt.getPropertyName().equals("tableCellEditor")) {
-                if (homeView.getVoTable().getColumnName(homeView.getVoTable().getSelectedColumn()).equals("Status")) {
+                if (ordersPanel.getOrdersTable().getColumnName(ordersPanel.getOrdersTable().getSelectedColumn()).equals("Status")) {
                     showMessage("Editing order status","To edit an order's status, enter the number corresponding\nto the status you want to change to:\n\n" +
                             "1 : Received Order\n2 : In Production\n3 : Preparing for Delivery\n4 : Delivered");
                 }

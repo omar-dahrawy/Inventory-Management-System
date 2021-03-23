@@ -49,7 +49,6 @@ public class StoragePanel extends JPanel implements MainPanel{
     }
 
     public int getRowCount(ResultSet set) {
-
         int rowCount = 0;
 
         try {
@@ -63,7 +62,6 @@ public class StoragePanel extends JPanel implements MainPanel{
     }
 
     public String[] getColumnNames(ResultSet set, int columnCount) {
-
         String[] columnNames = new String[columnCount];
 
         for (int i = 0 ; i < columnCount ; i++) {
@@ -83,6 +81,13 @@ public class StoragePanel extends JPanel implements MainPanel{
 
     @Override
     public void setTableFont(JTable table) {
+        Font font = new Font(table.getFont().getName(), table.getFont().getStyle(), 15);
+        table.setFont(font);
+        table.setRowHeight(25);
+    }
+
+    @Override
+    public void addActionListeners(SystemController controller) {
 
     }
 

@@ -2,6 +2,7 @@ package View;
 
 import Controller.SystemController;
 import Model.Constants;
+import View.MainPanels.OrdersPanel;
 import View.MainPanels.StoragePanel;
 import com.github.lgooddatepicker.components.DatePicker;
 
@@ -41,11 +42,12 @@ public class HomeView implements ActionListener {
 
     private JPanel expensesPanel;
     private JPanel materialsPanel;
-    private JPanel ordersPanel;
     private JPanel productionPanel;
     private JPanel formulasPanel;
     private JPanel vendorsPanel;
     private JPanel testingPanel;
+    private OrdersPanel ordersPanel;
+    private StoragePanel storagePanel;
 
     /*
      *
@@ -116,48 +118,6 @@ public class HomeView implements ActionListener {
     private JButton VmeViewButton;
     private JButton VmeClearFilterButton;
     private JButton VmeDeleteButton;
-
-    /*
-     *
-     *      ADD ORDER
-     *
-     */
-
-    private JTextField AoCustomerField;
-    private JTextField AoPriceField;
-    private JTextField AoBatchSerialField;
-    private JTextArea AoDetailsArea;
-    private JPanel AoDopPanel;
-    private JPanel AoDodPanel;
-    private DatePicker AoDopPicker = new DatePicker();
-    private DatePicker AoDodPicker = new DatePicker();
-    private JButton AoAddButton;
-
-    /*
-     *
-     *      VIEW ORDERS
-     *
-     */
-
-    private JPanel VoPanel;
-    private JTable VoTable;
-    private JPanel VoTablePanel;
-    private ButtonGroup VoRadioButtonGroup = new ButtonGroup();
-    private JRadioButton VoDateRadioButton;
-    private JRadioButton VoCustomerRadioButton;
-    private JRadioButton VoStatusRadioButton;
-    private JRadioButton VoBatchRadioButton;
-    private JButton VoViewButton;
-    private JButton clearOrdersSelectionButton;
-    private JTextField VoCustomerField;
-    private JTextField VoSerialField;
-    private JComboBox VoStatusComboBox;
-    private JPanel VoFromDatePanel;
-    private JPanel VoToDatePanel;
-    private JComboBox VoDateComboBox;
-    private DatePicker VoFromDatePicker = new DatePicker();
-    private DatePicker VoToDatePicker = new DatePicker();
-    private JButton deleteOrderButton;
 
     /*
      *
@@ -281,15 +241,6 @@ public class HomeView implements ActionListener {
     private JTable VsTable;
 
     /*
-     *
-     *      STORAGE
-     *
-     */
-
-    private StoragePanel storagePanel;
-
-
-    /*
      *  ------------------------
      *  ------------------------
      *      GENERAL SETTINGS
@@ -300,7 +251,9 @@ public class HomeView implements ActionListener {
     public HomeView() {
 
         storagePanel = new StoragePanel();
+        ordersPanel = new OrdersPanel();
         mainTabbedPane.add("Storage", storagePanel);
+        mainTabbedPane.add("Orders", ordersPanel);
 
         GeDatePicker.setDateToToday();
         MeDatePicker.setDateToToday();
@@ -330,27 +283,6 @@ public class HomeView implements ActionListener {
         VmeFromDatePanel.add(VmeFromDatePicker);
         VmeToDatePanel.add(VmeToDatePicker);
 
-        AoDopPicker.setDateToToday();
-        AoDodPicker.setDateToToday();
-        AoDopPanel.add(AoDopPicker);
-        AoDodPanel.add(AoDodPicker);
-
-        VoFromDatePanel.add(VoFromDatePicker);
-        VoFromDatePicker.setEnabled(false);
-        VoToDatePanel.add(VoToDatePicker);
-        VoToDatePicker.setEnabled(false);
-
-        VoRadioButtonGroup.add(VoDateRadioButton);
-        VoRadioButtonGroup.add(VoCustomerRadioButton);
-        VoRadioButtonGroup.add(VoStatusRadioButton);
-        VoRadioButtonGroup.add(VoBatchRadioButton);
-
-        VoStatusComboBox.addItem("Select Status");
-        VoStatusComboBox.addItem(K.status_1);
-        VoStatusComboBox.addItem(K.status_2);
-        VoStatusComboBox.addItem(K.status_3);
-        VoStatusComboBox.addItem(K.status_4);
-
         VpRadioButtonGroup.add(VpSerialRadioButton);
         VpRadioButtonGroup.add(VpOrderRadioButton);
         VpRadioButtonGroup.add(VpFormulaRadioButton);
@@ -367,7 +299,6 @@ public class HomeView implements ActionListener {
 
         VgeTablePanel.add(new JScrollPane(VgeTable));
         VmeTablePanel.add(new JScrollPane(VmeTable));
-        VoTablePanel.add(new JScrollPane(VoTable));
         VmPanel.add(new JScrollPane(VmTable));
         VpTablePanel.add(new JScrollPane(VpTable));
         VfTablePanel.add(new JScrollPane(VfTable));
@@ -377,6 +308,9 @@ public class HomeView implements ActionListener {
     }
 
     public void addActionListeners(SystemController controller) {
+        storagePanel.addActionListeners(controller);
+        ordersPanel.addActionListeners(controller);
+
         MeAddButton.addActionListener(controller);
         GeAddButton.addActionListener(controller);
         MeMaterialComboBox.addActionListener(this);
@@ -392,15 +326,6 @@ public class HomeView implements ActionListener {
         VmeViewButton.addActionListener(controller);
         VmeDeleteButton.addActionListener(controller);
         VmeClearFilterButton.addActionListener(this);
-
-        AoAddButton.addActionListener(controller);
-        VoViewButton.addActionListener(controller);
-        VoDateRadioButton.addActionListener(this);
-        VoCustomerRadioButton.addActionListener(this);
-        VoStatusRadioButton.addActionListener(this);
-        VoBatchRadioButton.addActionListener(this);
-        clearOrdersSelectionButton.addActionListener(this);
-        deleteOrderButton.addActionListener(controller);
 
         AmAddButton.addActionListener(controller);
         VmRefreshButton.addActionListener(controller);
@@ -592,114 +517,6 @@ public class HomeView implements ActionListener {
 
     public JTable getVmeTable() {
         return VmeTable;
-    }
-
-    /*
-     *
-     *      ADD ORDER
-     *
-     */
-
-    public String getAoCustomer() {
-        return AoCustomerField.getText();
-    }
-
-    public Double getAoPrice() {
-        if (!AoPriceField.getText().equals("")) {
-            try {
-                return Double.parseDouble(AoPriceField.getText());
-            } catch (NumberFormatException e) {
-                e.printStackTrace();
-            }
-        } else {
-            return 0.0;
-        }
-        return -13.11;
-    }
-
-    public String getAoBatchSerial() {
-        return AoBatchSerialField.getText();
-    }
-
-    public String getAoDetails() {
-        return AoDetailsArea.getText();
-    }
-
-    public LocalDate getAoDop() {
-        return AoDopPicker.getDate();
-    }
-
-    public LocalDate getAoDod() {
-        return AoDodPicker.getDate();
-    }
-
-    public JButton getAoAddButton() {
-        return AoAddButton;
-    }
-
-    public void clearAddOrderFields() {
-        AoPriceField.setText("");
-        AoBatchSerialField.setText("");
-        AoCustomerField.setText("");
-        AoDetailsArea.setText("");
-    }
-
-    /*
-     *
-     *      VIEW ORDERS
-     *
-     */
-
-    public JTable getVoTable() {
-        return VoTable;
-    }
-
-    public String getVoCustomer() {
-        return VoCustomerField.getText();
-    }
-
-    public String getVoSerial() {
-        return VoSerialField.getText();
-    }
-
-    public String getVoStatus() {
-        return VoStatusComboBox.getSelectedItem().toString();
-    }
-
-    public String getVoDateType() {
-        return VoDateComboBox.getSelectedItem().toString();
-    }
-
-    public LocalDate getVoFromDate() {
-        return VoFromDatePicker.getDate();
-    }
-
-    public LocalDate getVoToDate() {
-        return VoToDatePicker.getDate();
-    }
-
-    public JRadioButton getVoDateRadioButton() {
-        return VoDateRadioButton;
-    }
-
-    public JRadioButton getVoCustomerRadioButton() {
-        return VoCustomerRadioButton;
-    }
-
-    public JRadioButton getVoStatusRadioButton() {
-        return VoStatusRadioButton;
-    }
-
-    public JRadioButton getVoSerialRadioButton() {
-        return VoBatchRadioButton;
-    }
-
-    public JButton getVoViewButton() {
-        return VoViewButton;
-    }
-
-    public JButton getDeleteOrderButton() {
-        return deleteOrderButton;
     }
 
     /*
@@ -920,6 +737,10 @@ public class HomeView implements ActionListener {
         return storagePanel;
     }
 
+    public OrdersPanel getOrdersPanel() {
+        return ordersPanel;
+    }
+
     /*
     --
     --
@@ -976,31 +797,6 @@ public class HomeView implements ActionListener {
         VmeTablePanel.repaint();
         VmePanel.repaint();
         expensesPanel.repaint();
-    }
-
-    public void showOrders(ResultSet orders, SystemController controller) throws SQLException {
-        int columnCount = orders.getMetaData().getColumnCount();
-        int rowCount = getRowCount(orders);
-
-        String[] columnNames = getColumnNames(orders, columnCount);
-        String [][] data = new String[rowCount][columnCount];
-
-        while (orders.next()) {
-            for (int i = 0 ; i < columnCount ; i++) {
-                data[orders.getRow() - 1][i] = orders.getString(i + 1);
-            }
-        }
-        VoTable = new JTable(data, columnNames);
-        setTableFont(VoTable);
-        VoTablePanel.remove(0);
-        VoTablePanel.add(new JScrollPane(VoTable));
-        VoTable.getModel().addTableModelListener(controller);
-        VoTable.addPropertyChangeListener(controller);
-
-        VoTablePanel.repaint();
-        VoPanel.repaint();
-        ordersPanel.repaint();
-        homePanel.repaint();
     }
 
     public void getMaterials(ResultSet materials, SystemController controller) throws SQLException {
@@ -1196,44 +992,6 @@ public class HomeView implements ActionListener {
             VmeToDatePicker.setEnabled(false);
         }
 
-        else if (e.getSource() == VoDateRadioButton) {
-            VoFromDatePicker.setEnabled(!VoFromDatePicker.isEnabled());
-            VoToDatePicker.setEnabled(!VoToDatePicker.isEnabled());
-            VoDateComboBox.setEnabled(!VoDateComboBox.isEnabled());
-            VoStatusComboBox.setEnabled(false);
-            VoSerialField.setEnabled(false);
-            VoCustomerField.setEnabled(false);
-        } else if (e.getSource() == VoStatusRadioButton) {
-            VoStatusComboBox.setEnabled(!VoStatusComboBox.isEnabled());
-            VoToDatePicker.setEnabled(false);
-            VoFromDatePicker.setEnabled(false);
-            VoDateComboBox.setEnabled(false);
-            VoSerialField.setEnabled(false);
-            VoCustomerField.setEnabled(false);
-        } else if (e.getSource() == VoBatchRadioButton) {
-            VoSerialField.setEnabled(!VoSerialField.isEnabled());
-            VoFromDatePicker.setEnabled(false);
-            VoToDatePicker.setEnabled(false);
-            VoDateComboBox.setEnabled(false);
-            VoStatusComboBox.setEnabled(false);
-            VoCustomerField.setEnabled(false);
-        } else if (e.getSource() == VoCustomerRadioButton) {
-            VoCustomerField.setEnabled(!VoCustomerField.isEnabled());
-            VoFromDatePicker.setEnabled(false);
-            VoToDatePicker.setEnabled(false);
-            VoDateComboBox.setEnabled(false);
-            VoStatusComboBox.setEnabled(false);
-            VoSerialField.setEnabled(false);
-        } else if (e.getSource() == clearOrdersSelectionButton) {
-            VoRadioButtonGroup.clearSelection();
-            VoFromDatePicker.setEnabled(false);
-            VoToDatePicker.setEnabled(false);
-            VoDateComboBox.setEnabled(false);
-            VoStatusComboBox.setEnabled(false);
-            VoSerialField.setEnabled(false);
-            VoCustomerField.setEnabled(false);
-        }
-
         else if (e.getSource() == VpSerialRadioButton) {
             VpSerialField.setEnabled(!VpSerialField.isEnabled());
             VpOrderIdField.setEnabled(false);
@@ -1273,9 +1031,6 @@ public class HomeView implements ActionListener {
             VvVendorField.setEnabled(false);
             VvContactField.setEnabled(false);
         }
-
-        VoPanel.repaint();
-        ordersPanel.repaint();
     }
 
 }
