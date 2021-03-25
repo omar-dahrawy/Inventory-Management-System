@@ -5,6 +5,7 @@ import View.AddProductionView;
 import View.HomeView;
 import View.MainPanels.OrdersPanel;
 import View.MainPanels.ProductionPanel;
+import View.MainPanels.StoragePanel;
 import View.SystemView;
 
 import javax.swing.*;
@@ -26,6 +27,7 @@ public class SystemController implements ActionListener, TableModelListener {
 
     private final SystemView view;
     private final HomeView homeView;
+    private final StoragePanel storagePanel;
     private final OrdersPanel ordersPanel;
     private final ProductionPanel productionPanel;
 
@@ -41,50 +43,52 @@ public class SystemController implements ActionListener, TableModelListener {
         this.homeView = view.getHomeView();
         this.ordersPanel = homeView.getOrdersPanel();
         this.productionPanel = homeView.getProductionPanel();
+        this.storagePanel = homeView.getStoragePanel();
         this.view.addActionListeners(this);
+    }
 
+    void login() {
 
         //CONNECT TO DATABASE
-        while (databaseConnection == null) {
+        if (databaseConnection == null) {
             try {
                 Class.forName("org.postgresql.Driver");
                 databaseConnection = DriverManager.getConnection("jdbc:postgresql://localhost/Eagles", "postgres", "admin");
                 System.out.println("Database server connection successful");
                 sqlStatement = databaseConnection.createStatement();
             } catch (Exception e) {
-                showMessage("Could not connect to database server", "Connection to database server refused.\nCheck that the server is running and accepting connections. ");
+                showErrorMessage("Could not connect to database server", "Connection to database server refused.\nCheck that the server is running and accepting connections. ", e.getLocalizedMessage());
             }
-        }
-    }
+        } else {
 
-    void login() {
-        String username = view.getLoginView().getUsername();
-        String password = view.getLoginView().getPassword();
+            String username = view.getLoginView().getUsername();
+            String password = view.getLoginView().getPassword();
 
-        try {
-            ResultSet users = sqlStatement.executeQuery("SELECT * FROM public.\"Users\" where \"Username\" = '" + username + "'");
-            if (users.next()) {
-                if (users.getString(4).equals(password)) {
-                    showMessage("Login Message", "Login successful.");
-                    currentUserID = Integer.parseInt(users.getString(1));
-                    users.close();
-                    getMaterials();
-                    viewVendors();
-                    viewGeneralExpenses();
-                    viewMaterialExpenses();
-                    viewProductions();
-                    viewOrders();
-                    getFormulas();
-                    getStorage();
-                    view.goToHome();
+            try {
+                ResultSet users = sqlStatement.executeQuery("SELECT * FROM public.\"Users\" where \"Username\" = '" + username + "'");
+                if (users.next()) {
+                    if (users.getString(4).equals(password)) {
+                        showMessage("Login Message", "Login successful.");
+                        currentUserID = Integer.parseInt(users.getString(1));
+                        users.close();
+                        getMaterials();
+                        viewVendors();
+                        viewGeneralExpenses();
+                        viewMaterialExpenses();
+                        viewProductions();
+                        viewOrders();
+                        getFormulas();
+                        viewStorage();
+                        view.goToHome();
+                    } else {
+                        showMessage("Login Error", "Password is incorrect.");
+                    }
                 } else {
-                    showMessage("Login Error", "Password is incorrect.");
+                    showMessage("Login Error", "Username does not exist.");
                 }
-            } else {
-                showMessage("Login Error", "Username does not exist.");
+            } catch (SQLException throwables) {
+                throwables.printStackTrace();
             }
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
         }
     }
 
@@ -360,7 +364,7 @@ public class SystemController implements ActionListener, TableModelListener {
 
     void addOrder() {
         if (checkAddOrder()) {
-            String customer = ordersPanel.getFilterCustomer();
+            String customer = ordersPanel.getAddCustomer();
             String orderDetails = ordersPanel.getAddDetails();
             java.sql.Date DOP = java.sql.Date.valueOf(ordersPanel.getAddDop());
             java.sql.Date DOD = java.sql.Date.valueOf(ordersPanel.getAddDod());
@@ -1254,17 +1258,89 @@ public class SystemController implements ActionListener, TableModelListener {
                 throwables.printStackTrace();
             }
         }
-        getStorage();
+        viewStorage();
     }
 
-    void getStorage() {
-        String query = "SELECT * FROM \"Storage\"";
-        try {
-            PreparedStatement materialsQuery = databaseConnection.prepareStatement(query, ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
-            ResultSet items = materialsQuery.executeQuery();
-            homeView.getStoragePanel().getStorageItems(items, this);
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
+    void viewStorage() {
+        if (checkViewStorage()) {
+            boolean formulaFilterSelected = storagePanel.getFilterProductSelected();
+            boolean containerFilterSelected = storagePanel.getFilterContainerSelected();
+
+            String query;
+
+            if (formulaFilterSelected) {
+                query = "SELECT * FROM \"Storage\" WHERE \"Product_name\" = '" + storagePanel.getFilterProduct() + "'";
+            } else if (containerFilterSelected) {
+                query = "SELECT * FROM \"Storage\" WHERE \"Container_type\" = '" + storagePanel.getFilterContainerType() + "'";
+            } else {
+                query = "SELECT * FROM \"Storage\"";
+            }
+
+            try {
+                PreparedStatement materialsQuery = databaseConnection.prepareStatement(query, ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
+                ResultSet items = materialsQuery.executeQuery();
+                homeView.getStoragePanel().getStorageItems(items, this);
+            } catch (SQLException throwables) {
+                throwables.printStackTrace();
+            }
+        }
+    }
+
+    boolean checkViewStorage() {
+        if (storagePanel.getFilterContainerSelected()) {
+            if (storagePanel.getFilterContainerType().equals("Select Container")) {
+                showMessage("Error viewing storage", "Please select a container type to filter by");
+                return false;
+            }
+        } else if (storagePanel.getFilterProductSelected()) {
+            if (storagePanel.getFilterProduct().equals("Select Product")) {
+                showMessage("Error viewing storage", "Please select a product to filter by");
+                return false;
+            }
+        }
+        return true;
+    }
+
+    void updateStorageItem(TableModelEvent e) {
+        if (checkUpdatePrivilege()) {
+            JTable storageTable = storagePanel.getStorageTable();
+            int row = e.getFirstRow();
+            int column = e.getColumn();
+            String newValue = storageTable.getValueAt(row, column).toString();
+            String columnName = storageTable.getColumnName(column);
+            String id = storageTable.getValueAt(row, 0).toString();
+
+            String query = "UPDATE \"Storage\" SET \"" + columnName + "\" = '" + newValue + "' WHERE \"Item_ID\" = " + id;
+
+            try {
+                sqlStatement.executeUpdate(query);
+                showMessage("Update successful", "Storage updated successfully.");
+            } catch (SQLException throwables) {
+                showErrorMessage("Error performing operation", "Could not update storage. Please review the new values.", throwables.getLocalizedMessage());
+                throwables.printStackTrace();
+            }
+        }
+        viewStorage();
+    }
+
+    void deleteStorageItem() {
+        JTable storageTable = storagePanel.getStorageTable();
+        if (storageTable != null) {
+            if (storageTable.getModel() != null) {
+                int row = storageTable.getSelectedRow();
+                String id = storageTable.getValueAt(row, 0).toString();
+
+                String query = "DELETE FROM \"Storage\" WHERE \"Item_ID\" = " + id;
+
+                try {
+                    sqlStatement.executeUpdate(query);
+                    showMessage("Delete successful","Storage item deleted successfully.");
+                } catch (SQLException throwables) {
+                    showErrorMessage("Error performing operation", "Could not delete storage item.", throwables.getLocalizedMessage());
+                    throwables.printStackTrace();
+                }
+                viewStorage();
+            }
         }
     }
 
@@ -1351,34 +1427,47 @@ public class SystemController implements ActionListener, TableModelListener {
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == view.getLoginView().getContinueButton()) {
             login();
-        } else if (e.getSource() == homeView.getMeAddButton()) {
+        }
+
+        // GENERAL EXPENSES
+
+        else if (e.getSource() == homeView.getMeAddButton()) {
             addGeneralExpense();
-        } else if (e.getSource() == homeView.getGeAddButton()) {
-            addMaterialExpense();
         } else if (e.getSource() == homeView.getVgeViewButton()) {
             viewGeneralExpenses();
+        } else if (e.getSource() == homeView.getVgeDeleteButton()) {
+            deleteGeneralExpense();
+        }
+
+        //  MATERIAL EXPENSES
+
+        else if (e.getSource() == homeView.getGeAddButton()) {
+            addMaterialExpense();
         } else if (e.getSource() == homeView.getVmeViewButton()) {
             viewMaterialExpenses();
-        } else if (e.getSource() == ordersPanel.getAddOrderButton()) {
+        } else if (e.getSource() == homeView.getVmeDeleteButton()) {
+            deleteMaterialExpense();
+        }
+
+        //  ORDERS
+
+        else if (e.getSource() == ordersPanel.getAddOrderButton()) {
             addOrder();
         } else if (e.getSource() == ordersPanel.getViewOrdersButton()) {
             viewOrders();
-        } else if (e.getSource() == homeView.getVgeDeleteButton()) {
-            deleteGeneralExpense();
-        } else if (e.getSource() == homeView.getVmeDeleteButton()) {
-            deleteMaterialExpense();
         } else if (e.getSource() == ordersPanel.getDeleteOrderButton()) {
             deleteOrder();
-        } else if (e.getSource() == homeView.getVmRefreshButton()) {
+        }
+
+        //  MATERIALS
+
+        else if (e.getSource() == homeView.getVmRefreshButton()) {
             getMaterials();
-        } else if (e.getSource() == productionPanel.getAddNewProductionButton()) {
-            productionPanel.showAddProductionView(this);
-        } else if (e.getSource() == productionPanel.getViewProductionsButton()) {
-            viewProductions();
-        } else if (e.getSource() == productionPanel.getDeleteProductionButton()) {
-            deleteProduction();
         } else if (e.getSource() == homeView.getAmAddButton()) {
             addMaterial();
+
+        //  FORMULAS
+
         } else if (e.getSource() == homeView.getCreateNewFormulaButton()) {
             homeView.showCreateFormulaView(this);
         } else if (e.getActionCommand().equals("Create Formula")) {
@@ -1387,14 +1476,36 @@ public class SystemController implements ActionListener, TableModelListener {
             getFormulas();
         } else if (e.getSource() == homeView.getDeleteFormulaButton()) {
             deleteFormula();
-        } else if (e.getSource() == homeView.getAvAddButton()) {
+        }
+
+        //  VENDORS
+
+        else if (e.getSource() == homeView.getAvAddButton()) {
             addVendor();
         } else if (e.getSource() == homeView.getVvViewButton()) {
             viewVendors();
         } else if (e.getSource() == homeView.getDeleteVendorButton()) {
             deleteVendor();
-        } else if (e.getActionCommand().equals("Add Production")) {
+        }
+
+        //  PRODUCTION
+
+        else if (e.getActionCommand().equals("Add Production")) {
             addProduction();
+        } else if (e.getSource() == productionPanel.getAddNewProductionButton()) {
+            productionPanel.showAddProductionView(this);
+        } else if (e.getSource() == productionPanel.getViewProductionsButton()) {
+            viewProductions();
+        } else if (e.getSource() == productionPanel.getDeleteProductionButton()) {
+            deleteProduction();
+        }
+
+        //  STORAGE
+
+        else if (e.getSource() == storagePanel.getViewStorageButton()) {
+            viewStorage();
+        } else if (e.getSource() == storagePanel.getDeleteStorageButton()) {
+            deleteStorageItem();
         }
     }
 
@@ -1453,6 +1564,14 @@ public class SystemController implements ActionListener, TableModelListener {
                 if (e.getSource() == homeView.getVvTable().getModel()) {
                     if (e.getType() == TableModelEvent.UPDATE) {
                         updateVendor(e);
+                    }
+                }
+            }
+        } if (storagePanel.getStorageTable() != null) {
+            if (storagePanel.getStorageTable().getModel() != null) {
+                if (e.getSource() == storagePanel.getStorageTable().getModel()) {
+                    if (e.getType() == TableModelEvent.UPDATE) {
+                        updateStorageItem(e);
                     }
                 }
             }

@@ -205,7 +205,7 @@ public class HomeView implements ActionListener {
 
     public HomeView() {
 
-        storagePanel = new StoragePanel();
+        storagePanel = new StoragePanel(this);
         ordersPanel = new OrdersPanel(this);
         productionPanel = new ProductionPanel(this);
         mainTabbedPane.add("Storage", storagePanel);
@@ -723,6 +723,7 @@ public class HomeView implements ActionListener {
 
         homePanel.validate();
         productionPanel.getFormulas();
+        storagePanel.getFormulas();
     }
 
     public void showVendors(ResultSet vendors, SystemController controller) throws SQLException {

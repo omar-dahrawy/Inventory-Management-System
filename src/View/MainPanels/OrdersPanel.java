@@ -17,9 +17,9 @@ import java.time.LocalDate;
 
 public class OrdersPanel extends JPanel implements MainPanel, ActionListener, PropertyChangeListener {
 
-    private HomeView homeView;
+    private final HomeView homeView;
     private JPanel ordersPanel;
-    private Constants K;
+    private final Constants K;
 
     //  ADD ORDER
 
@@ -39,8 +39,8 @@ public class OrdersPanel extends JPanel implements MainPanel, ActionListener, Pr
 
     private JTextField filterCustomerField;
     private JTextField filterSerialField;
-    private JComboBox filterStatusComboBox;
-    private JComboBox filterDateComboBox;
+    private JComboBox<String> filterStatusComboBox;
+    private JComboBox<String> filterDateComboBox;
     private DatePicker filterToDatePicker;
     private DatePicker filterFromDatePicker;
     private JPanel filterToDatePanel;

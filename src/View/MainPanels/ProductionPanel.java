@@ -32,8 +32,8 @@ public class ProductionPanel extends JPanel implements MainPanel, PropertyChange
 
     private JTextField filterOrderIdField;
     private JTextField filterSerialField;
-    private JComboBox filterStatusComboBox;
-    private JComboBox filterFormulasComboBox;
+    private JComboBox<String> filterStatusComboBox;
+    private JComboBox<String> filterFormulasComboBox;
 
     private JRadioButton filterSerialButton;
     private JRadioButton filterOrderIdButton;
@@ -172,7 +172,7 @@ public class ProductionPanel extends JPanel implements MainPanel, PropertyChange
         filterFormulasComboBox.addItem("Select Formula");
 
         for (int i = 0 ; i < rowCount ; i++) {
-            filterFormulasComboBox.addItem(formulasTable.getValueAt(i, 0));
+            filterFormulasComboBox.addItem(formulasTable.getValueAt(i, 0).toString());
         }
     }
 
