@@ -51,7 +51,7 @@ public class SystemController implements ActionListener, TableModelListener {
         this.view.addActionListeners(this);
     }
 
-    void login() {
+    void connectToServer() {
 
         //CONNECT TO DATABASE
         if (databaseConnection == null) {
@@ -60,39 +60,43 @@ public class SystemController implements ActionListener, TableModelListener {
                 databaseConnection = DriverManager.getConnection("jdbc:postgresql://localhost/Eagles", "postgres", "admin");
                 System.out.println("Database server connection successful");
                 sqlStatement = databaseConnection.createStatement();
+                login();
             } catch (Exception e) {
                 showErrorMessage("Could not connect to database server", "Connection to database server refused.\nCheck that the server is running and accepting connections. ", e.getLocalizedMessage());
             }
         } else {
+            login();
+        }
+    }
 
-            String username = view.getLoginView().getUsername();
-            String password = view.getLoginView().getPassword();
+    void login() {
+        String username = view.getLoginView().getUsername();
+        String password = view.getLoginView().getPassword();
 
-            try {
-                ResultSet users = sqlStatement.executeQuery("SELECT * FROM public.\"Users\" where \"Username\" = '" + username + "'");
-                if (users.next()) {
-                    if (users.getString(4).equals(password)) {
-                        showMessage("Login Message", "Login successful.");
-                        currentUserID = Integer.parseInt(users.getString(1));
-                        users.close();
-                        getMaterials();
-                        viewVendors();
-                        viewGeneralExpenses();
-                        viewMaterialExpenses();
-                        viewProductions();
-                        viewOrders();
-                        getFormulas();
-                        viewStorage();
-                        view.goToHome();
-                    } else {
-                        showMessage("Login Error", "Password is incorrect.");
-                    }
+        try {
+            ResultSet users = sqlStatement.executeQuery("SELECT * FROM public.\"Users\" where \"Username\" = '" + username + "'");
+            if (users.next()) {
+                if (users.getString(4).equals(password)) {
+                    showMessage("Login Message", "Login successful.");
+                    currentUserID = Integer.parseInt(users.getString(1));
+                    users.close();
+                    getMaterials();
+                    viewVendors();
+                    viewGeneralExpenses();
+                    viewMaterialExpenses();
+                    viewProductions();
+                    viewOrders();
+                    getFormulas();
+                    viewStorage();
+                    view.goToHome();
                 } else {
-                    showMessage("Login Error", "Username does not exist.");
+                    showMessage("Login Error", "Password is incorrect.");
                 }
-            } catch (SQLException throwables) {
-                throwables.printStackTrace();
+            } else {
+                showMessage("Login Error", "Username does not exist.");
             }
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
         }
     }
 
@@ -1463,7 +1467,7 @@ public class SystemController implements ActionListener, TableModelListener {
     @Override
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == view.getLoginView().getContinueButton()) {
-            login();
+            connectToServer();
         }
 
         // GENERAL EXPENSES
