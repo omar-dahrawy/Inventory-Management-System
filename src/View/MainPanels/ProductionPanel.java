@@ -165,7 +165,7 @@ public class ProductionPanel extends JPanel implements MainPanel, PropertyChange
 
 
     public void getFormulas() {
-        JTable formulasTable = homeView.getVfTable();
+        JTable formulasTable = homeView.getFormulasPanel().getFormulasTable();
         int rowCount = formulasTable.getRowCount();
 
         filterFormulasComboBox.removeAllItems();

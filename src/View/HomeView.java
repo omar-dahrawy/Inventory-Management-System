@@ -2,6 +2,7 @@ package View;
 
 import Controller.SystemController;
 import Model.Constants;
+import View.MainPanels.FormulasPanel;
 import View.MainPanels.OrdersPanel;
 import View.MainPanels.ProductionPanel;
 import View.MainPanels.StoragePanel;
@@ -43,11 +44,12 @@ public class HomeView implements ActionListener {
 
     private JPanel expensesPanel;
     private JPanel materialsPanel;
-    private JPanel formulasPanel;
     private JPanel vendorsPanel;
     private OrdersPanel ordersPanel;
     private StoragePanel storagePanel;
+    private FormulasPanel formulasPanel;
     private ProductionPanel productionPanel;
+
     /*
      *
      *      ADD GENERAL EXPENSE
@@ -135,26 +137,6 @@ public class HomeView implements ActionListener {
 
     /*
      *
-     *      CREATE NEW FORMULA
-     *
-     */
-
-    private CreateFormulaView CfView;
-    private JButton createNewFormulaButton;
-
-    /*
-     *
-     *      VIEW FORMULAS
-     *
-     */
-
-    private JPanel VfTablePanel;
-    private JButton VfRefreshButton;
-    private JButton deleteFormulaButton;
-    private JTable VfTable;
-
-    /*
-     *
      *      ADD VENDOR
      *
      */
@@ -205,11 +187,13 @@ public class HomeView implements ActionListener {
 
     public HomeView() {
 
-        storagePanel = new StoragePanel(this);
         ordersPanel = new OrdersPanel(this);
+        storagePanel = new StoragePanel(this);
+        formulasPanel = new FormulasPanel(this);
         productionPanel = new ProductionPanel(this);
-        mainTabbedPane.add("Storage", storagePanel);
         mainTabbedPane.add("Orders", ordersPanel);
+        mainTabbedPane.add("Storage", storagePanel);
+        mainTabbedPane.add("Formulas", formulasPanel);
         mainTabbedPane.add("Production", productionPanel);
 
         GeDatePicker.setDateToToday();
@@ -246,14 +230,14 @@ public class HomeView implements ActionListener {
         VgeTablePanel.add(new JScrollPane(VgeTable));
         VmeTablePanel.add(new JScrollPane(VmeTable));
         VmPanel.add(new JScrollPane(VmTable));
-        VfTablePanel.add(new JScrollPane(VfTable));
         VvTablePanel.add(new JScrollPane(VvTable));
         VsTablePanel.add(new JScrollPane(VsTable));
     }
 
     public void addActionListeners(SystemController controller) {
-        storagePanel.addActionListeners(controller);
         ordersPanel.addActionListeners(controller);
+        storagePanel.addActionListeners(controller);
+        formulasPanel.addActionListeners(controller);
         productionPanel.addActionListeners(controller);
 
         MeAddButton.addActionListener(controller);
@@ -274,10 +258,6 @@ public class HomeView implements ActionListener {
 
         AmAddButton.addActionListener(controller);
         VmRefreshButton.addActionListener(controller);
-
-        createNewFormulaButton.addActionListener(controller);
-        VfRefreshButton.addActionListener(controller);
-        deleteFormulaButton.addActionListener(controller);
 
         AvAddButton.addActionListener(controller);
         VvVendorRadioButton.addActionListener(this);
@@ -494,42 +474,6 @@ public class HomeView implements ActionListener {
 
     /*
      *
-     *      CREATE NEW FORMULA
-     *
-     */
-
-    public void showCreateFormulaView(SystemController controller) {
-        CfView = new CreateFormulaView(controller, this);
-    }
-
-    public JButton getCreateNewFormulaButton() {
-        return createNewFormulaButton;
-    }
-
-    public CreateFormulaView getCfView() {
-        return CfView;
-    }
-
-    /*
-     *
-     *      VIEW FORMULAS
-     *
-     */
-
-    public JButton getVfRefreshButton() {
-        return VfRefreshButton;
-    }
-
-    public JButton getDeleteFormulaButton() {
-        return deleteFormulaButton;
-    }
-
-    public JTable getVfTable() {
-        return VfTable;
-    }
-
-    /*
-     *
      *      ADD VENDOR
      *
      */
@@ -601,12 +545,16 @@ public class HomeView implements ActionListener {
      *
      */
 
+    public OrdersPanel getOrdersPanel() {
+        return ordersPanel;
+    }
+
     public StoragePanel getStoragePanel() {
         return storagePanel;
     }
 
-    public OrdersPanel getOrdersPanel() {
-        return ordersPanel;
+    public FormulasPanel getFormulasPanel() {
+        return formulasPanel;
     }
 
     public ProductionPanel getProductionPanel() {
@@ -699,31 +647,6 @@ public class HomeView implements ActionListener {
 
         VmPanel.repaint();
         materialsPanel.repaint();
-    }
-
-    public void showFormulas(ResultSet formulas, SystemController controller) throws SQLException {
-        int columnCount = formulas.getMetaData().getColumnCount();
-        int rowCount = getRowCount(formulas);
-
-        String[] columnNames = getColumnNames(formulas, columnCount);
-        String [][] data = new String[rowCount][columnCount];
-
-
-        while (formulas.next()) {
-            for (int i = 0 ; i < columnCount ; i++) {
-                data[formulas.getRow() - 1][i] = formulas.getString(i + 1);
-            }
-        }
-        VfTable = new JTable(data, columnNames);
-        VfTable.setAutoCreateRowSorter(true);
-        setTableFont(VfTable);
-        VfTablePanel.remove(0);
-        VfTablePanel.add(new JScrollPane(VfTable));
-        VfTable.getModel().addTableModelListener(controller);
-
-        homePanel.validate();
-        productionPanel.getFormulas();
-        storagePanel.getFormulas();
     }
 
     public void showVendors(ResultSet vendors, SystemController controller) throws SQLException {

@@ -73,11 +73,11 @@ public class AddProductionView extends JFrame implements ActionListener {
     }
 
     private void getFormulas() {
-        int formulasCount = homeView.getVfTable().getRowCount();
+        int formulasCount = homeView.getFormulasPanel().getFormulasTable().getRowCount();
         ApFormulasComboBox.addItem("Select Formula");
 
         for (int i = 0 ; i < formulasCount ; i++) {
-            ApFormulasComboBox.addItem(homeView.getVfTable().getValueAt(i, 0));
+            ApFormulasComboBox.addItem(homeView.getFormulasPanel().getFormulasTable().getValueAt(i, 0));
         }
 
     }

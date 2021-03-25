@@ -119,7 +119,7 @@ public class StoragePanel extends JPanel implements MainPanel, ActionListener {
 
 
     public void getFormulas() {
-        JTable formulasTable = homeView.getVfTable();
+        JTable formulasTable = homeView.getFormulasPanel().getFormulasTable();
         int rowCount = formulasTable.getRowCount();
 
         filterProductsComboBox.removeAllItems();

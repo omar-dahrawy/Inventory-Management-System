@@ -2,7 +2,9 @@ package Controller;
 
 import Model.Constants;
 import View.AddProductionView;
+import View.CreateFormulaView;
 import View.HomeView;
+import View.MainPanels.FormulasPanel;
 import View.MainPanels.OrdersPanel;
 import View.MainPanels.ProductionPanel;
 import View.MainPanels.StoragePanel;
@@ -27,8 +29,9 @@ public class SystemController implements ActionListener, TableModelListener {
 
     private final SystemView view;
     private final HomeView homeView;
-    private final StoragePanel storagePanel;
     private final OrdersPanel ordersPanel;
+    private final StoragePanel storagePanel;
+    private final FormulasPanel formulasPanel;
     private final ProductionPanel productionPanel;
 
     private final Constants K = new Constants();
@@ -42,8 +45,9 @@ public class SystemController implements ActionListener, TableModelListener {
         this.view = view;
         this.homeView = view.getHomeView();
         this.ordersPanel = homeView.getOrdersPanel();
-        this.productionPanel = homeView.getProductionPanel();
         this.storagePanel = homeView.getStoragePanel();
+        this.formulasPanel = homeView.getFormulasPanel();
+        this.productionPanel = homeView.getProductionPanel();
         this.view.addActionListeners(this);
     }
 
@@ -97,7 +101,6 @@ public class SystemController implements ActionListener, TableModelListener {
      *      ADD GENERAL EXPENSE
      *
      */
-
 
     void addGeneralExpense() {
         if (checkGeneralExpenses()) {
@@ -850,7 +853,7 @@ public class SystemController implements ActionListener, TableModelListener {
             }
         }
 
-        String formulaDescription = homeView.getVfTable().getValueAt(row, 1).toString();
+        String formulaDescription = formulasPanel.getFormulasTable().getValueAt(row, 1).toString();
         String [] materials = formulaDescription.split(" - ");
 
         for (String material : materials) {
@@ -924,7 +927,7 @@ public class SystemController implements ActionListener, TableModelListener {
             query.executeUpdate();
             query.close();
             showMessage("Operation successful","New formula created.");
-            homeView.getCfView().dispatchEvent(new WindowEvent(homeView.getCfView(), WindowEvent.WINDOW_CLOSING));
+            formulasPanel.getCreateFormulaView().dispatchEvent(new WindowEvent(formulasPanel.getCreateFormulaView(), WindowEvent.WINDOW_CLOSING));
             getFormulas();
         } catch (SQLException throwables) {
             throwables.printStackTrace();
@@ -933,17 +936,18 @@ public class SystemController implements ActionListener, TableModelListener {
     }
 
     void checkCreateFormula() {
-        String formulaName = homeView.getCfView().getFormulaName();
+        CreateFormulaView CfView = formulasPanel.getCreateFormulaView();
+        String formulaName = CfView.getFormulaName();
         String formulaDescription = "";
 
-        ArrayList<JCheckBox> checkBoxes = homeView.getCfView().getCheckBoxes();
-        ArrayList<JTextField> textFields = homeView.getCfView().getTextFields();
+        ArrayList<JCheckBox> checkBoxes = CfView.getCheckBoxes();
+        ArrayList<JTextField> textFields = CfView.getTextFields();
 
         if (formulaName.equals("")) {
             showMessage("Error creating new formula","Formula name cannot be empty.");
         } else {
             int count = 0;
-            int formulaQuantity = 0;
+            Double formulaQuantity = 0.0;
             for (int i = 0 ; i < checkBoxes.size(); i++) {
                 JCheckBox checkBox = checkBoxes.get(i);
                 if (checkBox.isSelected()) {
@@ -984,7 +988,7 @@ public class SystemController implements ActionListener, TableModelListener {
         try {
             PreparedStatement formulasQuery = databaseConnection.prepareStatement(query, ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
             ResultSet formulas = formulasQuery.executeQuery();
-            homeView.showFormulas(formulas, this);
+            formulasPanel.showFormulas(formulas, this);
         } catch (SQLException throwables) {
             throwables.printStackTrace();
             showMessage("Error performing operation", "Error viewing formulas.");
@@ -993,17 +997,19 @@ public class SystemController implements ActionListener, TableModelListener {
 
     void updateFormula(TableModelEvent e) {
         if (checkUpdatePrivilege()) {
+            JTable formulasTable = formulasPanel.getFormulasTable();
+
             int row = e.getFirstRow();
             int column = e.getColumn();
-            String newValue = homeView.getVfTable().getValueAt(row, column).toString();
-            String columnName = homeView.getVfTable().getColumnName(column);
-            String id = "'" + homeView.getVfTable().getValueAt(row, 0).toString() + "'";
+            String newValue = formulasTable.getValueAt(row, column).toString();
+            String columnName = formulasTable.getColumnName(column);
+            String id = formulasTable.getValueAt(row, 0).toString();
 
-            String query = "UPDATE \"Formulas\" SET \"" + columnName + "\" = '" + newValue + "' WHERE \"Formula_ID\" = " + id;
+            String query = "UPDATE \"Formulas\" SET \"" + columnName + "\" = '" + newValue + "' WHERE \"Formula_ID\" = '" + id + "'";
 
             try {
                 sqlStatement.executeUpdate(query);
-                showMessage("Update successful", "Formula updated successfully.");
+                recalculateFormulaQuantity(id, row);
             } catch (SQLException throwables) {
                 showMessage("Error performing operation", "Could not update batch. Please review the new values.");
                 throwables.printStackTrace();
@@ -1012,11 +1018,42 @@ public class SystemController implements ActionListener, TableModelListener {
         getFormulas();
     }
 
+    void recalculateFormulaQuantity(String formulaID, int row) {
+        Double newQuantity = 0.0;
+        String formulaDescription = formulasPanel.getFormulasTable().getValueAt(row, 1).toString();
+        String [] materials = formulaDescription.split(" - ");
+
+        for (int i = 0 ; i < materials.length ; i++) {
+            materials[i] = materials[i].split(": ")[1];
+        }
+        for (int i = 0 ; i < materials.length ; i++) {
+            materials[i] = materials[i].split(" ")[0];
+        }
+        for (String quantity : materials) {
+            newQuantity += Double.parseDouble(quantity);
+        }
+
+        String sql = "UPDATE \"Formulas\" SET \"Formula_quantity\" = ? WHERE \"Formula_ID\" = ?";
+        try {
+            PreparedStatement query = databaseConnection.prepareStatement(sql);
+            query.setString(1, newQuantity + " Kg");
+            query.setString(2, formulaID);
+            query.executeUpdate();
+            query.close();
+            showMessage("Update successful", "Formula updated successfully.");
+        } catch (SQLException throwables) {
+            showErrorMessage("Error updating formula price", "Formula price could not be updated", throwables.getLocalizedMessage());
+            throwables.printStackTrace();
+        }
+
+    }
+
     void deleteFormula() {
-        if (homeView.getVfTable() != null) {
-            if (homeView.getVfTable().getModel() != null) {
-                int row = homeView.getVfTable().getSelectedRow();
-                String id = "'" + homeView.getVfTable().getValueAt(row, 0).toString() + "'";
+        JTable formulasTable = formulasPanel.getFormulasTable();
+        if (formulasTable != null) {
+            if (formulasTable.getModel() != null) {
+                int row = formulasTable.getSelectedRow();
+                String id = "'" + formulasTable.getValueAt(row, 0).toString() + "'";
 
                 String query = "DELETE FROM \"Formulas\" WHERE \"Formula_ID\" = " + id;
 
@@ -1468,13 +1505,13 @@ public class SystemController implements ActionListener, TableModelListener {
 
         //  FORMULAS
 
-        } else if (e.getSource() == homeView.getCreateNewFormulaButton()) {
-            homeView.showCreateFormulaView(this);
+        } else if (e.getSource() == formulasPanel.getCreateNewFormulaButton()) {
+            formulasPanel.showCreateFormulaView(this);
         } else if (e.getActionCommand().equals("Create Formula")) {
             checkCreateFormula();
-        } else if (e.getSource() == homeView.getVfRefreshButton()) {
+        } else if (e.getSource() == formulasPanel.getRefreshFormulasButton()) {
             getFormulas();
-        } else if (e.getSource() == homeView.getDeleteFormulaButton()) {
+        } else if (e.getSource() == formulasPanel.getDeleteFormulaButton()) {
             deleteFormula();
         }
 
@@ -1551,9 +1588,9 @@ public class SystemController implements ActionListener, TableModelListener {
                     }
                 }
             }
-        } if (homeView.getVfTable() != null) {
-            if (homeView.getVfTable().getModel() != null) {
-                if (e.getSource() == homeView.getVfTable().getModel()) {
+        } if (formulasPanel.getFormulasTable() != null) {
+            if (formulasPanel.getFormulasTable().getModel() != null) {
+                if (e.getSource() == formulasPanel.getFormulasTable().getModel()) {
                     if (e.getType() == TableModelEvent.UPDATE) {
                         updateFormula(e);
                     }
