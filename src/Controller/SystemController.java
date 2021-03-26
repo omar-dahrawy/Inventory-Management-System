@@ -4,10 +4,7 @@ import Model.Constants;
 import View.AddProductionView;
 import View.CreateFormulaView;
 import View.HomeView;
-import View.MainPanels.FormulasPanel;
-import View.MainPanels.OrdersPanel;
-import View.MainPanels.ProductionPanel;
-import View.MainPanels.StoragePanel;
+import View.MainPanels.*;
 import View.SystemView;
 
 import javax.swing.*;
@@ -31,8 +28,10 @@ public class SystemController implements ActionListener, TableModelListener {
     private final HomeView homeView;
     private final OrdersPanel ordersPanel;
     private final StoragePanel storagePanel;
+    private final VendorsPanel vendorsPanel;
     private final FormulasPanel formulasPanel;
     private final ProductionPanel productionPanel;
+    private final RawMaterialsPanel rawMaterialsPanel;
 
     private final Constants K = new Constants();
 
@@ -46,8 +45,10 @@ public class SystemController implements ActionListener, TableModelListener {
         this.homeView = view.getHomeView();
         this.ordersPanel = homeView.getOrdersPanel();
         this.storagePanel = homeView.getStoragePanel();
+        this.vendorsPanel = homeView.getVendorsPanel();
         this.formulasPanel = homeView.getFormulasPanel();
         this.productionPanel = homeView.getProductionPanel();
+        this.rawMaterialsPanel = homeView.getRawMaterialsPanel();
         this.view.addActionListeners(this);
     }
 
@@ -156,7 +157,9 @@ public class SystemController implements ActionListener, TableModelListener {
             String materialID = homeView.getMaterialID();
             String materialQuantity = homeView.getMeQuantity() + ",";
             String materialInvoice = "'" + homeView.getMeInvoice() + "'";
+            //
             String vendorID = homeView.getVendorID();
+            //
             String materialUnit = "'" + homeView.getMaterialUnit() + "',";
             String dateOfEntry = "'" + new SimpleDateFormat("yyyy-MM-dd").format(new Date()) + "',";
             String dateOfPurchase = "'" + homeView.getMeDate() + "',";
@@ -535,6 +538,44 @@ public class SystemController implements ActionListener, TableModelListener {
 
     /*
      *
+     *      ADD MATERIAL
+     *
+     */
+
+    void addMaterial() {
+        if (checkAddMaterial()) {
+            String sql = "INSERT INTO \"Materials\" values (DEFAULT, ?, ?, ?, ?)";
+            try {
+                PreparedStatement query = databaseConnection.prepareStatement(sql);
+                query.setString( 1, rawMaterialsPanel.getAddName());
+                query.setDouble( 2, 0.0);
+                query.setDate( 3, java.sql.Date.valueOf(new SimpleDateFormat("yyyy-MM-dd").format(new Date())));
+                query.setString( 4, rawMaterialsPanel.getAddUnit());
+                query.executeUpdate();
+                query.close();
+                showMessage("Operation successful","New material added.");
+                rawMaterialsPanel.clearAddFields();
+                getMaterials();
+            } catch (SQLException throwables) {
+                throwables.printStackTrace();
+                showMessage("Error performing operation","Material could not be added.");
+            }
+        }
+    }
+
+    boolean checkAddMaterial() {
+        if (rawMaterialsPanel.getAddName().equals("")) {
+            showMessage("Error adding material","Material name cannot be empty.");
+            return false;
+        } else if (rawMaterialsPanel.getAddUnit().equals("")) {
+            showMessage("Error adding material","Material unit cannot be empty.");
+            return false;
+        }
+        return true;
+    }
+
+    /*
+     *
      *      VIEW MATERIALS
      *
      */
@@ -544,7 +585,7 @@ public class SystemController implements ActionListener, TableModelListener {
         try {
             PreparedStatement materialsQuery = databaseConnection.prepareStatement(query, ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
             ResultSet materials = materialsQuery.executeQuery();
-            homeView.getMaterials(materials, this);
+            rawMaterialsPanel.getMaterials(materials, this);
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
@@ -552,11 +593,13 @@ public class SystemController implements ActionListener, TableModelListener {
 
     void updateMaterial(TableModelEvent e) {
         if (checkUpdatePrivilege()) {
+            JTable materialsTable = rawMaterialsPanel.getMaterialsTable();
+
             int row = e.getFirstRow();
             int column = e.getColumn();
-            String columnName = homeView.getVmTable().getColumnName(column);
-            String newValue = homeView.getVmTable().getValueAt(row, column).toString();
-            String id = homeView.getVmTable().getValueAt(row, 0).toString();
+            String columnName = materialsTable.getColumnName(column);
+            String newValue = materialsTable.getValueAt(row, column).toString();
+            String id = materialsTable.getValueAt(row, 0).toString();
 
             String query = "UPDATE \"Materials\" SET \"" + columnName + "\" = '" + newValue + "' WHERE \"Material_ID\" = " + id;
             try {
@@ -570,44 +613,20 @@ public class SystemController implements ActionListener, TableModelListener {
         getMaterials();
     }
 
-    /*
-     *
-     *      ADD MATERIAL
-     *
-     */
+    void deleteMaterial() {
+        int row = rawMaterialsPanel.getMaterialsTable().getSelectedRow();
+        String id = rawMaterialsPanel.getMaterialsTable().getValueAt(row, 0).toString();
 
-    void addMaterial() {
-        if (checkAddMaterial()) {
-            String sql = "INSERT INTO \"Materials\" values (DEFAULT, ?, ?, ?, ?)";
-            try {
-                PreparedStatement query = databaseConnection.prepareStatement(sql);
-                query.setString( 1, homeView.getAmNameField());
-                query.setDouble( 2, 0.0);
-                query.setDate( 3, java.sql.Date.valueOf(new SimpleDateFormat("yyyy-MM-dd").format(new Date())));
-                query.setString( 4, homeView.getAmUnitField());
-                query.executeUpdate();
-                query.close();
-                showMessage("Operation successful","New material added.");
-                homeView.clearAddMaterialFields();
-                getMaterials();
-            } catch (SQLException throwables) {
-                throwables.printStackTrace();
-                showMessage("Error performing operation","Material could not be added.");
-            }
+        String query = "DELETE FROM \"Materials\" WHERE \"Material_ID\" = " + id;
+
+        try {
+            sqlStatement.executeUpdate(query);
+            showMessage("Delete successful","Item deleted successfully.");
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+            showMessage("Error performing operation", "Could not delete item.");
         }
-    }
-
-    boolean checkAddMaterial() {
-        boolean flag = true;
-
-        if (homeView.getAmNameField().equals("")) {
-            flag = false;
-            showMessage("Error adding material","Material name cannot be empty.");
-        } else if (homeView.getAmUnitField().equals("")) {
-            flag = false;
-            showMessage("Error adding material","Material unit cannot be empty.");
-        }
-        return flag;
+        getMaterials();
     }
 
     /*
@@ -865,9 +884,9 @@ public class SystemController implements ActionListener, TableModelListener {
             double materialQuantity = Double.parseDouble(material.split(":")[1].substring(1, material.split(":")[1].lastIndexOf(" ")));
             double availableQuantity = 0.0;
 
-            for (int i = 0 ; i < homeView.getVmTable().getRowCount() ; i++) {
-                if (homeView.getVmTable().getValueAt(i, 1).toString().equals(materialName)) {
-                    availableQuantity = Double.parseDouble(homeView.getVmTable().getValueAt(i, 2).toString());
+            for (int i = 0 ; i < rawMaterialsPanel.getMaterialsTable().getRowCount() ; i++) {
+                if (rawMaterialsPanel.getMaterialsTable().getValueAt(i, 1).toString().equals(materialName)) {
+                    availableQuantity = Double.parseDouble(rawMaterialsPanel.getMaterialsTable().getValueAt(i, 2).toString());
                 }
             }
 
@@ -965,7 +984,7 @@ public class SystemController implements ActionListener, TableModelListener {
                         formulaDescription += ": ";
                         formulaDescription += textFields.get(i).getText();
                         formulaQuantity += Double.parseDouble(textFields.get(i).getText());
-                        formulaDescription += " " + homeView.getVmTable().getValueAt(i, 4).toString();
+                        formulaDescription += " " + rawMaterialsPanel.getMaterialsTable().getValueAt(i, 4).toString();
                         formulaDescription += " - ";
                     }
                 }
@@ -1081,10 +1100,10 @@ public class SystemController implements ActionListener, TableModelListener {
 
     void addVendor() {
         if (checkAddVendor()) {
-            String vendorName = homeView.getAvVendorName();
-            String contactName = homeView.getAvContactName();
-            String contactNumber = homeView.getAvContactNumber();
-            String contactEmail = homeView.getAvContactEmail();
+            String vendorName = vendorsPanel.getAddVendorName();
+            String contactName = vendorsPanel.getAddContactName();
+            String contactNumber = vendorsPanel.getAddContactNumber();
+            String contactEmail = vendorsPanel.getAddContactEmail();
 
             String sql = "INSERT INTO \"Vendors\" values (DEFAULT, ?, ?, ?, ?)";
             try {
@@ -1097,7 +1116,7 @@ public class SystemController implements ActionListener, TableModelListener {
                 query.close();
                 showMessage("Operation successful", "New vendor added.");
                 viewVendors();
-                homeView.clearAddVendorFields();
+                vendorsPanel.clearAddFields();
             } catch (SQLException throwables) {
                 throwables.printStackTrace();
                 showMessage("Operation unsuccessful", "Could not add new vendor.");
@@ -1106,23 +1125,20 @@ public class SystemController implements ActionListener, TableModelListener {
     }
 
     boolean checkAddVendor() {
-        boolean flag = true;
-
-        if (homeView.getAvVendorName().equals("")) {
-            flag = false;
+        if (vendorsPanel.getAddVendorName().equals("")) {
             showMessage("Error adding vendor", "Vendor name cannot be empty.");
-        } else if (homeView.getAvContactName().equals("")) {
-            flag = false;
+            return false;
+        } else if (vendorsPanel.getAddContactName().equals("")) {
             showMessage("Error adding vendor","Contact name cannot be empty.");
-        } else if (homeView.getAvContactNumber().equals("")) {
-            flag = false;
+            return false;
+        } else if (vendorsPanel.getAddContactNumber().equals("")) {
             showMessage("Error adding vendor","Contact number cannot be empty.");
-        } else if (homeView.getAvContactEmail().equals("")) {
-            flag = false;
+            return false;
+        } else if (vendorsPanel.getAddContactEmail().equals("")) {
             showMessage("Error adding vendor","Contact email cannot be empty.");
+            return false;
         }
-
-        return flag;
+        return true;
     }
 
     /*
@@ -1133,16 +1149,16 @@ public class SystemController implements ActionListener, TableModelListener {
 
     void viewVendors() {
         if (checkViewVendors()) {
-            boolean vendorIsSelected = homeView.getVvVendorRadioButton().isSelected();
-            boolean contactIsSelected = homeView.getVvContactRadioButton().isSelected();
+            boolean vendorIsSelected = vendorsPanel.getFilterVendorNameSelected();
+            boolean contactIsSelected = vendorsPanel.getFilterContactNameSelected();
 
             String query;
 
             if (vendorIsSelected) {
-                String vendorName = "'" + homeView.getVvVendor() + "'";
+                String vendorName = "'" + vendorsPanel.getFilterVendorName() + "'";
                 query = "SELECT * FROM public.\"Vendors\" WHERE \"Vendor_name\" = " + vendorName;
             } else if (contactIsSelected) {
-                String contactName = "'" + homeView.getVvContact() + "'";
+                String contactName = "'" + vendorsPanel.getFilterContactName() + "'";
                 query = "SELECT * FROM public.\"Vendors\" WHERE \"Contact_name\" = " + contactName;
             } else {
                 query = "SELECT * FROM public.\"Vendors\"";
@@ -1151,7 +1167,7 @@ public class SystemController implements ActionListener, TableModelListener {
             try {
                 PreparedStatement vendorsQuery = databaseConnection.prepareStatement(query, ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
                 ResultSet vendors = vendorsQuery.executeQuery();
-                homeView.showVendors(vendors, this);
+                vendorsPanel.showVendors(vendors, this);
             } catch (SQLException throwables) {
                 throwables.printStackTrace();
                 showMessage("Error performing operation", "Error viewing vendors.");
@@ -1160,30 +1176,28 @@ public class SystemController implements ActionListener, TableModelListener {
     }
 
     boolean checkViewVendors() {
-        boolean flag = true;
-
-        if (homeView.getVvVendorRadioButton().isSelected()) {
-            if (homeView.getVvVendor().equals("")) {
-                System.out.println("VvV");
-                flag = false;
+        if (vendorsPanel.getFilterVendorNameSelected()) {
+            if (vendorsPanel.getFilterVendorName().equals("")) {
                 showMessage("Error viewing vendors", "Please enter a vendor name to filter by.");
+                return false;
             }
-        } else if (homeView.getVvContactRadioButton().isSelected()) {
-            if (homeView.getVvContact().equals("")) {
-                flag = false;
+        } else if (vendorsPanel.getFilterContactNameSelected()) {
+            if (vendorsPanel.getFilterContactName().equals("")) {
                 showMessage("Error viewing vendors", "Please enter a contact name to filter by.");
+                return false;
             }
         }
-        return flag;
+        return true;
     }
 
     void updateVendor(TableModelEvent e) {
         if (checkUpdatePrivilege()) {
+            JTable vendorsTable = vendorsPanel.getVendorsTable();
             int row = e.getFirstRow();
             int column = e.getColumn();
-            String newValue = homeView.getVvTable().getValueAt(row, column).toString();
-            String columnName = homeView.getVvTable().getColumnName(column);
-            String id = homeView.getVvTable().getValueAt(row, 0).toString();
+            String newValue = vendorsTable.getValueAt(row, column).toString();
+            String columnName = vendorsTable.getColumnName(column);
+            String id = vendorsTable.getValueAt(row, 0).toString();
 
             String query = "UPDATE \"Vendors\" SET \"" + columnName + "\" = '" + newValue + "' WHERE \"Vendor_ID\" = " + id;
 
@@ -1199,10 +1213,11 @@ public class SystemController implements ActionListener, TableModelListener {
     }
 
     void deleteVendor() {
-        if (homeView.getVvTable() != null) {
-            if (homeView.getVvTable().getModel() != null) {
-                int row = homeView.getVvTable().getSelectedRow();
-                String id = homeView.getVvTable().getValueAt(row, 0).toString();
+        JTable vendorsTable = vendorsPanel.getVendorsTable();
+        if (vendorsTable != null) {
+            if (vendorsTable.getModel() != null) {
+                int row = vendorsTable.getSelectedRow();
+                String id = vendorsTable.getValueAt(row, 0).toString();
 
                 String query = "DELETE FROM \"Vendors\" WHERE \"Vendor_ID\" = " + id;
 
@@ -1502,14 +1517,17 @@ public class SystemController implements ActionListener, TableModelListener {
 
         //  MATERIALS
 
-        else if (e.getSource() == homeView.getVmRefreshButton()) {
+        else if (e.getSource() == rawMaterialsPanel.getRefreshMaterialsButton()) {
             getMaterials();
-        } else if (e.getSource() == homeView.getAmAddButton()) {
+        } else if (e.getSource() == rawMaterialsPanel.getAddMaterialButton()) {
             addMaterial();
+        } else if (e.getSource() == rawMaterialsPanel.getDeleteMaterialButton()) {
+            deleteMaterial();
+        }
 
         //  FORMULAS
 
-        } else if (e.getSource() == formulasPanel.getCreateNewFormulaButton()) {
+        else if (e.getSource() == formulasPanel.getCreateNewFormulaButton()) {
             formulasPanel.showCreateFormulaView(this);
         } else if (e.getActionCommand().equals("Create Formula")) {
             checkCreateFormula();
@@ -1521,11 +1539,11 @@ public class SystemController implements ActionListener, TableModelListener {
 
         //  VENDORS
 
-        else if (e.getSource() == homeView.getAvAddButton()) {
+        else if (e.getSource() == vendorsPanel.getAddVendorButton()) {
             addVendor();
-        } else if (e.getSource() == homeView.getVvViewButton()) {
+        } else if (e.getSource() == vendorsPanel.getViewVendorsButton()) {
             viewVendors();
-        } else if (e.getSource() == homeView.getDeleteVendorButton()) {
+        } else if (e.getSource() == vendorsPanel.getDeleteVendorButton()) {
             deleteVendor();
         }
 
@@ -1576,9 +1594,9 @@ public class SystemController implements ActionListener, TableModelListener {
                     }
                 }
             }
-        } if (homeView.getVmTable() != null) {
-            if (homeView.getVmTable().getModel() != null) {
-                if (e.getSource() == homeView.getVmTable().getModel()) {
+        } if (rawMaterialsPanel.getMaterialsTable() != null) {
+            if (rawMaterialsPanel.getMaterialsTable().getModel() != null) {
+                if (e.getSource() == rawMaterialsPanel.getMaterialsTable().getModel()) {
                     if (e.getType() == TableModelEvent.UPDATE) {
                         updateMaterial(e);
                     }
@@ -1600,9 +1618,9 @@ public class SystemController implements ActionListener, TableModelListener {
                     }
                 }
             }
-        } if (homeView.getVvTable() != null) {
-            if (homeView.getVvTable().getModel() != null) {
-                if (e.getSource() == homeView.getVvTable().getModel()) {
+        } if (vendorsPanel.getVendorsTable() != null) {
+            if (vendorsPanel.getVendorsTable().getModel() != null) {
+                if (e.getSource() == vendorsPanel.getVendorsTable().getModel()) {
                     if (e.getType() == TableModelEvent.UPDATE) {
                         updateVendor(e);
                     }

@@ -2,10 +2,7 @@ package View;
 
 import Controller.SystemController;
 import Model.Constants;
-import View.MainPanels.FormulasPanel;
-import View.MainPanels.OrdersPanel;
-import View.MainPanels.ProductionPanel;
-import View.MainPanels.StoragePanel;
+import View.MainPanels.*;
 import com.github.lgooddatepicker.components.DatePicker;
 
 import javax.swing.*;
@@ -34,7 +31,6 @@ public class HomeView implements ActionListener {
 
     private JTabbedPane mainTabbedPane;
     private JTabbedPane expensesTabbedPane;
-    private JTabbedPane materialsTabbedPane;
 
     /*
      *
@@ -43,12 +39,12 @@ public class HomeView implements ActionListener {
      */
 
     private JPanel expensesPanel;
-    private JPanel materialsPanel;
-    private JPanel vendorsPanel;
     private OrdersPanel ordersPanel;
     private StoragePanel storagePanel;
+    private VendorsPanel vendorsPanel;
     private FormulasPanel formulasPanel;
     private ProductionPanel productionPanel;
+    private RawMaterialsPanel rawMaterialsPanel;
 
     /*
      *
@@ -69,8 +65,6 @@ public class HomeView implements ActionListener {
      */
 
     private JComboBox MeMaterialComboBox;
-    private ArrayList<String> materialUnits = new ArrayList<>();
-    private ArrayList<String> materialIDs = new ArrayList<>();
     private JLabel MeQuantityLabel;
     private JTextField MeQuantityField;
     private JComboBox MeVendorComboBox;
@@ -122,52 +116,6 @@ public class HomeView implements ActionListener {
 
     /*
      *
-     *      VIEW MATERIALS
-     *
-     */
-
-    private JPanel viewMaterialsPanel;
-    private JPanel AmPanel;
-    private JTextField AmNameField;
-    private JTextField AmUnitField;
-    private JButton AmAddButton;
-    private JTable VmTable;
-    private JPanel VmPanel;
-    private JButton VmRefreshButton;
-
-    /*
-     *
-     *      ADD VENDOR
-     *
-     */
-
-    private JTextField AvVendorNameField;
-    private JTextField AvContactNameField;
-    private JTextField AvContactNumberField;
-    private JTextField AvContactEmailField;
-    private JButton AvAddButton;
-
-    /*
-     *
-     *      VIEW VENDORS
-     *
-     */
-
-    private JPanel VvPanel;
-    private JPanel VvTablePanel;
-    private JButton VvViewButton;
-    private ArrayList<String> vendorIDs = new ArrayList<>();
-    private ButtonGroup VvRadioButtonGroup = new ButtonGroup();
-    private JRadioButton VvVendorRadioButton;
-    private JRadioButton VvContactRadioButton;
-    private JTextField VvVendorField;
-    private JTextField VvContactField;
-    private JButton clearVendorsSelectionButton;
-    private JButton deleteVendorButton;
-    private JTable VvTable;
-
-    /*
-     *
      *      STANDARD SPECIFICATION
      *
      */
@@ -187,23 +135,29 @@ public class HomeView implements ActionListener {
 
     public HomeView() {
 
+
         ordersPanel = new OrdersPanel(this);
         storagePanel = new StoragePanel(this);
+        vendorsPanel = new VendorsPanel(this);
         formulasPanel = new FormulasPanel(this);
         productionPanel = new ProductionPanel(this);
+        rawMaterialsPanel = new RawMaterialsPanel(this);
+
+        JTabbedPane materialsTabbedPane = new JTabbedPane();
+        materialsTabbedPane.add("Raw Materials", rawMaterialsPanel);
+        materialsTabbedPane.add("Vendors", vendorsPanel);
+
+        mainTabbedPane.add("Materials", materialsTabbedPane);
         mainTabbedPane.add("Orders", ordersPanel);
-        mainTabbedPane.add("Storage", storagePanel);
-        mainTabbedPane.add("Formulas", formulasPanel);
         mainTabbedPane.add("Production", productionPanel);
+        mainTabbedPane.add("Formulas", formulasPanel);
+        mainTabbedPane.add("Storage", storagePanel);
 
         GeDatePicker.setDateToToday();
         MeDatePicker.setDateToToday();
         GeDatePickerPanel.add(GeDatePicker);
         MeDatePickerPanel.add(MeDatePicker);
 
-        materialUnits.add("");
-        materialIDs.add("");
-        vendorIDs.add("");
         MeMaterialComboBox.addItem("Select Material");
 
         VgeButtonGroup.add(VgeDopRadioButton);
@@ -224,21 +178,18 @@ public class HomeView implements ActionListener {
         VmeFromDatePanel.add(VmeFromDatePicker);
         VmeToDatePanel.add(VmeToDatePicker);
 
-        VvRadioButtonGroup.add(VvVendorRadioButton);
-        VvRadioButtonGroup.add(VvContactRadioButton);
-
         VgeTablePanel.add(new JScrollPane(VgeTable));
         VmeTablePanel.add(new JScrollPane(VmeTable));
-        VmPanel.add(new JScrollPane(VmTable));
-        VvTablePanel.add(new JScrollPane(VvTable));
         VsTablePanel.add(new JScrollPane(VsTable));
     }
 
     public void addActionListeners(SystemController controller) {
         ordersPanel.addActionListeners(controller);
         storagePanel.addActionListeners(controller);
+        vendorsPanel.addActionListeners(controller);
         formulasPanel.addActionListeners(controller);
         productionPanel.addActionListeners(controller);
+        rawMaterialsPanel.addActionListeners(controller);
 
         MeAddButton.addActionListener(controller);
         GeAddButton.addActionListener(controller);
@@ -255,16 +206,6 @@ public class HomeView implements ActionListener {
         VmeViewButton.addActionListener(controller);
         VmeDeleteButton.addActionListener(controller);
         VmeClearFilterButton.addActionListener(this);
-
-        AmAddButton.addActionListener(controller);
-        VmRefreshButton.addActionListener(controller);
-
-        AvAddButton.addActionListener(controller);
-        VvVendorRadioButton.addActionListener(this);
-        VvContactRadioButton.addActionListener(this);
-        VvViewButton.addActionListener(controller);
-        clearVendorsSelectionButton.addActionListener(this);
-        deleteVendorButton.addActionListener(controller);
     }
 
     public JPanel getHomePanel() {
@@ -314,15 +255,7 @@ public class HomeView implements ActionListener {
      */
 
     public String getMaterialID() {
-        return materialIDs.get(MeMaterialComboBox.getSelectedIndex());
-    }
-
-    public String getVendorID() {
-        return vendorIDs.get(MeVendorComboBox.getSelectedIndex());
-    }
-
-    public ArrayList<String> getMaterialIDs() {
-        return materialIDs;
+        return rawMaterialsPanel.getMaterialIDs().get(MeMaterialComboBox.getSelectedIndex());
     }
 
     public JComboBox getMeMaterialComboBox() {
@@ -355,7 +288,7 @@ public class HomeView implements ActionListener {
     }
 
     public String getMaterialUnit() {
-        return materialUnits.get(MeMaterialComboBox.getSelectedIndex());
+        return rawMaterialsPanel.getMaterialUnits().get(MeMaterialComboBox.getSelectedIndex());
     }
 
     public JButton getMeAddButton() {
@@ -365,6 +298,10 @@ public class HomeView implements ActionListener {
     public void clearMaterialExpensesFields() {
         MeMaterialComboBox.setSelectedIndex(0);
         MeQuantityField.setText("");
+    }
+
+    public String getVendorID() {
+        return vendorsPanel.getVendorIDs().get(MeVendorComboBox.getSelectedIndex());
     }
 
     /*
@@ -437,110 +374,6 @@ public class HomeView implements ActionListener {
 
     /*
      *
-     *      ADD MATERIAL
-     *
-     */
-
-    public String getAmNameField() {
-        return AmNameField.getText();
-    }
-
-    public String getAmUnitField() {
-        return AmUnitField.getText();
-    }
-
-    public JButton getAmAddButton() {
-        return AmAddButton;
-    }
-
-    public void clearAddMaterialFields() {
-        AmNameField.setText("");
-        AmUnitField.setText("");
-    }
-
-    /*
-     *
-     *      VIEW MATERIALS
-     *
-     */
-
-    public JButton getVmRefreshButton() {
-        return VmRefreshButton;
-    }
-
-    public JTable getVmTable() {
-        return VmTable;
-    }
-
-    /*
-     *
-     *      ADD VENDOR
-     *
-     */
-
-    public JButton getAvAddButton() {
-        return AvAddButton;
-    }
-
-    public String getAvVendorName() {
-        return AvVendorNameField.getText();
-    }
-
-    public String getAvContactName() {
-        return AvContactNameField.getText();
-    }
-
-    public String getAvContactNumber() {
-        return AvContactNumberField.getText();
-    }
-
-    public String getAvContactEmail() {
-        return AvContactEmailField.getText();
-    }
-
-    public void clearAddVendorFields() {
-        AvVendorNameField.setText("");
-        AvContactNameField.setText("");
-        AvContactNumberField.setText("");
-        AvContactEmailField.setText("");
-    }
-
-    /*
-     *
-     *      VIEW VENDORS
-     *
-     */
-
-    public JButton getVvViewButton() {
-        return VvViewButton;
-    }
-
-    public JButton getDeleteVendorButton() {
-        return deleteVendorButton;
-    }
-
-    public JRadioButton getVvVendorRadioButton() {
-        return VvVendorRadioButton;
-    }
-
-    public JRadioButton getVvContactRadioButton() {
-        return VvContactRadioButton;
-    }
-
-    public String getVvVendor() {
-        return VvVendorField.getText();
-    }
-
-    public String getVvContact() {
-        return VvContactField.getText();
-    }
-
-    public JTable getVvTable() {
-        return VvTable;
-    }
-
-    /*
-     *
      *      VIEW STORAGE
      *
      */
@@ -553,12 +386,20 @@ public class HomeView implements ActionListener {
         return storagePanel;
     }
 
+    public VendorsPanel getVendorsPanel() {
+        return vendorsPanel;
+    }
+
     public FormulasPanel getFormulasPanel() {
         return formulasPanel;
     }
 
     public ProductionPanel getProductionPanel() {
         return productionPanel;
+    }
+
+    public RawMaterialsPanel getRawMaterialsPanel() {
+        return rawMaterialsPanel;
     }
 
     /*
@@ -601,7 +442,7 @@ public class HomeView implements ActionListener {
         while (results.next()) {
             for (int i = 0 ; i < columnCount ; i++) {
                 if (i == 1) {
-                    data[results.getRow() - 1][i] = (String) MeMaterialComboBox.getItemAt(materialIDs.indexOf(results.getString(i + 1)));
+                    data[results.getRow() - 1][i] = (String) MeMaterialComboBox.getItemAt(rawMaterialsPanel.getMaterialIDs().indexOf(results.getString(i + 1)));
                 } else {
                     data[results.getRow() - 1][i] = results.getString(i + 1);
                 }
@@ -617,65 +458,6 @@ public class HomeView implements ActionListener {
         VmeTablePanel.repaint();
         VmePanel.repaint();
         expensesPanel.repaint();
-    }
-
-    public void getMaterials(ResultSet materials, SystemController controller) throws SQLException {
-
-        int columnCount = materials.getMetaData().getColumnCount();
-        int rowCount = getRowCount(materials);
-
-        String[] columnNames = getColumnNames(materials, columnCount);
-        String [][] data = new String[rowCount][columnCount];
-
-        MeMaterialComboBox.removeAllItems();
-        MeMaterialComboBox.addItem("Select Material");
-
-        while (materials.next()) {
-            for (int i = 0 ; i < columnCount ; i++) {
-                data[materials.getRow()-1][i] = materials.getString(i+1);
-            }
-            MeMaterialComboBox.addItem(materials.getString(2));
-            materialUnits.add(materials.getString(5));
-            materialIDs.add(materials.getString(1));
-        }
-
-        VmTable = new JTable(data, columnNames);
-        setTableFont(VmTable);
-        VmPanel.remove(0);
-        VmPanel.add(new JScrollPane(VmTable));
-        VmTable.getModel().addTableModelListener(controller);
-
-        VmPanel.repaint();
-        materialsPanel.repaint();
-    }
-
-    public void showVendors(ResultSet vendors, SystemController controller) throws SQLException {
-        int columnCount = vendors.getMetaData().getColumnCount();
-        int rowCount = getRowCount(vendors);
-
-        String[] columnNames = getColumnNames(vendors, columnCount);
-        String [][] data = new String[rowCount][columnCount];
-
-        MeVendorComboBox.removeAllItems();
-        MeVendorComboBox.addItem("Select Vendor");
-
-        while (vendors.next()) {
-            for (int i = 0 ; i < columnCount ; i++) {
-                data[vendors.getRow() - 1][i] = vendors.getString(i + 1);
-            }
-            MeVendorComboBox.addItem(vendors.getString(2));
-            vendorIDs.add(vendors.getString(1));
-        }
-        VvTable = new JTable(data, columnNames);
-        VvTable.setAutoCreateRowSorter(false);
-        setTableFont(VvTable);
-        VvTablePanel.remove(0);
-        VvTablePanel.add(new JScrollPane(VvTable));
-        VvTable.getModel().addTableModelListener(controller);
-
-        VvTablePanel.repaint();
-        vendorsPanel.repaint();
-        homePanel.repaint();
     }
 
     private String[] getColumnNames(ResultSet set, int columnCount) {
@@ -727,7 +509,7 @@ public class HomeView implements ActionListener {
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == MeMaterialComboBox) {
             if (MeMaterialComboBox.getItemCount() > 0) {
-                MeQuantityLabel.setText("Quantity/" + materialUnits.get(MeMaterialComboBox.getSelectedIndex()));
+                MeQuantityLabel.setText("Quantity/" + rawMaterialsPanel.getMaterialUnits().get(MeMaterialComboBox.getSelectedIndex()));
             }
         }
 
@@ -750,18 +532,5 @@ public class HomeView implements ActionListener {
             VmeFromDatePicker.setEnabled(false);
             VmeToDatePicker.setEnabled(false);
         }
-
-        else if (e.getSource() == VvVendorRadioButton) {
-            VvVendorField.setEnabled(!VvVendorField.isEnabled());
-            VvContactField.setEnabled(false);
-        } else if (e.getSource() == VvContactRadioButton) {
-            VvContactField.setEnabled(!VvContactField.isEnabled());
-            VvVendorField.setEnabled(false);
-        } else if (e.getSource() == clearVendorsSelectionButton) {
-            VvRadioButtonGroup.clearSelection();
-            VvVendorField.setEnabled(false);
-            VvContactField.setEnabled(false);
-        }
     }
-
 }

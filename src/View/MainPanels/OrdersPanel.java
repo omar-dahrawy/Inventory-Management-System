@@ -52,7 +52,6 @@ public class OrdersPanel extends JPanel implements MainPanel, ActionListener, Pr
     private JRadioButton filterBatchSerialButton;
     private ButtonGroup buttonGroup;
 
-
     private JButton viewOrdersButton;
     private JButton clearFiltersButton;
     private JButton deleteOrderButton;

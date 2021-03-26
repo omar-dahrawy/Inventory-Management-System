@@ -40,7 +40,7 @@ public class CreateFormulaView extends JFrame implements ActionListener {
 
     private void getMaterials() {
 
-        int materialCount = homeView.getVmTable().getRowCount();
+        int materialCount = homeView.getRawMaterialsPanel().getMaterialsTable().getRowCount();
         
         CfMaterialsPanel.setLayout(new GridLayout(materialCount+1,1));
 
@@ -65,12 +65,12 @@ public class CreateFormulaView extends JFrame implements ActionListener {
             field.setEnabled(false);
             textFields.add(field);
 
-            String materialName = homeView.getVmTable().getValueAt(i, 1).toString();
+            String materialName = homeView.getRawMaterialsPanel().getMaterialsTable().getValueAt(i, 1).toString();
             JCheckBox checkBox = new JCheckBox(materialName);
             checkBox.addActionListener(this);
             checkBoxes.add(checkBox);
 
-            String unit = " " + homeView.getVmTable().getValueAt(i, 4).toString() + "   ";
+            String unit = " " + homeView.getRawMaterialsPanel().getMaterialsTable().getValueAt(i, 4).toString() + "   ";
             JPanel panel2 = new JPanel(new BorderLayout());
             panel2.add(field, BorderLayout.CENTER);
             panel2.add(new JLabel(unit), BorderLayout.EAST);
