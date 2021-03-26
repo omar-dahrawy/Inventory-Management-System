@@ -15,7 +15,6 @@ public class RawMaterialsPanel extends JPanel implements MainPanel {
     private JPanel rawMaterialsPanel;
 
     private ArrayList<String> materialUnits = new ArrayList<>();
-    private ArrayList<String> materialIDs = new ArrayList<>();
 
     //  ADD MATERIAL
 
@@ -44,7 +43,6 @@ public class RawMaterialsPanel extends JPanel implements MainPanel {
         tablePanel.add(new JScrollPane(materialsTable));
 
         materialUnits.add("");
-        materialIDs.add("");
     }
 
     public void getMaterials(ResultSet materials, SystemController controller) throws SQLException {
@@ -54,16 +52,11 @@ public class RawMaterialsPanel extends JPanel implements MainPanel {
         String[] columnNames = getColumnNames(materials, columnCount);
         String [][] data = new String[rowCount][columnCount];
 
-        homeView.getMeMaterialComboBox().removeAllItems();
-        homeView.getMeMaterialComboBox().addItem("Select Material");
-
         while (materials.next()) {
             for (int i = 0 ; i < columnCount ; i++) {
                 data[materials.getRow()-1][i] = materials.getString(i+1);
             }
-            homeView.getMeMaterialComboBox().addItem(materials.getString(2));
-            materialUnits.add(materials.getString(5));
-            materialIDs.add(materials.getString(1));
+            materialUnits.add(materials.getString(4));
         }
 
         materialsTable = new JTable(data, columnNames);
@@ -73,6 +66,7 @@ public class RawMaterialsPanel extends JPanel implements MainPanel {
         materialsTable.getModel().addTableModelListener(controller);
 
         this.validate();
+        homeView.getMaterialPurchasesPanel().getMaterials();
     }
 
     public void clearAddFields() {
@@ -114,10 +108,6 @@ public class RawMaterialsPanel extends JPanel implements MainPanel {
 
     public ArrayList<String> getMaterialUnits() {
         return materialUnits;
-    }
-
-    public ArrayList<String> getMaterialIDs() {
-        return materialIDs;
     }
 
 

@@ -69,14 +69,10 @@ public class VendorsPanel extends JPanel implements MainPanel, ActionListener {
         String[] columnNames = getColumnNames(vendors, columnCount);
         String [][] data = new String[rowCount][columnCount];
 
-        homeView.getMeVendorComboBox().removeAllItems();
-        homeView.getMeVendorComboBox().addItem("Select Vendor");
-
         while (vendors.next()) {
             for (int i = 0 ; i < columnCount ; i++) {
                 data[vendors.getRow() - 1][i] = vendors.getString(i + 1);
             }
-            homeView.getMeVendorComboBox().addItem(vendors.getString(2));
             vendorIDs.add(vendors.getString(1));
         }
         vendorsTable = new JTable(data, columnNames);
@@ -87,6 +83,7 @@ public class VendorsPanel extends JPanel implements MainPanel, ActionListener {
         vendorsTable.getModel().addTableModelListener(controller);
 
         this.validate();
+        homeView.getMaterialPurchasesPanel().getVendors();
     }
 
     public void clearAddFields() {

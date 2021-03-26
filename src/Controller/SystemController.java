@@ -32,6 +32,8 @@ public class SystemController implements ActionListener, TableModelListener {
     private final FormulasPanel formulasPanel;
     private final ProductionPanel productionPanel;
     private final RawMaterialsPanel rawMaterialsPanel;
+    private final GeneralPurchasesPanel generalPurchasesPanel;
+    private final MaterialPurchasesPanel materialPurchasesPanel;
 
     private final Constants K = new Constants();
 
@@ -49,6 +51,8 @@ public class SystemController implements ActionListener, TableModelListener {
         this.formulasPanel = homeView.getFormulasPanel();
         this.productionPanel = homeView.getProductionPanel();
         this.rawMaterialsPanel = homeView.getRawMaterialsPanel();
+        this.generalPurchasesPanel = homeView.getGeneralPurchasesPanel();
+        this.materialPurchasesPanel = homeView.getMaterialPurchasesPanel();
         this.view.addActionListeners(this);
     }
 
@@ -101,25 +105,29 @@ public class SystemController implements ActionListener, TableModelListener {
         }
     }
 
-    /*
-     *
-     *      ADD GENERAL EXPENSE
-     *
-     */
+
+    // ADD GENERAL EXPENSE
+
 
     void addGeneralExpense() {
         if (checkGeneralExpenses()) {
-            String itemName = "'" + homeView.getGeItemName() + "',";
-            String itemQuantity = homeView.getGeQuantity() + ",";
-            String dateOfPurchase = "'" + homeView.getGeDate() + "'";
-            String dateOfEntry = "'" + new SimpleDateFormat("yyyy-MM-dd").format(new Date()) + "',";
+            String itemName = generalPurchasesPanel.getAddItem();
+            double itemQuantity = generalPurchasesPanel.getAddQuantity();
+            java.sql.Date DOP = java.sql.Date.valueOf(generalPurchasesPanel.getAddDop());
+            java.sql.Date DOE = java.sql.Date.valueOf(new SimpleDateFormat("yyyy-MM-dd").format(new Date()));
 
+            String sql = "INSERT INTO \"General_Expenses\" VALUES (DEFAULT, ?, ?, ?, ?, ?)";
             try {
-                String sqlQuery = "insert into public.\"General_Expenses\" values (DEFAULT," + itemName + itemQuantity + "null, " + currentUserID + "," + dateOfEntry + dateOfPurchase + ")";
-                System.out.println(sqlQuery);
-                sqlStatement.executeUpdate(sqlQuery);
+                PreparedStatement query = databaseConnection.prepareStatement(sql);
+                query.setString(1, itemName);
+                query.setDouble(2, itemQuantity);
+                query.setInt(3, currentUserID);
+                query.setDate(4, DOP);
+                query.setDate(5, DOE);
+                query.execute();
+                query.close();
                 showMessage("Operation successful", "General Expense added.");
-                homeView.clearGeneralExpensesFields();
+                generalPurchasesPanel.clearAddFields();
             } catch (SQLException throwables) {
                 showMessage("Error performing operation", "General Expense could not be added.");
                 throwables.printStackTrace();
@@ -128,50 +136,51 @@ public class SystemController implements ActionListener, TableModelListener {
     }
 
     boolean checkGeneralExpenses() {
-        boolean flag = true;
-
-        if (homeView.getGeItemName().equals("")) {
-            flag = false;
+        if (generalPurchasesPanel.getAddItem().equals("")) {
             showMessage("Error adding expense", "Item name cannot be empty.");
-        } else if (homeView.getGeQuantity() == -13.11) {
-            flag = false;
+            return false;
+        } else if (generalPurchasesPanel.getAddQuantity() == -13.11) {
             showMessage("Error adding expense", "Item quantity must be a number.");
-        } else if (homeView.getGeQuantity() == 0) {
-            flag = false;
+            return false;
+        } else if (generalPurchasesPanel.getAddQuantity() == 0) {
             showMessage("Error adding expense", "Item quantity cannot be 0 or empty.");
-        } else if (homeView.getGeDate() == null) {
-            flag = false;
+            return false;
+        } else if (generalPurchasesPanel.getAddDop() == null) {
             showMessage("Error adding expense", "Date of purchase cannot be empty.");
+            return false;
         }
-        return  flag;
+        return true;
     }
 
-    /*
-     *
-     *      ADD MATERIAL EXPENSE
-     *
-     */
+
+    //  ADD MATERIAL EXPENSE
+
 
     void addMaterialExpense() {
         if (checkMaterialExpenses()) {
-            String materialID = homeView.getMaterialID();
-            String materialQuantity = homeView.getMeQuantity() + ",";
-            String materialInvoice = "'" + homeView.getMeInvoice() + "'";
-            //
-            String vendorID = homeView.getVendorID();
-            //
-            String materialUnit = "'" + homeView.getMaterialUnit() + "',";
-            String dateOfEntry = "'" + new SimpleDateFormat("yyyy-MM-dd").format(new Date()) + "',";
-            String dateOfPurchase = "'" + homeView.getMeDate() + "',";
+            String materialName = materialPurchasesPanel.getAddMaterial();
+            double materialQuantity = materialPurchasesPanel.getAddQuantity();
+            String materialInvoice = materialPurchasesPanel.getAddInvoice();
+            java.sql.Date DOP = java.sql.Date.valueOf(generalPurchasesPanel.getAddDop());
+            java.sql.Date DOE = java.sql.Date.valueOf(new SimpleDateFormat("yyyy-MM-dd").format(new Date()));
+
+            String sql = "INSERT INTO \"Material_Expenses\" VALUES (DEFAULT, ?, ?, ?, ?, ?, ?, ?, ?)";
 
             try {
-                String sqlQuery = "insert into public.\"Material_Expenses\" values (DEFAULT," + materialID + "," + materialQuantity + materialUnit + currentUserID + "," + dateOfEntry + dateOfPurchase + vendorID + "," + materialInvoice + ")";
-                sqlStatement.executeUpdate(sqlQuery);
+                PreparedStatement query = databaseConnection.prepareStatement(sql);
+                query.setString(1, materialName);
+                query.setDouble(2, materialQuantity);
+                query.setString(3, "Kg");
+                query.setInt(4, currentUserID);
+                query.setDate(5, DOE);
+                query.setDate(6, DOP);
+                query.setString(7, "Vendor");
+                query.setString(8, materialInvoice);
                 showMessage("Operation successful", "General Expense added.");
-                String updateQuery = "UPDATE \"Materials\" SET \"Available_quantity\" = \"Available_quantity\" + " + homeView.getMeQuantity() + " WHERE \"Material_ID\" = " + homeView.getMaterialID();
-                sqlStatement.executeUpdate(updateQuery);
+                //String updateQuery = "UPDATE \"Materials\" SET \"Available_quantity\" = \"Available_quantity\" + " + homeView.getMeQuantity() + " WHERE \"Material_ID\" = " + homeView.getMaterialID();
+                //sqlStatement.executeUpdate(updateQuery);
                 getMaterials();
-                homeView.clearMaterialExpensesFields();
+                materialPurchasesPanel.clearAddFields();
                 //updateFormulasPrice(materialID,materialName, materialPrice, materialQuantity);
             } catch (SQLException throwables) {
                 showMessage("Error performing operation", "Material Expense could not be added.");
@@ -181,37 +190,33 @@ public class SystemController implements ActionListener, TableModelListener {
     }
 
     boolean checkMaterialExpenses() {
-        boolean flag = true;
-
-        if (homeView.getMaterialID().equals("")) {
-            flag = false;
+        if (materialPurchasesPanel.getAddMaterial().equals("")) {
             showMessage("Error adding expense", "Please select a Material.");
-        } else if (homeView.getMeQuantity() == -13.11) {
-            flag = false;
+            return false;
+        } else if (materialPurchasesPanel.getAddQuantity() == -13.11) {
             showMessage("Error adding expense", "Material quantity must be in numbers only.");
-        } else if (homeView.getMeQuantity() == 0) {
-            flag = false;
+            return false;
+        } else if (materialPurchasesPanel.getAddQuantity() == 0) {
             showMessage("Error adding expense", "Material quantity cannot be 0 or empty.");
-        } else if (homeView.getMeDate() == null) {
-            flag = false;
+            return false;
+        } else if (materialPurchasesPanel.getAddDop() == null) {
             showMessage("Error adding expense.", "Date of purchase cannot be empty.");
+            return false;
         }
-        return  flag;
+        return true;
     }
 
-    /*
-     *
-     *      VIEW GENERAL EXPENSES
-     *
-     */
+
+    //  VIEW GENERAL EXPENSES
+
 
     void viewGeneralExpenses() {
 
-        LocalDate fromDate = homeView.getVgeFromDate();
-        LocalDate toDate = homeView.getVgeToDate();
+        LocalDate fromDate = generalPurchasesPanel.getFilterFromDate();
+        LocalDate toDate = generalPurchasesPanel.getFilterToDate();
 
-        String VeDoeSelected = (homeView.getVgeDoeRadioButton().isSelected()) ? ((" WHERE \"Date_of_entry\" >= '" + fromDate + "'" ) + (toDate != null ? " AND \"Date_of_entry\" <= '" + toDate + "'" : "")) : "";
-        String VeDopSelected = (homeView.getVgeDopRadioButton().isSelected()) ? ((" WHERE \"Date_of_purchase\" >= '" + fromDate + "'" ) + (toDate != null ? " AND \"Date_of_purchase\" <= '" + toDate + "'" : "")) : "";
+        String VeDoeSelected = (generalPurchasesPanel.getFilterDoeSelected()) ? ((" WHERE \"Date_of_entry\" >= '" + fromDate + "'" ) + (toDate != null ? " AND \"Date_of_entry\" <= '" + toDate + "'" : "")) : "";
+        String VeDopSelected = (generalPurchasesPanel.getFilterDopSelected()) ? ((" WHERE \"Date_of_purchase\" >= '" + fromDate + "'" ) + (toDate != null ? " AND \"Date_of_purchase\" <= '" + toDate + "'" : "")) : "";
 
         String query = "SELECT * FROM public.\"General_Expenses\"" + VeDoeSelected + VeDopSelected;
 
@@ -219,7 +224,7 @@ public class SystemController implements ActionListener, TableModelListener {
             try {
                 PreparedStatement expensesQuery = databaseConnection.prepareStatement(query, ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
                 ResultSet results = expensesQuery.executeQuery();
-                homeView.showGeneralExpenses(results, this);
+                generalPurchasesPanel.showGeneralPurchases(results, this);
 
             } catch (SQLException throwables) {
                 showMessage("Error performing operation", "Error viewing expenses.");
@@ -229,27 +234,26 @@ public class SystemController implements ActionListener, TableModelListener {
     }
 
     boolean checkViewGeneralExpenses() {
-        boolean flag = true;
-
-        if (homeView.getVgeDoeRadioButton().isSelected() || homeView.getVgeDopRadioButton().isSelected()) {
-            if (homeView.getVgeFromDate() == null && homeView.getVgeToDate() == null) {
-                flag = false;
+        if (generalPurchasesPanel.getFilterDoeSelected() || generalPurchasesPanel.getFilterDopSelected()) {
+            if (generalPurchasesPanel.getFilterFromDate() == null && generalPurchasesPanel.getFilterToDate() == null) {
                 showMessage("Error viewing expenses","Please enter viewing dates.");
-            } else if (homeView.getVgeFromDate() == null && homeView.getVgeToDate() != null) {
-                flag = false;
+                return false;
+            } else if (generalPurchasesPanel.getFilterFromDate() == null && generalPurchasesPanel.getFilterToDate() != null) {
                 showMessage("Error viewing expenses","Please enter a From viewing date.");
+                return false;
             }
         }
-        return flag;
+        return true;
     }
 
     void updateGeneralExpense(TableModelEvent e) {
         if (checkUpdatePrivilege()) {
+            JTable generalPurchasesTable = generalPurchasesPanel.getPurchasesTable();
             int row = e.getFirstRow();
             int column = e.getColumn();
-            String newValue = homeView.getVgeTable().getValueAt(row, column).toString();
-            String columnName = homeView.getVgeTable().getColumnName(column);
-            String id = homeView.getVgeTable().getValueAt(row, 0).toString();
+            String newValue = generalPurchasesTable.getValueAt(row, column).toString();
+            String columnName = generalPurchasesTable.getColumnName(column);
+            String id = generalPurchasesTable.getValueAt(row, 0).toString();
 
             String query = "UPDATE \"General_Expenses\" SET \"" + columnName + "\" = '" + newValue + "' WHERE \"Purchase_ID\" = " + id;
 
@@ -265,11 +269,12 @@ public class SystemController implements ActionListener, TableModelListener {
     }
 
     void deleteGeneralExpense() {
+        JTable generalPurchasesTable = generalPurchasesPanel.getPurchasesTable();
 
-        int[] rows = homeView.getVgeTable().getSelectedRows();
+        int[] rows = generalPurchasesTable.getSelectedRows();
 
         for (int i: rows) {
-            String id = homeView.getVgeTable().getValueAt(i, 0).toString();
+            String id = generalPurchasesTable.getValueAt(i, 0).toString();
             String query = "DELETE FROM \"General_Expenses\" WHERE \"Purchase_ID\" = " + id;
 
             try {
@@ -283,27 +288,24 @@ public class SystemController implements ActionListener, TableModelListener {
         viewGeneralExpenses();
     }
 
-    /*
-     *
-     *      VIEW MATERIAL EXPENSES
-     *
-     */
+
+    //  VIEW MATERIAL EXPENSES
+
 
     void viewMaterialExpenses() {
+        LocalDate fromDate = materialPurchasesPanel.getFilterFromDate();
+        LocalDate toDate = materialPurchasesPanel.getFilterToDate();
 
-        LocalDate fromDate = homeView.getVmeFromDate();
-        LocalDate toDate = homeView.getVmeToDate();
+        String VeDoeSelected = (materialPurchasesPanel.getFilterDoeSelected()) ? ((" WHERE \"Date_of_entry\" >= '" + fromDate + "'" ) + (toDate != null ? " AND \"Date_of_entry\" <= '" + toDate + "'" : "")) : "";
+        String VeDopSelected = (materialPurchasesPanel.getFilterDopSelected()) ? ((" WHERE \"Date_of_purchase\" >= '" + fromDate + "'" ) + (toDate != null ? " AND \"Date_of_purchase\" <= '" + toDate + "'" : "")) : "";
 
-        String VeDoeSelected = (homeView.getVmeDoeRadioButton().isSelected()) ? ((" WHERE \"Date_of_entry\" >= '" + fromDate + "'" ) + (toDate != null ? " AND \"Date_of_entry\" <= '" + toDate + "'" : "")) : "";
-        String VeDopSelected = (homeView.getVmeDopRadioButton().isSelected()) ? ((" WHERE \"Date_of_purchase\" >= '" + fromDate + "'" ) + (toDate != null ? " AND \"Date_of_purchase\" <= '" + toDate + "'" : "")) : "";
-
-        String query = "SELECT \"Purchase_ID\", \"Material_ID\", \"Quantity\", \"Unit\", \"Vendor\", \"Invoice_number\", \"User_ID\", \"Date_of_entry\", \"Date_of_purchase\" FROM public.\"Material_Expenses\"" + VeDoeSelected + VeDopSelected;
+        String query = "SELECT * FROM public.\"Material_Expenses\"" + VeDoeSelected + VeDopSelected;
 
         if (checkViewMaterialExpenses()) {
             try {
                 PreparedStatement expensesQuery = databaseConnection.prepareStatement(query, ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
                 ResultSet results = expensesQuery.executeQuery();
-                homeView.showMaterialExpenses(results, this);
+                materialPurchasesPanel.showMaterialExpenses(results, this);
 
             } catch (SQLException throwables) {
                 showMessage("Error performing operation", "Error viewing expenses.");
@@ -313,27 +315,26 @@ public class SystemController implements ActionListener, TableModelListener {
     }
 
     boolean checkViewMaterialExpenses() {
-        boolean flag = true;
-
-        if (homeView.getVgeDoeRadioButton().isSelected() || homeView.getVgeDopRadioButton().isSelected()) {
-            if (homeView.getVgeFromDate() == null && homeView.getVgeToDate() == null) {
-                flag = false;
+        if (materialPurchasesPanel.getFilterDoeSelected() || materialPurchasesPanel.getFilterDopSelected()) {
+            if (materialPurchasesPanel.getFilterFromDate() == null && materialPurchasesPanel.getFilterToDate() == null) {
                 showMessage("Error viewing expenses","Please enter viewing dates.");
-            } else if (homeView.getVgeFromDate() == null && homeView.getVgeToDate() != null) {
-                flag = false;
+                return false;
+            } else if (materialPurchasesPanel.getFilterFromDate() == null && materialPurchasesPanel.getFilterToDate() != null) {
                 showMessage("Error viewing expenses","Please enter a From viewing date.");
+                return false;
             }
         }
-        return flag;
+        return true;
     }
 
     void updateMaterialExpense(TableModelEvent e) {
         if (checkUpdatePrivilege()) {
+            JTable purchasesTable = materialPurchasesPanel.getPurchasesTable();
             int row = e.getFirstRow();
             int column = e.getColumn();
-            String newValue = homeView.getVmeTable().getValueAt(row, column).toString();
-            String columnName = homeView.getVmeTable().getColumnName(column);
-            String id = homeView.getVmeTable().getValueAt(row, 0).toString();
+            String newValue = purchasesTable.getValueAt(row, column).toString();
+            String columnName = purchasesTable.getColumnName(column);
+            String id = purchasesTable.getValueAt(row, 0).toString();
 
             String query = "UPDATE \"Material_Expenses\" SET \"" + columnName + "\" = '" + newValue + "' WHERE \"Material_ID\" = " + id;
 
@@ -349,10 +350,11 @@ public class SystemController implements ActionListener, TableModelListener {
     }
 
     void deleteMaterialExpense() {
-        int[] rows = homeView.getVmeTable().getSelectedRows();
+        JTable purchasesTable = materialPurchasesPanel.getPurchasesTable();
+        int[] rows = purchasesTable.getSelectedRows();
 
         for (int i: rows) {
-            String id = homeView.getVmeTable().getValueAt(i, 0).toString();
+            String id = purchasesTable.getValueAt(i, 0).toString();
             String query = "DELETE FROM \"Material_Expenses\" WHERE \"Purchase_ID\" = " + id;
 
             try {
@@ -366,11 +368,9 @@ public class SystemController implements ActionListener, TableModelListener {
         viewGeneralExpenses();
     }
 
-    /*
-     *
-     *      ADD ORDER
-     *
-     */
+
+    //  ADD ORDER
+
 
     void addOrder() {
         if (checkAddOrder()) {
@@ -426,11 +426,9 @@ public class SystemController implements ActionListener, TableModelListener {
         return flag;
     }
 
-    /*
-     *
-     *      VIEW ORDERS
-     *
-     */
+
+    //  VIEW ORDERS
+
 
     void viewOrders() {
         if (checkViewOrders()) {
@@ -536,15 +534,13 @@ public class SystemController implements ActionListener, TableModelListener {
         viewOrders();
     }
 
-    /*
-     *
-     *      ADD MATERIAL
-     *
-     */
+
+    //  ADD MATERIAL
+
 
     void addMaterial() {
         if (checkAddMaterial()) {
-            String sql = "INSERT INTO \"Materials\" values (DEFAULT, ?, ?, ?, ?)";
+            String sql = "INSERT INTO \"Materials\" values (?, ?, ?, ?)";
             try {
                 PreparedStatement query = databaseConnection.prepareStatement(sql);
                 query.setString( 1, rawMaterialsPanel.getAddName());
@@ -574,11 +570,9 @@ public class SystemController implements ActionListener, TableModelListener {
         return true;
     }
 
-    /*
-     *
-     *      VIEW MATERIALS
-     *
-     */
+
+    //  VIEW MATERIALS
+
 
     void getMaterials() {
         String query = "SELECT * FROM public.\"Materials\"";
@@ -629,11 +623,9 @@ public class SystemController implements ActionListener, TableModelListener {
         getMaterials();
     }
 
-    /*
-     *
-     *      ADD PRODUCTION
-     *
-     */
+
+    //  ADD PRODUCTION
+
 
     void addProduction() {
         AddProductionView ApView = productionPanel.getAddProductionView();
@@ -770,11 +762,9 @@ public class SystemController implements ActionListener, TableModelListener {
         return -13.11;
     }
 
-    /*
-     *
-     *      VIEW PRODUCTIONS
-     *
-     */
+
+    //  VIEW PRODUCTIONS
+
 
     void viewProductions() {
         if (checkViewProductions()) {
@@ -933,11 +923,9 @@ public class SystemController implements ActionListener, TableModelListener {
         }
     }
 
-    /*
-     *
-     *      CREATE NEW FORMULA
-     *
-     */
+
+    //  CREATE NEW FORMULA
+
 
     void createNewFormula(String formulaName, String formulaDescription, String formulaQuantity) {
         String sql = "INSERT INTO \"Formulas\" values (?, ?, ?, ?)";
@@ -1000,11 +988,9 @@ public class SystemController implements ActionListener, TableModelListener {
         }
     }
 
-    /*
-     *
-     *      VIEW FORMULAS
-     *
-     */
+
+    //  VIEW FORMULAS
+
 
     void getFormulas() {
         String query = "SELECT * FROM public.\"Formulas\"";
@@ -1092,11 +1078,9 @@ public class SystemController implements ActionListener, TableModelListener {
         }
     }
 
-    /*
-     *
-     *      ADD VENDOR
-     *
-     */
+
+    //  ADD VENDOR
+
 
     void addVendor() {
         if (checkAddVendor()) {
@@ -1141,11 +1125,9 @@ public class SystemController implements ActionListener, TableModelListener {
         return true;
     }
 
-    /*
-     *
-     *      VIEW VENDORS
-     *
-     */
+
+    //  VIEW VENDORS
+
 
     void viewVendors() {
         if (checkViewVendors()) {
@@ -1233,11 +1215,9 @@ public class SystemController implements ActionListener, TableModelListener {
         }
     }
 
-    /*
-     *
-     *      STORAGE
-     *
-     */
+
+    //  STORAGE
+
 
     void addItemsToStorage() {
         AddProductionView ApView = productionPanel.getAddProductionView();
@@ -1400,11 +1380,9 @@ public class SystemController implements ActionListener, TableModelListener {
         }
     }
 
-    /*
-    --
-    --
-    --
-     */
+
+    //  OTHER METHODS
+
 
     void addMaterials() {
         String delete = "DELETE FROM \"Materials\"";
@@ -1487,21 +1465,21 @@ public class SystemController implements ActionListener, TableModelListener {
 
         // GENERAL EXPENSES
 
-        else if (e.getSource() == homeView.getMeAddButton()) {
-            addGeneralExpense();
-        } else if (e.getSource() == homeView.getVgeViewButton()) {
+        else if (e.getSource() == generalPurchasesPanel.getAddPurchaseButton()) {
+            addMaterialExpense();
+        } else if (e.getSource() == generalPurchasesPanel.getViewPurchasesButton()) {
             viewGeneralExpenses();
-        } else if (e.getSource() == homeView.getVgeDeleteButton()) {
+        } else if (e.getSource() == generalPurchasesPanel.getDeletePurchaseButton()) {
             deleteGeneralExpense();
         }
 
         //  MATERIAL EXPENSES
 
-        else if (e.getSource() == homeView.getGeAddButton()) {
-            addMaterialExpense();
-        } else if (e.getSource() == homeView.getVmeViewButton()) {
+        else if (e.getSource() == materialPurchasesPanel.getAddPurchaseButton()) {
+            addGeneralExpense();
+        } else if (e.getSource() == materialPurchasesPanel.getViewPurchasesButton()) {
             viewMaterialExpenses();
-        } else if (e.getSource() == homeView.getVmeDeleteButton()) {
+        } else if (e.getSource() == materialPurchasesPanel.getDeletePurchaseButton()) {
             deleteMaterialExpense();
         }
 
@@ -1570,17 +1548,17 @@ public class SystemController implements ActionListener, TableModelListener {
 
     @Override
     public void tableChanged(TableModelEvent e) {
-        if (homeView.getVgeTable() != null) {
-            if (homeView.getVgeTable().getModel() != null) {
-                if (e.getSource() == homeView.getVgeTable().getModel()) {
+        if (generalPurchasesPanel.getPurchasesTable() != null) {
+            if (generalPurchasesPanel.getPurchasesTable().getModel() != null) {
+                if (e.getSource() == generalPurchasesPanel.getPurchasesTable().getModel()) {
                     if (e.getType() == TableModelEvent.UPDATE) {
                         updateGeneralExpense(e);
                     }
                 }
             }
-        } if (homeView.getVmeTable() != null) {
-            if (homeView.getVmeTable().getModel() != null) {
-                if (e.getSource() == homeView.getVmeTable().getModel()) {
+        } if (materialPurchasesPanel.getPurchasesTable() != null) {
+            if (materialPurchasesPanel.getPurchasesTable().getModel() != null) {
+                if (e.getSource() == materialPurchasesPanel.getPurchasesTable().getModel()) {
                     if (e.getType() == TableModelEvent.UPDATE) {
                         updateMaterialExpense(e);
                     }
