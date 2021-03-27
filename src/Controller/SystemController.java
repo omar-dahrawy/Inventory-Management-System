@@ -21,6 +21,7 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.regex.Pattern;
 
 public class SystemController implements ActionListener, TableModelListener {
 
@@ -595,9 +596,9 @@ public class SystemController implements ActionListener, TableModelListener {
             int column = e.getColumn();
             String columnName = materialsTable.getColumnName(column);
             String newValue = materialsTable.getValueAt(row, column).toString();
-            String id = materialsTable.getValueAt(row, 0).toString();
+            String materialName = materialsTable.getValueAt(row, 0).toString();
 
-            String query = "UPDATE \"Materials\" SET \"" + columnName + "\" = '" + newValue + "' WHERE \"Material_ID\" = " + id;
+            String query = "UPDATE \"Materials\" SET \"" + columnName + "\" = '" + newValue + "' WHERE \"Material_name\" = '" + materialName + "'";
             try {
                 sqlStatement.executeUpdate(query);
                 showMessage("Update successful", "Item updated successfully.");
@@ -607,6 +608,7 @@ public class SystemController implements ActionListener, TableModelListener {
             }
         }
         getMaterials();
+        calculateFormulaPrices();
     }
 
     void deleteMaterial() {
@@ -942,6 +944,7 @@ public class SystemController implements ActionListener, TableModelListener {
             showMessage("Operation successful","New formula created.");
             formulasPanel.getCreateFormulaView().dispatchEvent(new WindowEvent(formulasPanel.getCreateFormulaView(), WindowEvent.WINDOW_CLOSING));
             getFormulas();
+            calculateFormulaPrices();
         } catch (SQLException throwables) {
             throwables.printStackTrace();
             showErrorMessage("Operation unsuccessful","Could not create new formula.", throwables.getLocalizedMessage());
@@ -1004,6 +1007,43 @@ public class SystemController implements ActionListener, TableModelListener {
             throwables.printStackTrace();
             showMessage("Error performing operation", "Error viewing formulas.");
         }
+    }
+
+    void calculateFormulaPrices() {
+        for (int i = 0 ; i < formulasPanel.getFormulasTable().getRowCount() ; i++) {
+            double pricePerKg = 0.0;
+            String formulaName = formulasPanel.getFormulasTable().getValueAt(i, 0).toString();
+            String formulaDescription = formulasPanel.getFormulasTable().getValueAt(i, 1).toString();
+            String [] materials = formulaDescription.split(" - ");
+            for (int j = 0 ; j < materials.length ; j++) {
+                materials[j] = materials[j].split(":")[0];
+            }
+            for (String materialName : materials) {
+                String sql = "SELECT \"Price/Kg\" FROM \"Materials\" WHERE \"Material_name\" = '" + materialName + "'";
+                try {
+                    ResultSet materialInfo = sqlStatement.executeQuery(sql);
+                    materialInfo.next();
+                    if (materialInfo.getString(1) != null) {
+                        String materialPricePerKg = materialInfo.getString(1);
+                        pricePerKg += Double.parseDouble(materialPricePerKg.split("/")[0]);
+                    } else {
+                        pricePerKg = 0.0;
+                        break;
+                    }
+                } catch (SQLException throwables) {
+                    throwables.printStackTrace();
+                }
+            }
+            if (pricePerKg > 0) {
+                String sql = "UPDATE \"Formulas\" SET \"Price/Kg\" = '" + pricePerKg + "/Kg' WHERE \"Formula_ID\" = '" + formulaName + "'";
+                try {
+                    sqlStatement.executeUpdate(sql);
+                } catch (SQLException throwables) {
+                    throwables.printStackTrace();
+                }
+            }
+        }
+        getFormulas();
     }
 
     void updateFormula(TableModelEvent e) {
@@ -1513,6 +1553,7 @@ public class SystemController implements ActionListener, TableModelListener {
             checkCreateFormula();
         } else if (e.getSource() == formulasPanel.getRefreshFormulasButton()) {
             getFormulas();
+            calculateFormulaPrices();
         } else if (e.getSource() == formulasPanel.getDeleteFormulaButton()) {
             deleteFormula();
         }
