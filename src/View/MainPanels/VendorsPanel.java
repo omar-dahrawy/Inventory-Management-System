@@ -15,7 +15,6 @@ public class VendorsPanel extends JPanel implements MainPanel, ActionListener {
 
     private JPanel vendorsPanel;
     private HomeView homeView;
-    private ArrayList<String> vendorIDs = new ArrayList<>();
 
     //  ADD VENDOR
 
@@ -58,8 +57,6 @@ public class VendorsPanel extends JPanel implements MainPanel, ActionListener {
         buttonGroup = new ButtonGroup();
         buttonGroup.add(filterContactNameButton);
         buttonGroup.add(filterVendorNameButton);
-
-        vendorIDs.add("");
     }
 
     public void showVendors(ResultSet vendors, SystemController controller) throws SQLException {
@@ -73,10 +70,12 @@ public class VendorsPanel extends JPanel implements MainPanel, ActionListener {
             for (int i = 0 ; i < columnCount ; i++) {
                 data[vendors.getRow() - 1][i] = vendors.getString(i + 1);
             }
-            vendorIDs.add(vendors.getString(1));
         }
+        vendorsTable.setAutoCreateRowSorter(false);
+        vendorsTable.setRowSorter(null);
         vendorsTable = new JTable(data, columnNames);
         vendorsTable.setAutoCreateRowSorter(false);
+        vendorsTable.setRowSorter(null);
         setTableFont(vendorsTable);
         tablePanel.remove(0);
         tablePanel.add(new JScrollPane(vendorsTable));
@@ -91,10 +90,6 @@ public class VendorsPanel extends JPanel implements MainPanel, ActionListener {
         addContactNameField.setText("");
         addContactNumberField.setText("");
         addContactEmailField.setText("");
-    }
-
-    public ArrayList<String> getVendorIDs() {
-        return vendorIDs;
     }
 
 
@@ -155,7 +150,7 @@ public class VendorsPanel extends JPanel implements MainPanel, ActionListener {
 
 
     //  OTHER METHODS
-
+    
 
     @Override
     public int getRowCount(ResultSet set) {

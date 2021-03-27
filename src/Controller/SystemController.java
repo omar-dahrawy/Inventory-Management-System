@@ -128,6 +128,7 @@ public class SystemController implements ActionListener, TableModelListener {
                 query.close();
                 showMessage("Operation successful", "General Expense added.");
                 generalPurchasesPanel.clearAddFields();
+                viewGeneralExpenses();
             } catch (SQLException throwables) {
                 showMessage("Error performing operation", "General Expense could not be added.");
                 throwables.printStackTrace();
@@ -160,8 +161,9 @@ public class SystemController implements ActionListener, TableModelListener {
         if (checkMaterialExpenses()) {
             String materialName = materialPurchasesPanel.getAddMaterial();
             double materialQuantity = materialPurchasesPanel.getAddQuantity();
+            int vendorID = materialPurchasesPanel.getAddVendor();
             String materialInvoice = materialPurchasesPanel.getAddInvoice();
-            java.sql.Date DOP = java.sql.Date.valueOf(generalPurchasesPanel.getAddDop());
+            java.sql.Date DOP = java.sql.Date.valueOf(materialPurchasesPanel.getAddDop());
             java.sql.Date DOE = java.sql.Date.valueOf(new SimpleDateFormat("yyyy-MM-dd").format(new Date()));
 
             String sql = "INSERT INTO \"Material_Expenses\" VALUES (DEFAULT, ?, ?, ?, ?, ?, ?, ?, ?)";
@@ -174,14 +176,15 @@ public class SystemController implements ActionListener, TableModelListener {
                 query.setInt(4, currentUserID);
                 query.setDate(5, DOE);
                 query.setDate(6, DOP);
-                query.setString(7, "Vendor");
+                query.setInt(7, vendorID);
                 query.setString(8, materialInvoice);
-                showMessage("Operation successful", "General Expense added.");
-                //String updateQuery = "UPDATE \"Materials\" SET \"Available_quantity\" = \"Available_quantity\" + " + homeView.getMeQuantity() + " WHERE \"Material_ID\" = " + homeView.getMaterialID();
-                //sqlStatement.executeUpdate(updateQuery);
+                query.executeUpdate();
+                String updateQuery = "UPDATE \"Materials\" SET \"Available_quantity\" = " + materialQuantity + " WHERE \"Material_name\" = '" + materialName + "'";
+                sqlStatement.executeUpdate(updateQuery);
+                showMessage("Operation successful", "Material Expense added.");
                 getMaterials();
                 materialPurchasesPanel.clearAddFields();
-                //updateFormulasPrice(materialID,materialName, materialPrice, materialQuantity);
+                viewMaterialExpenses();
             } catch (SQLException throwables) {
                 showMessage("Error performing operation", "Material Expense could not be added.");
                 throwables.printStackTrace();
@@ -299,14 +302,13 @@ public class SystemController implements ActionListener, TableModelListener {
         String VeDoeSelected = (materialPurchasesPanel.getFilterDoeSelected()) ? ((" WHERE \"Date_of_entry\" >= '" + fromDate + "'" ) + (toDate != null ? " AND \"Date_of_entry\" <= '" + toDate + "'" : "")) : "";
         String VeDopSelected = (materialPurchasesPanel.getFilterDopSelected()) ? ((" WHERE \"Date_of_purchase\" >= '" + fromDate + "'" ) + (toDate != null ? " AND \"Date_of_purchase\" <= '" + toDate + "'" : "")) : "";
 
-        String query = "SELECT * FROM public.\"Material_Expenses\"" + VeDoeSelected + VeDopSelected;
+        String query = "SELECT * FROM \"Material_Expenses\"" + VeDoeSelected + VeDopSelected;
 
         if (checkViewMaterialExpenses()) {
             try {
                 PreparedStatement expensesQuery = databaseConnection.prepareStatement(query, ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
                 ResultSet results = expensesQuery.executeQuery();
                 materialPurchasesPanel.showMaterialExpenses(results, this);
-
             } catch (SQLException throwables) {
                 showMessage("Error performing operation", "Error viewing expenses.");
                 throwables.printStackTrace();
@@ -1466,7 +1468,7 @@ public class SystemController implements ActionListener, TableModelListener {
         // GENERAL EXPENSES
 
         else if (e.getSource() == generalPurchasesPanel.getAddPurchaseButton()) {
-            addMaterialExpense();
+            addGeneralExpense();
         } else if (e.getSource() == generalPurchasesPanel.getViewPurchasesButton()) {
             viewGeneralExpenses();
         } else if (e.getSource() == generalPurchasesPanel.getDeletePurchaseButton()) {
@@ -1476,7 +1478,7 @@ public class SystemController implements ActionListener, TableModelListener {
         //  MATERIAL EXPENSES
 
         else if (e.getSource() == materialPurchasesPanel.getAddPurchaseButton()) {
-            addGeneralExpense();
+            addMaterialExpense();
         } else if (e.getSource() == materialPurchasesPanel.getViewPurchasesButton()) {
             viewMaterialExpenses();
         } else if (e.getSource() == materialPurchasesPanel.getDeletePurchaseButton()) {

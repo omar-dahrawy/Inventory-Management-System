@@ -116,8 +116,10 @@ public class MaterialPurchasesPanel extends JPanel implements MainPanel, ActionL
         return addMaterialComboBox.getSelectedItem().toString();
     }
 
-    public String getAddVendor() {
-        return addVendorComboBox.getSelectedItem().toString();
+    public int getAddVendor() {
+        int row = addVendorComboBox.getSelectedIndex() - 1;
+
+        return Integer.parseInt(homeView.getVendorsPanel().getVendorsTable().getValueAt(row, 0).toString());
     }
 
     public LocalDate getAddDop() {
