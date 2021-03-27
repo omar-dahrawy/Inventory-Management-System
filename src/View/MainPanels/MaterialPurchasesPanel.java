@@ -189,12 +189,12 @@ public class MaterialPurchasesPanel extends JPanel implements MainPanel, ActionL
         addVendorComboBox.addItem("Select Vendor");
 
         for (int i = 0 ; i < rowCount ; i++) {
-            addMaterialComboBox.addItem(vendorsTable.getValueAt(i, 1).toString());
+            addVendorComboBox.addItem(vendorsTable.getValueAt(i, 1).toString());
         }
     }
 
     public void getMaterials() {
-        JTable materialsTable = homeView.getMaterialPurchasesPanel().getPurchasesTable();
+        JTable materialsTable = homeView.getRawMaterialsPanel().getMaterialsTable();
         int rowCount = materialsTable.getRowCount();
 
         addMaterialComboBox.removeAllItems();
