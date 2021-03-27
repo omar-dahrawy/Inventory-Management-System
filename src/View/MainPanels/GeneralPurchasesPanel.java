@@ -226,4 +226,5 @@ public class GeneralPurchasesPanel extends JPanel implements MainPanel, ActionLi
             filterToDatePicker.setEnabled(true);
         }
     }
+
 }
