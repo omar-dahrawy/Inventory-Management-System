@@ -979,7 +979,7 @@ public class SystemController implements ActionListener, TableModelListener {
                         formulaDescription += ": ";
                         formulaDescription += textFields.get(i).getText();
                         formulaQuantity += Double.parseDouble(textFields.get(i).getText());
-                        formulaDescription += " " + rawMaterialsPanel.getMaterialsTable().getValueAt(i, 4).toString();
+                        formulaDescription += " " + rawMaterialsPanel.getMaterialsTable().getValueAt(i, 3).toString();
                         formulaDescription += " - ";
                     }
                 }
