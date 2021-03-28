@@ -640,17 +640,23 @@ public class SystemController implements ActionListener, TableModelListener {
 
         if (checkAddProduction()) {
             String formula = ApView.getApFormula();
-            double quantity = ApView.getApProductionQuantity();
+            double productionQuantity = ApView.getApProductionQuantity();
+            double batchQuantity = ApView.getApBatchQuantity();
+            int batchesNumber = (int) (productionQuantity/batchQuantity);
 
-            String sql = "INSERT INTO \"Production\" values (DEFAULT, ?, ?, ?, ?)";
+
+            String sql = "INSERT INTO \"Production\" values (DEFAULT, ?, ?, ?, ?, ?, ?, ?)";
 
             try {
-                Array array = databaseConnection.createArrayOf("VARCHAR", ApView.getApOrders());
+                Array ordersArray = databaseConnection.createArrayOf("INTEGER", ApView.getApOrders());
                 PreparedStatement query = databaseConnection.prepareStatement(sql);
                 query.setString(1, formula);
-                query.setDouble(2,quantity);
-                query.setArray(3, array);
-                query.setString(4, K.status_1);
+                query.setString(2,productionQuantity + " Kg");
+                query.setString(3,batchQuantity + " Kg");
+                query.setInt(4, batchesNumber);
+                query.setArray(5,null);
+                query.setArray(6,ordersArray);
+                query.setString(7, K.status_1);
                 query.executeUpdate();
                 query.close();
                 showMessage("Operation successful", "New production added.");
@@ -672,6 +678,12 @@ public class SystemController implements ActionListener, TableModelListener {
             return false;
         } else if (ApView.getApProductionQuantity() == 0) {
             showMessage("Error adding production", "Production quantity cannot be 0 or empty.");
+            return false;
+        } else if (ApView.getApBatchQuantity() == -13.11) {
+            showMessage("Error adding production", "Batch quantity must be numbers.");
+            return false;
+        } else if (ApView.getApBatchQuantity() == 0) {
+            showMessage("Error adding production", "Batch quantity cannot be 0 or empty.");
             return false;
         } else if (ApView.getApOrders().length == 0) {
             showMessage("Error adding production", "Order IDs cannot be empty.");
@@ -847,18 +859,13 @@ public class SystemController implements ActionListener, TableModelListener {
             String columnName = productionTable.getColumnName(column);
             String serial = "'" + productionTable.getValueAt(row, 0).toString() + "'";
 
-            String query = "UPDATE \"Production\" SET \"" + columnName + "\" = '" + newValue + "' WHERE \"Batch_serial\" = " + serial;
+            String query = "UPDATE \"Production\" SET \"" + columnName + "\" = '" + newValue + "' WHERE \"Production_ID\" = " + serial;
 
             try {
                 sqlStatement.executeUpdate(query);
-                showMessage("Update successful", "Batch updated successfully.");
-                if (columnName.equals("Production_status") && newValue.equals(K.status_3)) {
-                    String formulaName = productionTable.getValueAt(row,1).toString();
-                    double quantity = Double.parseDouble(productionTable.getValueAt(row,2).toString());
-                    deductMaterialQuantity(formulaName, quantity);
-                }
+                showMessage("Update successful", "Production order updated successfully.");
             } catch (SQLException throwables) {
-                showMessage("Error performing operation", "Could not update batch. Please review the new values.");
+                showMessage("Error performing operation", "Could not update production order. Please review the new values.");
                 throwables.printStackTrace();
             }
         }
@@ -915,9 +922,9 @@ public class SystemController implements ActionListener, TableModelListener {
         if (productionTable != null) {
             if (productionTable.getModel() != null) {
                 int row = productionTable.getSelectedRow();
-                String serial = "'" + productionTable.getValueAt(row, 0).toString() + "'";
+                String id = "'" + productionTable.getValueAt(row, 0).toString() + "'";
 
-                String query = "DELETE FROM \"Production\" WHERE \"Batch_serial\" = " + serial;
+                String query = "DELETE FROM \"Production\" WHERE \"Production_ID\" = " + id;
 
                 try {
                     sqlStatement.executeUpdate(query);
