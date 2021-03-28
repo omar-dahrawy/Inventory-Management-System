@@ -38,6 +38,8 @@ public class SystemController implements ActionListener, TableModelListener {
     private final Constants K = new Constants();
 
     private int currentUserID;
+    private String currentUserType;
+
 
     private Connection databaseConnection;
     private Statement sqlStatement;
@@ -85,6 +87,7 @@ public class SystemController implements ActionListener, TableModelListener {
                 if (users.getString(4).equals(password)) {
                     showMessage("Login Message", "Login successful.");
                     currentUserID = Integer.parseInt(users.getString(1));
+                    currentUserType = users.getString(5);
                     users.close();
                     getMaterials();
                     viewVendors();
@@ -1476,34 +1479,12 @@ public class SystemController implements ActionListener, TableModelListener {
     }
 
     boolean checkUpdatePrivilege() {
-        boolean flag = false;
-
-        String username = JOptionPane.showInputDialog(null, "Enter username:",
-                "Confirm data update", JOptionPane.INFORMATION_MESSAGE);
-
-        String password = JOptionPane.showInputDialog(null, "Enter password:",
-                "Confirm data update", JOptionPane.INFORMATION_MESSAGE);
-
-        try {
-            ResultSet users = sqlStatement.executeQuery("SELECT * FROM public.\"Users\" where \"Username\" = '" + username + "'");
-            if (users.next()) {
-                if (users.getString(4).equals(password)) {
-                    if (users.getString(5).equals("Admin")) {
-                        flag = true;
-                    } else {
-                        showMessage("Confirm error", "Update unsuccessful\nAdmin privileges needed to confirm update");
-                    }
-                } else {
-                    showMessage("Confirm update error", "Password is incorrect.");
-                }
-            } else {
-                showMessage("Confirm update error", "Username does not exist.");
-            }
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
+        if (currentUserType.equals("Admin")) {
+            return true;
+        } else {
+            showMessage("Confirm error", "Update unsuccessful\nAdmin privileges needed to confirm update");
+            return false;
         }
-
-        return flag;
     }
 
     @Override
