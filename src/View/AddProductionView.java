@@ -19,7 +19,8 @@ public class AddProductionView extends JFrame implements ActionListener {
     private JPanel ApPanel;
 
     private JComboBox ApFormulasComboBox;
-    private JTextField ApQuantityField;
+    private JTextField ApProductionQuantityField;
+    private JTextField ApBatchQuantityField;
     private JTextArea ApOrdersArea;
     private JButton ApAddButton;
 
@@ -86,10 +87,23 @@ public class AddProductionView extends JFrame implements ActionListener {
         return ApFormulasComboBox.getSelectedItem().toString();
     }
 
-    public Double getApQuantity() {
-        if (!ApQuantityField.getText().equals("")) {
+    public Double getApProductionQuantity() {
+        if (!ApProductionQuantityField.getText().equals("")) {
             try {
-                return Double.parseDouble(ApQuantityField.getText());
+                return Double.parseDouble(ApProductionQuantityField.getText());
+            } catch (NumberFormatException e) {
+                e.printStackTrace();
+            }
+        } else {
+            return 0.0;
+        }
+        return -13.11;
+    }
+
+    public Double getApBatchQuantity() {
+        if (!ApBatchQuantityField.getText().equals("")) {
+            try {
+                return Double.parseDouble(ApBatchQuantityField.getText());
             } catch (NumberFormatException e) {
                 e.printStackTrace();
             }

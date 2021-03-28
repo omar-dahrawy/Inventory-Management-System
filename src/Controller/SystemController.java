@@ -21,7 +21,6 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.regex.Pattern;
 
 public class SystemController implements ActionListener, TableModelListener {
 
@@ -638,7 +637,7 @@ public class SystemController implements ActionListener, TableModelListener {
 
         if (checkAddProduction()) {
             String formula = ApView.getApFormula();
-            double quantity = ApView.getApQuantity();
+            double quantity = ApView.getApProductionQuantity();
 
             String sql = "INSERT INTO \"Production\" values (DEFAULT, ?, ?, ?, ?)";
 
@@ -665,10 +664,10 @@ public class SystemController implements ActionListener, TableModelListener {
     boolean checkAddProduction() {
         AddProductionView ApView = productionPanel.getAddProductionView();
 
-        if (ApView.getApQuantity() == -13.11) {
+        if (ApView.getApProductionQuantity() == -13.11) {
             showMessage("Error adding production", "Production quantity must be numbers.");
             return false;
-        } else if (ApView.getApQuantity() == 0) {
+        } else if (ApView.getApProductionQuantity() == 0) {
             showMessage("Error adding production", "Production quantity cannot be 0 or empty.");
             return false;
         } else if (ApView.getApOrders().length == 0) {
