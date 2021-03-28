@@ -92,8 +92,9 @@ public class SystemController implements ActionListener, TableModelListener {
                     viewMaterialExpenses();
                     viewProductions();
                     viewOrders();
-                    getFormulas();
                     viewStorage();
+                    getFormulas();
+                    calculateFormulaPrices();
                     view.goToHome();
                 } else {
                     showMessage("Login Error", "Password is incorrect.");
@@ -1011,31 +1012,37 @@ public class SystemController implements ActionListener, TableModelListener {
 
     void calculateFormulaPrices() {
         for (int i = 0 ; i < formulasPanel.getFormulasTable().getRowCount() ; i++) {
-            double pricePerKg = 0.0;
+            double formulaPrice = 0.0;
             String formulaName = formulasPanel.getFormulasTable().getValueAt(i, 0).toString();
             String formulaDescription = formulasPanel.getFormulasTable().getValueAt(i, 1).toString();
             String [] materials = formulaDescription.split(" - ");
+            Double [] materialQuantities = new Double[materials.length];
             for (int j = 0 ; j < materials.length ; j++) {
+                String temp = materials[j].split(":")[1];
+                temp = temp.substring(1);
+                temp = temp.split(" ")[0];
+                materialQuantities[j] = Double.parseDouble(temp);
                 materials[j] = materials[j].split(":")[0];
             }
-            for (String materialName : materials) {
+            for (int j = 0 ; j < materials.length ; j++) {
+                String materialName = materials[j];
                 String sql = "SELECT \"Price/Kg\" FROM \"Materials\" WHERE \"Material_name\" = '" + materialName + "'";
                 try {
                     ResultSet materialInfo = sqlStatement.executeQuery(sql);
                     materialInfo.next();
                     if (materialInfo.getString(1) != null) {
                         String materialPricePerKg = materialInfo.getString(1);
-                        pricePerKg += Double.parseDouble(materialPricePerKg.split("/")[0]);
+                        formulaPrice += Double.parseDouble(materialPricePerKg.split("/")[0]) * materialQuantities[j];
                     } else {
-                        pricePerKg = 0.0;
+                        formulaPrice = 0.0;
                         break;
                     }
                 } catch (SQLException throwables) {
                     throwables.printStackTrace();
                 }
             }
-            if (pricePerKg > 0) {
-                String sql = "UPDATE \"Formulas\" SET \"Price/Kg\" = '" + pricePerKg + "/Kg' WHERE \"Formula_ID\" = '" + formulaName + "'";
+            if (formulaPrice > 0) {
+                String sql = "UPDATE \"Formulas\" SET \"Formula_price\" = '" + formulaPrice + " EGP' WHERE \"Formula_ID\" = '" + formulaName + "'";
                 try {
                     sqlStatement.executeUpdate(sql);
                 } catch (SQLException throwables) {
