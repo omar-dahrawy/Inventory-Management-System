@@ -267,6 +267,7 @@ public class OrdersPanel extends JPanel implements MainPanel, ActionListener, Pr
         Font font = new Font(table.getFont().getName(), table.getFont().getStyle(), 15);
         table.setFont(font);
         table.setRowHeight(25);
+        table.getTableHeader().setFont(font);
     }
 
     @Override

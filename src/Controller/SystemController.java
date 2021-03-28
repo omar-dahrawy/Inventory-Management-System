@@ -64,6 +64,7 @@ public class SystemController implements ActionListener, TableModelListener {
             try {
                 Class.forName("org.postgresql.Driver");
                 databaseConnection = DriverManager.getConnection("jdbc:postgresql://localhost/Eagles", "postgres", "admin");
+                //databaseConnection = DriverManager.getConnection("jdbc:postgresql://192.168.1.35/Eagles", "postgres", "admin");
                 System.out.println("Database server connection successful");
                 sqlStatement = databaseConnection.createStatement();
                 login();

@@ -245,6 +245,7 @@ public class MaterialPurchasesPanel extends JPanel implements MainPanel, ActionL
         Font font = new Font(table.getFont().getName(), table.getFont().getStyle(), 15);
         table.setFont(font);
         table.setRowHeight(25);
+        table.getTableHeader().setFont(font);
     }
 
     @Override
