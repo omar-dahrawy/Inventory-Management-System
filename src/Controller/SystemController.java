@@ -665,6 +665,7 @@ public class SystemController implements ActionListener, TableModelListener {
                 viewProductions();
                 addItemsToStorage();
                 ApView.dispatchEvent(new WindowEvent(ApView, WindowEvent.WINDOW_CLOSING));
+                createBatches(batchesNumber, formula, batchQuantity);
             } catch (SQLException throwables) {
                 showErrorMessage("Error performing operation", "New production could not be added.", throwables.getLocalizedMessage());
                 throwables.printStackTrace();
@@ -1444,6 +1445,44 @@ public class SystemController implements ActionListener, TableModelListener {
 
     //  BATCHES
 
+
+    void createBatches(int batchesNumber, String formulaName, double batchQuantity) {
+        try {
+            ResultSet productionInfo = sqlStatement.executeQuery("SELECT \"Production_ID\" FROM \"Production\" ORDER BY \"Production_ID\" DESC LIMIT 1");
+            productionInfo.next();
+            int productionID = productionInfo.getInt(1);
+            for (int i = 0 ; i < batchesNumber ; i++) {
+                String sql = "INSERT INTO \"Batches\" VALUES (DEFAULT, ?, ?, ?, ?, ?)";
+                PreparedStatement query = databaseConnection.prepareStatement(sql);
+                query.setInt(1, productionID);
+                query.setString(2, formulaName);
+                query.setString(3, batchQuantity + " Kg");
+                query.setString(4, null);
+                query.setString(5, K.batchStatus_1);
+                query.executeUpdate();
+                query.close();
+                viewBatches();
+            }
+            ResultSet batchesInfo = sqlStatement.executeQuery("SELECT * FROM (SELECT \"Batch_serial\" FROM \"Batches\" ORDER BY \"Batch_serial\" DESC LIMIT " + batchesNumber + ")" +
+                    " AS nested ORDER BY \"Batch_serial\" ASC");
+            Object [] batchesSerials = new Object[batchesNumber];
+            for (int i = 0 ; i < batchesNumber ; i++) {
+                if (batchesInfo.next()) {
+                    batchesSerials[i] = batchesInfo.getInt(1);
+                }
+            }
+            Array serialsArray = databaseConnection.createArrayOf("INTEGER", batchesSerials);
+            String sql = "UPDATE \"Production\" SET \"Batch_serials\" = ? WHERE \"Production_ID\" = ?";
+            PreparedStatement query = databaseConnection.prepareStatement(sql);
+            query.setArray(1, serialsArray);
+            query.setInt(2, productionID);
+            query.executeUpdate();
+            query.close();
+            viewProductions();
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+    }
 
     void viewBatches() {
         if (checkViewStorage()) {
