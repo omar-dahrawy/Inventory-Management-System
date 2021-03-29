@@ -96,10 +96,10 @@ public class OrdersPanel extends JPanel implements MainPanel, ActionListener, Pr
         filterFromDatePanel.add(filterFromDatePicker);
 
         filterStatusComboBox.addItem("Select Status");
-        filterStatusComboBox.addItem(K.status_1);
-        filterStatusComboBox.addItem(K.status_2);
-        filterStatusComboBox.addItem(K.status_3);
-        filterStatusComboBox.addItem(K.status_4);
+        filterStatusComboBox.addItem(K.productionStatus_1);
+        filterStatusComboBox.addItem(K.productionStatus_2);
+        filterStatusComboBox.addItem(K.productionStatus_3);
+        filterStatusComboBox.addItem(K.productionStatus_4);
     }
 
     public void showOrders(ResultSet orders, SystemController controller) throws SQLException {
@@ -220,7 +220,7 @@ public class OrdersPanel extends JPanel implements MainPanel, ActionListener, Pr
 
 
     void showDropBoxMessage() {
-        String[] options = {"Select Status", K.status_1, K.status_2, K.status_3, K.status_4};
+        String[] options = {"Select Status", K.productionStatus_1, K.productionStatus_2, K.productionStatus_3, K.productionStatus_4};
         String selectedStatus = (String)JOptionPane.showInputDialog(null, " \nChange order status:\n ",
                 "Update status", JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
 

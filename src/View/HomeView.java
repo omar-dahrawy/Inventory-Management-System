@@ -12,6 +12,7 @@ public class HomeView {
 
     private JPanel homePanel;
     private final OrdersPanel ordersPanel;
+    private final BatchesPanel batchesPanel;
     private final StoragePanel storagePanel;
     private final VendorsPanel vendorsPanel;
     private final FormulasPanel formulasPanel;
@@ -22,6 +23,7 @@ public class HomeView {
 
     public HomeView() {
         ordersPanel = new OrdersPanel(this);
+        batchesPanel = new BatchesPanel(this);
         storagePanel = new StoragePanel(this);
         vendorsPanel = new VendorsPanel(this);
         formulasPanel = new FormulasPanel(this);
@@ -38,16 +40,21 @@ public class HomeView {
         purchasesTabbedPane.add("General Purchases", generalPurchasesPanel);
         purchasesTabbedPane.add("Material Purchases", materialPurchasesPanel);
 
+        JTabbedPane productionTabbedPane = new JTabbedPane();
+        productionTabbedPane.add("Production Orders", productionPanel);
+        productionTabbedPane.add("Batches", batchesPanel);
+
         mainTabbedPane.add("Purchases", purchasesTabbedPane);
         mainTabbedPane.add("Materials", materialsTabbedPane);
         mainTabbedPane.add("Orders", ordersPanel);
-        mainTabbedPane.add("Production", productionPanel);
+        mainTabbedPane.add("Production", productionTabbedPane);
         mainTabbedPane.add("Formulas", formulasPanel);
         mainTabbedPane.add("Storage", storagePanel);
     }
 
     public void addActionListeners(SystemController controller) {
         ordersPanel.addActionListeners(controller);
+        batchesPanel.addActionListeners(controller);
         storagePanel.addActionListeners(controller);
         vendorsPanel.addActionListeners(controller);
         formulasPanel.addActionListeners(controller);
@@ -65,6 +72,10 @@ public class HomeView {
 
     public OrdersPanel getOrdersPanel() {
         return ordersPanel;
+    }
+
+    public BatchesPanel getBatchesPanel() {
+        return batchesPanel;
     }
 
     public StoragePanel getStoragePanel() {

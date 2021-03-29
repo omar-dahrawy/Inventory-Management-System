@@ -27,6 +27,7 @@ public class SystemController implements ActionListener, TableModelListener {
     private final SystemView view;
     private final HomeView homeView;
     private final OrdersPanel ordersPanel;
+    private final BatchesPanel batchesPanel;
     private final StoragePanel storagePanel;
     private final VendorsPanel vendorsPanel;
     private final FormulasPanel formulasPanel;
@@ -40,7 +41,6 @@ public class SystemController implements ActionListener, TableModelListener {
     private int currentUserID;
     private String currentUserType;
 
-
     private Connection databaseConnection;
     private Statement sqlStatement;
 
@@ -48,6 +48,7 @@ public class SystemController implements ActionListener, TableModelListener {
         this.view = view;
         this.homeView = view.getHomeView();
         this.ordersPanel = homeView.getOrdersPanel();
+        this.batchesPanel = homeView.getBatchesPanel();
         this.storagePanel = homeView.getStoragePanel();
         this.vendorsPanel = homeView.getVendorsPanel();
         this.formulasPanel = homeView.getFormulasPanel();
@@ -98,6 +99,7 @@ public class SystemController implements ActionListener, TableModelListener {
                     viewStorage();
                     getFormulas();
                     calculateFormulaPrices();
+                    viewBatches();
                     view.goToHome();
                 } else {
                     showMessage("Login Error", "Password is incorrect.");
@@ -393,7 +395,7 @@ public class SystemController implements ActionListener, TableModelListener {
                 PreparedStatement query = databaseConnection.prepareStatement(sql);
                 query.setString(1, customer);
                 query.setString(2, orderDetails);
-                query.setString(3, K.status_1);
+                query.setString(3, K.productionStatus_1);
                 query.setInt(4, currentUserID);
                 query.setDate(5, DOP);
                 query.setDate(6, DOD);
@@ -656,7 +658,7 @@ public class SystemController implements ActionListener, TableModelListener {
                 query.setInt(4, batchesNumber);
                 query.setArray(5,null);
                 query.setArray(6,ordersArray);
-                query.setString(7, K.status_1);
+                query.setString(7, K.productionStatus_1);
                 query.executeUpdate();
                 query.close();
                 showMessage("Operation successful", "New production added.");
@@ -1440,6 +1442,85 @@ public class SystemController implements ActionListener, TableModelListener {
     }
 
 
+    //  BATCHES
+
+
+    void viewBatches() {
+        if (checkViewStorage()) {
+            boolean batchesFilterSelected = batchesPanel.getFilterBatchSelected();
+            boolean productionFilterSelected = batchesPanel.getFilterProductionSelected();
+            boolean formulaFilterSelected = batchesPanel.getFilterFormulaSelected();
+            boolean statusFilterSelected = batchesPanel.getFilterStatusSelected();
+
+            String query;
+
+            if (batchesFilterSelected) {
+                query = "SELECT * FROM \"Batches\" WHERE \"Batch_serial\" = " + batchesPanel.getFilterBatch();
+            } else if (productionFilterSelected) {
+                query = "SELECT * FROM \"Batches\" WHERE \"Production_order\" = " + batchesPanel.getFilterProduction();
+            } else if (formulaFilterSelected) {
+                query = "SELECT * FROM \"Batches\" WHERE \"Formula_name\" = '" + batchesPanel.getFilterFormula() + "'";
+            } else if (statusFilterSelected) {
+                query = "SELECT * FROM \"Batches\" WHERE \"Batch_status\" = '" + batchesPanel.getFilterStatus() + "'";
+            } else {
+                query = "SELECT * FROM \"Batches\"";
+            }
+
+            try {
+                PreparedStatement materialsQuery = databaseConnection.prepareStatement(query, ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
+                ResultSet batches = materialsQuery.executeQuery();
+                homeView.getBatchesPanel().viewBatches(batches, this);
+            } catch (SQLException throwables) {
+                throwables.printStackTrace();
+                showErrorMessage("Error viewing batches", "Could not view batches", throwables.getLocalizedMessage());
+            }
+        }
+    }
+
+    void updateBatch(TableModelEvent e) {
+        if (checkUpdatePrivilege()) {
+            JTable batchesTable = batchesPanel.getBatchesTable();
+            int row = e.getFirstRow();
+            int column = e.getColumn();
+            String newValue = batchesTable.getValueAt(row, column).toString();
+            String columnName = batchesTable.getColumnName(column);
+            String serial = batchesTable.getValueAt(row, 0).toString();
+
+            String query = "UPDATE \"Batches\" SET \"" + columnName + "\" = '" + newValue + "' WHERE \"Batch_serial\" = " + serial;
+
+            try {
+                sqlStatement.executeUpdate(query);
+                showMessage("Update successful", "Batch updated successfully.");
+            } catch (SQLException throwables) {
+                showErrorMessage("Error performing operation", "Could not update batch. Please review the new values.", throwables.getLocalizedMessage());
+                throwables.printStackTrace();
+            }
+        }
+        viewBatches();
+    }
+
+    void deleteBatch() {
+        JTable batchesTable = batchesPanel.getBatchesTable();
+        if (batchesTable != null) {
+            if (batchesTable.getModel() != null) {
+                int row = batchesTable.getSelectedRow();
+                String serial = batchesTable.getValueAt(row, 0).toString();
+
+                String query = "DELETE FROM \"Batches\" WHERE \"Batch_serial\" = " + serial;
+
+                try {
+                    sqlStatement.executeUpdate(query);
+                    showMessage("Delete successful","Batch deleted successfully.");
+                } catch (SQLException throwables) {
+                    showErrorMessage("Error performing operation", "Could not delete batch.", throwables.getLocalizedMessage());
+                    throwables.printStackTrace();
+                }
+                viewBatches();
+            }
+        }
+    }
+
+
     //  OTHER METHODS
 
 
@@ -1582,6 +1663,14 @@ public class SystemController implements ActionListener, TableModelListener {
         } else if (e.getSource() == storagePanel.getDeleteStorageButton()) {
             deleteStorageItem();
         }
+
+        //  BATCHES
+
+        else if (e.getSource() == batchesPanel.getViewBatchesButton()) {
+            viewBatches();
+        } else if (e.getSource() == batchesPanel.getDeleteBatchButton()) {
+            deleteBatch();
+        }
     }
 
     @Override
@@ -1647,6 +1736,14 @@ public class SystemController implements ActionListener, TableModelListener {
                 if (e.getSource() == storagePanel.getStorageTable().getModel()) {
                     if (e.getType() == TableModelEvent.UPDATE) {
                         updateStorageItem(e);
+                    }
+                }
+            }
+        } if (batchesPanel.getBatchesTable() != null) {
+            if (batchesPanel.getBatchesTable().getModel() != null) {
+                if (e.getSource() == batchesPanel.getBatchesTable().getModel()) {
+                    if (e.getType() == TableModelEvent.UPDATE) {
+                        updateBatch(e);
                     }
                 }
             }
