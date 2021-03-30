@@ -2,7 +2,7 @@ package View.MainPanels;
 
 import Controller.SystemController;
 import Model.Constants;
-import View.AddProductionView;
+import View.HelperPanels.AddProductionView;
 import View.HomeView;
 
 import javax.swing.*;

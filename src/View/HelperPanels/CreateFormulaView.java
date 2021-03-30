@@ -1,6 +1,7 @@
-package View;
+package View.HelperPanels;
 
 import Controller.SystemController;
+import View.HomeView;
 
 import javax.swing.*;
 import java.awt.*;

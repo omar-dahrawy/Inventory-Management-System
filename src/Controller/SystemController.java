@@ -1,8 +1,8 @@
 package Controller;
 
 import Model.Constants;
-import View.AddProductionView;
-import View.CreateFormulaView;
+import View.HelperPanels.AddProductionView;
+import View.HelperPanels.CreateFormulaView;
 import View.HomeView;
 import View.MainPanels.*;
 import View.SystemView;
@@ -32,6 +32,7 @@ public class SystemController implements ActionListener, TableModelListener {
     private final VendorsPanel vendorsPanel;
     private final FormulasPanel formulasPanel;
     private final ProductionPanel productionPanel;
+    private final FormulaSpecsPanel formulaSpecsPanel;
     private final RawMaterialsPanel rawMaterialsPanel;
     private final GeneralPurchasesPanel generalPurchasesPanel;
     private final MaterialPurchasesPanel materialPurchasesPanel;
@@ -53,6 +54,7 @@ public class SystemController implements ActionListener, TableModelListener {
         this.vendorsPanel = homeView.getVendorsPanel();
         this.formulasPanel = homeView.getFormulasPanel();
         this.productionPanel = homeView.getProductionPanel();
+        this.formulaSpecsPanel = homeView.getFormulaSpecsPanel();
         this.rawMaterialsPanel = homeView.getRawMaterialsPanel();
         this.generalPurchasesPanel = homeView.getGeneralPurchasesPanel();
         this.materialPurchasesPanel = homeView.getMaterialPurchasesPanel();
@@ -98,6 +100,7 @@ public class SystemController implements ActionListener, TableModelListener {
                     viewOrders();
                     viewStorage();
                     getFormulas();
+                    getFormulaSpecs();
                     calculateFormulaPrices();
                     viewBatches();
                     view.goToHome();
@@ -959,6 +962,7 @@ public class SystemController implements ActionListener, TableModelListener {
             formulasPanel.getCreateFormulaView().dispatchEvent(new WindowEvent(formulasPanel.getCreateFormulaView(), WindowEvent.WINDOW_CLOSING));
             getFormulas();
             calculateFormulaPrices();
+            addFormulaSpecs(formulaName);
         } catch (SQLException throwables) {
             throwables.printStackTrace();
             showErrorMessage("Operation unsuccessful","Could not create new formula.", throwables.getLocalizedMessage());
@@ -1138,6 +1142,70 @@ public class SystemController implements ActionListener, TableModelListener {
                 getFormulas();
             }
         }
+    }
+
+
+    //  FORMULA SPECIFICATIONS
+
+
+    void addFormulaSpecs(String formulaName) {
+        String sql = "INSERT INTO \"Formula_Specifications\" VALUES(?, ?, ?, ?, ?, ?, ?, ?)";
+        try {
+            PreparedStatement query = databaseConnection.prepareStatement(sql);
+            query.setString(1, formulaName);
+            query.setString(2, "0 - 0");
+            query.setString(3, "0 - 0");
+            query.setString(4, "0 - 0");
+            query.setString(5, "0 - 0");
+            query.setString(6, "0 - 0");
+            query.setString(7, "0 - 0");
+            query.setString(8, "0 - 0");
+            query.executeUpdate();
+            query.close();
+            getFormulaSpecs();
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+    }
+
+    void getFormulaSpecs() {
+        String query;
+
+        if (formulaSpecsPanel.getFilterFormulasSelected()) {
+            query = "SELECT * FROM \"Formula_Specifications\" WHERE \"Formula_ID\" = '" + formulaSpecsPanel.getFilterFormula() + "'";
+        } else {
+            query = "SELECT * FROM \"Formula_Specifications\"";
+        }
+        try {
+            PreparedStatement formulasQuery = databaseConnection.prepareStatement(query, ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
+            ResultSet formulaSpecs = formulasQuery.executeQuery();
+            formulaSpecsPanel.getFormulasSpecs(formulaSpecs, this);
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+            showErrorMessage("Error performing operation", "Error viewing formula specifications.", throwables.getLocalizedMessage());
+        }
+    }
+
+    void updateFormulaSpecs(TableModelEvent e) {
+        if (checkUpdatePrivilege()) {
+            JTable formulaSpecsTable = formulaSpecsPanel.getSpecsTable();
+            int row = e.getFirstRow();
+            int column = e.getColumn();
+            String newValue = formulaSpecsTable.getValueAt(row, column).toString();
+            String columnName = formulaSpecsTable.getColumnName(column);
+            String id = formulaSpecsTable.getValueAt(row, 0).toString();
+
+            String query = "UPDATE \"Formula_Specifications\" SET \"" + columnName + "\" = '" + newValue + "' WHERE \"Formula_ID\" = '" + id + "'";
+
+            try {
+                sqlStatement.executeUpdate(query);
+                showMessage("Update successful", "Formula specification updated successfully.");
+            } catch (SQLException throwables) {
+                showErrorMessage("Error performing operation", "Could not update Formula specification. Please review the new values.", throwables.getLocalizedMessage());
+                throwables.printStackTrace();
+            }
+        }
+        getFormulaSpecs();
     }
 
 
@@ -1673,6 +1741,12 @@ public class SystemController implements ActionListener, TableModelListener {
             deleteFormula();
         }
 
+        //  FORMULA SPECIFICATIONS
+
+        else if (e.getSource() == formulaSpecsPanel.getViewSpecsButton()) {
+            getFormulaSpecs();
+        }
+
         //  VENDORS
 
         else if (e.getSource() == vendorsPanel.getAddVendorButton()) {
@@ -1783,6 +1857,14 @@ public class SystemController implements ActionListener, TableModelListener {
                 if (e.getSource() == batchesPanel.getBatchesTable().getModel()) {
                     if (e.getType() == TableModelEvent.UPDATE) {
                         updateBatch(e);
+                    }
+                }
+            }
+        } if (formulaSpecsPanel.getSpecsTable() != null) {
+            if (formulaSpecsPanel.getSpecsTable().getModel() != null) {
+                if (e.getSource() == formulaSpecsPanel.getSpecsTable().getModel()) {
+                    if (e.getType() == TableModelEvent.UPDATE) {
+                        updateFormulaSpecs(e);
                     }
                 }
             }

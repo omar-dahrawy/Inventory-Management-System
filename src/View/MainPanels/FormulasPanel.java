@@ -1,7 +1,7 @@
 package View.MainPanels;
 
 import Controller.SystemController;
-import View.CreateFormulaView;
+import View.HelperPanels.CreateFormulaView;
 import View.HomeView;
 
 import javax.swing.*;
@@ -66,6 +66,7 @@ public class FormulasPanel extends JPanel implements MainPanel {
         homeView.getProductionPanel().getFormulas();
         homeView.getStoragePanel().getFormulas();
         homeView.getBatchesPanel().getFormulas();
+        homeView.getFormulaSpecsPanel().getFormulas();
     }
 
     public void showCreateFormulaView(SystemController controller) {
