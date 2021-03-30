@@ -17,6 +17,7 @@ public class HomeView {
     private final VendorsPanel vendorsPanel;
     private final FormulasPanel formulasPanel;
     private final ProductionPanel productionPanel;
+    private final BatchSpecsPanel batchSpecsPanel;
     private final FormulaSpecsPanel formulaSpecsPanel;
     private final RawMaterialsPanel rawMaterialsPanel;
     private final GeneralPurchasesPanel generalPurchasesPanel;
@@ -29,6 +30,7 @@ public class HomeView {
         vendorsPanel = new VendorsPanel(this);
         formulasPanel = new FormulasPanel(this);
         productionPanel = new ProductionPanel(this);
+        batchSpecsPanel = new BatchSpecsPanel(this);
         formulaSpecsPanel = new FormulaSpecsPanel(this);
         rawMaterialsPanel = new RawMaterialsPanel(this);
         generalPurchasesPanel = new GeneralPurchasesPanel();
@@ -45,6 +47,7 @@ public class HomeView {
         JTabbedPane productionTabbedPane = new JTabbedPane();
         productionTabbedPane.add("Production Orders", productionPanel);
         productionTabbedPane.add("Batches", batchesPanel);
+        productionTabbedPane.add("Batch Specifications", batchSpecsPanel);
 
         JTabbedPane formulasTabbedPane = new JTabbedPane();
         formulasTabbedPane.add("Formulas", formulasPanel);
@@ -65,6 +68,7 @@ public class HomeView {
         vendorsPanel.addActionListeners(controller);
         formulasPanel.addActionListeners(controller);
         productionPanel.addActionListeners(controller);
+        batchSpecsPanel.addActionListeners(controller);
         formulaSpecsPanel.addActionListeners(controller);
         rawMaterialsPanel.addActionListeners(controller);
         generalPurchasesPanel.addActionListeners(controller);
@@ -99,6 +103,10 @@ public class HomeView {
 
     public ProductionPanel getProductionPanel() {
         return productionPanel;
+    }
+
+    public BatchSpecsPanel getBatchSpecsPanel() {
+        return batchSpecsPanel;
     }
 
     public FormulaSpecsPanel getFormulaSpecsPanel() {

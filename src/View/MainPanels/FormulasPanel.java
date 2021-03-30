@@ -67,6 +67,7 @@ public class FormulasPanel extends JPanel implements MainPanel {
         homeView.getStoragePanel().getFormulas();
         homeView.getBatchesPanel().getFormulas();
         homeView.getFormulaSpecsPanel().getFormulas();
+        homeView.getBatchSpecsPanel().getFormulas();
     }
 
     public void showCreateFormulaView(SystemController controller) {

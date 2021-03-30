@@ -1,7 +1,6 @@
 package View.MainPanels;
 
 import Controller.SystemController;
-import Model.Constants;
 import View.HomeView;
 
 import javax.swing.*;
@@ -11,10 +10,10 @@ import java.awt.event.ActionListener;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-public class FormulaSpecsPanel extends JPanel implements MainPanel, ActionListener {
+public class BatchSpecsPanel extends JPanel implements MainPanel, ActionListener {
 
     private final HomeView homeView;
-    private JPanel formulaSpecsPanel;
+    private JPanel batchSpecsPanel;
 
     //  VIEW STORAGE
 
@@ -22,27 +21,36 @@ public class FormulaSpecsPanel extends JPanel implements MainPanel, ActionListen
     private JPanel tablePanel;
 
     private JComboBox<String> filterFormulasComboBox;
+    private JTextField filterBatchField;
 
     private JRadioButton filterFormulasButton;
+    private JRadioButton filterBatchButton;
+    private ButtonGroup buttonGroup;
 
     private JButton viewSpecsButton;
     private JButton clearFiltersButton;
 
 
-    public FormulaSpecsPanel(HomeView homeView) {
+    public BatchSpecsPanel(HomeView homeView) {
         this.homeView = homeView;
         initializePanel();
     }
 
     private void initializePanel() {
         this.setLayout(new BorderLayout());
-        this.add(formulaSpecsPanel, BorderLayout.CENTER);
+        this.add(batchSpecsPanel, BorderLayout.CENTER);
 
         specsTable = new JTable();
         tablePanel.add(new JScrollPane(specsTable));
+
+        //  VIEW BATCHES SPECIFICATIONS
+
+        buttonGroup = new ButtonGroup();
+        buttonGroup.add(filterBatchButton);
+        buttonGroup.add(filterFormulasButton);
     }
 
-    public void getFormulasSpecs(ResultSet items, SystemController controller) throws SQLException {
+    public void getBatchSpecs(ResultSet items, SystemController controller) throws SQLException {
         int columnCount = items.getMetaData().getColumnCount();
         int rowCount = getRowCount(items);
 
@@ -64,7 +72,7 @@ public class FormulaSpecsPanel extends JPanel implements MainPanel, ActionListen
     }
 
 
-    //  VIEW FORMULA SPECIFICATIONS GETTERS
+    //  VIEW BATCHES SPECIFICATIONS GETTERS
 
 
     public JTable getSpecsTable() {
@@ -73,6 +81,14 @@ public class FormulaSpecsPanel extends JPanel implements MainPanel, ActionListen
 
     public String getFilterFormula() {
         return filterFormulasComboBox.getSelectedItem().toString();
+    }
+
+    public String getFilterBatch() {
+        return filterBatchField.getText();
+    }
+
+    public boolean getFilterBatchSelected() {
+        return filterBatchButton.isSelected();
     }
 
     public boolean getFilterFormulasSelected() {
@@ -143,6 +159,7 @@ public class FormulaSpecsPanel extends JPanel implements MainPanel, ActionListen
     @Override
     public void addActionListeners(SystemController controller) {
         filterFormulasButton.addActionListener(this);
+        filterBatchButton.addActionListener(this);
         viewSpecsButton.addActionListener(controller);
         clearFiltersButton.addActionListener(this);
     }
@@ -151,9 +168,11 @@ public class FormulaSpecsPanel extends JPanel implements MainPanel, ActionListen
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == clearFiltersButton) {
             filterFormulasComboBox.setEnabled(false);
-            filterFormulasButton.setSelected(false);
+            filterBatchField.setEnabled(false);
+            buttonGroup.clearSelection();
         } else {
-            filterFormulasComboBox.setEnabled(true);
+            filterFormulasComboBox.setEnabled(filterFormulasButton.isSelected());
+            filterBatchField.setEnabled(filterBatchButton.isSelected());
         }
     }
 }

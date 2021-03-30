@@ -32,6 +32,7 @@ public class SystemController implements ActionListener, TableModelListener {
     private final VendorsPanel vendorsPanel;
     private final FormulasPanel formulasPanel;
     private final ProductionPanel productionPanel;
+    private final BatchSpecsPanel batchSpecsPanel;
     private final FormulaSpecsPanel formulaSpecsPanel;
     private final RawMaterialsPanel rawMaterialsPanel;
     private final GeneralPurchasesPanel generalPurchasesPanel;
@@ -54,6 +55,7 @@ public class SystemController implements ActionListener, TableModelListener {
         this.vendorsPanel = homeView.getVendorsPanel();
         this.formulasPanel = homeView.getFormulasPanel();
         this.productionPanel = homeView.getProductionPanel();
+        this.batchSpecsPanel = homeView.getBatchSpecsPanel();
         this.formulaSpecsPanel = homeView.getFormulaSpecsPanel();
         this.rawMaterialsPanel = homeView.getRawMaterialsPanel();
         this.generalPurchasesPanel = homeView.getGeneralPurchasesPanel();
@@ -102,6 +104,7 @@ public class SystemController implements ActionListener, TableModelListener {
                     getFormulas();
                     getFormulaSpecs();
                     calculateFormulaPrices();
+                    getBatchSpecs();
                     viewBatches();
                     view.goToHome();
                 } else {
@@ -1149,7 +1152,7 @@ public class SystemController implements ActionListener, TableModelListener {
 
 
     void addFormulaSpecs(String formulaName) {
-        String sql = "INSERT INTO \"Formula_Specifications\" VALUES(?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO \"Formula_Specifications\" VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try {
             PreparedStatement query = databaseConnection.prepareStatement(sql);
             query.setString(1, formulaName);
@@ -1160,6 +1163,7 @@ public class SystemController implements ActionListener, TableModelListener {
             query.setString(6, "0 - 0");
             query.setString(7, "0 - 0");
             query.setString(8, "0 - 0");
+            query.setString(9, "0 - 0");
             query.executeUpdate();
             query.close();
             getFormulaSpecs();
@@ -1547,6 +1551,7 @@ public class SystemController implements ActionListener, TableModelListener {
             query.executeUpdate();
             query.close();
             viewProductions();
+            addBatchSpecs(batchesSerials, formulaName);
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
@@ -1625,6 +1630,78 @@ public class SystemController implements ActionListener, TableModelListener {
                 viewBatches();
             }
         }
+    }
+
+
+    //  BATCHES SPECIFICATIONS
+
+
+    void addBatchSpecs(Object [] batchSerials, String formulaName) {
+        for (int i = 0 ; i < batchSerials.length ; i++) {
+            int batchSerial = (int)batchSerials[i];
+            String sql = "INSERT INTO \"Batch_Specifications\" VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            try {
+                PreparedStatement query = databaseConnection.prepareStatement(sql);
+                query.setInt(1, batchSerial);
+                query.setString(2, formulaName);
+                query.setString(3, null);
+                query.setString(4, null);
+                query.setString(5, null);
+                query.setString(6, null);
+                query.setString(7, null);
+                query.setString(8, null);
+                query.setString(9, null);
+                query.setString(10, null);
+                query.setString(10, null);
+                query.executeUpdate();
+                query.close();
+            } catch (SQLException throwables) {
+                throwables.printStackTrace();
+            }
+        }
+        getBatchSpecs();
+    }
+
+    void getBatchSpecs() {
+        String query;
+
+        if (batchSpecsPanel.getFilterFormulasSelected()) {
+            query = "SELECT * FROM \"Batch_Specifications\" WHERE \"Formula_ID\" = '" + batchSpecsPanel.getFilterFormula() + "'";
+        } else if (batchSpecsPanel.getFilterBatchSelected()) {
+            query = "SELECT * FROM \"Batch_Specifications\" WHERE \"Batch_serial\" = " + batchSpecsPanel.getFilterBatch();
+        } else {
+            query = "SELECT * FROM \"Batch_Specifications\"";
+        }
+        try {
+            PreparedStatement formulasQuery = databaseConnection.prepareStatement(query, ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
+            ResultSet formulaSpecs = formulasQuery.executeQuery();
+            batchSpecsPanel.getBatchSpecs(formulaSpecs, this);
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+            showErrorMessage("Error performing operation", "Error viewing batch specifications.", throwables.getLocalizedMessage());
+        }
+    }
+
+    void updateBatchSpecs(TableModelEvent e) {
+        if (checkUpdatePrivilege()) {
+            JTable formulaSpecsTable = formulaSpecsPanel.getSpecsTable();
+            int row = e.getFirstRow();
+            int column = e.getColumn();
+            String newValue = formulaSpecsTable.getValueAt(row, column).toString();
+            String columnName = formulaSpecsTable.getColumnName(column);
+            String serial = formulaSpecsTable.getValueAt(row, 0).toString();
+
+            String query = "UPDATE \"Batch_Specifications\" SET \"" + columnName + "\" = '" + newValue + "' WHERE \"Batch_serial\" = " + serial;
+
+            try {
+                sqlStatement.executeUpdate(query);
+                showMessage("Update successful", "Batch specification updated successfully.");
+            } catch (SQLException throwables) {
+                showErrorMessage("Error performing operation", "Could not update Batch specification. Please review the new values.", throwables.getLocalizedMessage());
+                throwables.printStackTrace();
+            }
+        }
+        getBatchSpecs();
     }
 
 
@@ -1784,6 +1861,12 @@ public class SystemController implements ActionListener, TableModelListener {
         } else if (e.getSource() == batchesPanel.getDeleteBatchButton()) {
             deleteBatch();
         }
+
+        //  BATCHES SPECIFICATIONS
+
+        else if (e.getSource() == batchSpecsPanel.getViewSpecsButton()) {
+            getBatchSpecs();
+        }
     }
 
     @Override
@@ -1865,6 +1948,14 @@ public class SystemController implements ActionListener, TableModelListener {
                 if (e.getSource() == formulaSpecsPanel.getSpecsTable().getModel()) {
                     if (e.getType() == TableModelEvent.UPDATE) {
                         updateFormulaSpecs(e);
+                    }
+                }
+            }
+        } if (batchSpecsPanel.getSpecsTable() != null) {
+            if (batchSpecsPanel.getSpecsTable().getModel() != null) {
+                if (e.getSource() == batchSpecsPanel.getSpecsTable().getModel()) {
+                    if (e.getType() == TableModelEvent.UPDATE) {
+                        updateBatchSpecs(e);
                     }
                 }
             }
