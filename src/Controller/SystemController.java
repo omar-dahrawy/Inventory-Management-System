@@ -1684,24 +1684,62 @@ public class SystemController implements ActionListener, TableModelListener {
 
     void updateBatchSpecs(TableModelEvent e) {
         if (checkUpdatePrivilege()) {
-            JTable formulaSpecsTable = formulaSpecsPanel.getSpecsTable();
+            JTable specsTable = batchSpecsPanel.getSpecsTable();
             int row = e.getFirstRow();
             int column = e.getColumn();
-            String newValue = formulaSpecsTable.getValueAt(row, column).toString();
-            String columnName = formulaSpecsTable.getColumnName(column);
-            String serial = formulaSpecsTable.getValueAt(row, 0).toString();
+            String newValue = specsTable.getValueAt(row, column).toString();
+            String columnName = specsTable.getColumnName(column);
+            String serial = specsTable.getValueAt(row, 0).toString();
 
             String query = "UPDATE \"Batch_Specifications\" SET \"" + columnName + "\" = '" + newValue + "' WHERE \"Batch_serial\" = " + serial;
 
             try {
                 sqlStatement.executeUpdate(query);
                 showMessage("Update successful", "Batch specification updated successfully.");
+                checkBatchAcceptance(row, serial);
             } catch (SQLException throwables) {
                 showErrorMessage("Error performing operation", "Could not update Batch specification. Please review the new values.", throwables.getLocalizedMessage());
                 throwables.printStackTrace();
             }
         }
         getBatchSpecs();
+    }
+
+    void checkBatchAcceptance(int row, String serial) {
+        int columns = batchSpecsPanel.getSpecsTable().getColumnCount();
+        boolean isAccepted = true;
+        String formulaName = batchSpecsPanel.getSpecsTable().getValueAt(row, 1).toString();
+        try {
+            ResultSet formulaSpecs = sqlStatement.executeQuery("SELECT * FROM \"Formula_Specifications\" WHERE \"Formula_ID\" = '" + formulaName + "'");
+            formulaSpecs.next();
+            for (int i = 2 ; i < columns-1 ; i++) {
+                if (batchSpecsPanel.getSpecsTable().getValueAt(row, i) != null) {
+                    double batchSpec = Double.parseDouble(batchSpecsPanel.getSpecsTable().getValueAt(row, i).toString());
+                    String specRange = formulaSpecs.getString(i);
+                    if (!((batchSpec > Double.parseDouble(specRange.split(" - ")[0])) && (batchSpec < Double.parseDouble(specRange.split(" - ")[1])))) {
+                        isAccepted = false;
+                    }
+                } else {
+                    System.out.println("return");
+                    return;
+                }
+            }
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+        if (isAccepted) {
+            try {
+                sqlStatement.executeUpdate("UPDATE \"Batch_Specifications\" SET \"Acceptance\" = 'Accepted' WHERE \"Batch_serial\" = " + serial);
+            } catch (SQLException throwables) {
+                throwables.printStackTrace();
+            }
+        } else {
+            try {
+                sqlStatement.executeUpdate("UPDATE \"Batch_Specifications\" SET \"Acceptance\" = 'Not accepted' WHERE \"Batch_serial\" = " + serial);
+            } catch (SQLException throwables) {
+                throwables.printStackTrace();
+            }
+        }
     }
 
 
