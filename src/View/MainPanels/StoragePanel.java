@@ -66,7 +66,7 @@ public class StoragePanel extends JPanel implements MainPanel, ActionListener {
         int rowCount = getRowCount(items);
 
         String[] columnNames = getColumnNames(items, columnCount);
-        String [][] data = new String[rowCount][columnCount];
+        Object [][] data = new String[rowCount][columnCount];
 
         while (items.next()) {
             for (int i = 0 ; i < columnCount ; i++) {
