@@ -1284,89 +1284,39 @@ public class SystemController implements ActionListener, TableModelListener {
 
         String batchSerial = addBatchContainersView.getBatchSerial();
         String batchFormula = addBatchContainersView.getBatchFormula();
-        ArrayList<JPanel> tanksPanels = addBatchContainersView.getTanksPanels();
-        ArrayList<JPanel> pailsPanels = addBatchContainersView.getPailsPanels();
-        ArrayList<JPanel> drumsPanels = addBatchContainersView.getDrumsPanels();
-        ArrayList<JPanel> cartonsPanels = addBatchContainersView.getCartonsPanels();
-        ArrayList<JPanel> gallonsPanels = addBatchContainersView.getGallonsPanels();
 
-        Object [] batchSerials = {batchSerial};
+        ArrayList<JPanel>[] allPanels = new ArrayList[5];
+        allPanels[0] = (addBatchContainersView.getTanksPanels());
+        allPanels[1] = (addBatchContainersView.getPailsPanels());
+        allPanels[2] = (addBatchContainersView.getDrumsPanels());
+        allPanels[3] = (addBatchContainersView.getCartonsPanels());
+        allPanels[4] = (addBatchContainersView.getGallonsPanels());
 
-        addTanks(tanksPanels, batchSerial, batchFormula);
+        String[] containerTypes = new String[5];
+        containerTypes[0] = "Tank";
+        containerTypes[1] = "Pail";
+        containerTypes[2] = "Drum";
+        containerTypes[3] = "Carton";
+        containerTypes[4] = "Gallon";
 
-        for (JPanel panel : pailsPanels) {
-            String sql = "INSERT INTO \"Storage\" values(DEFAULT, ?, ?, ?, ?, ?)";
-            try {
-                Array batchSerialsArray = databaseConnection.createArrayOf("INTEGER", batchSerials);
-                PreparedStatement query = databaseConnection.prepareStatement(sql);
-                query.setString(1, batchFormula);
-                query.setString(2, "Pail");
-                query.setDouble(3, Double.parseDouble(((JTextField)panel.getComponent(1)).getText()));
-                query.setDouble(4, Double.parseDouble(((JTextField)panel.getComponent(2)).getText()));
-                query.setArray(5, batchSerialsArray);
-                query.executeUpdate();
-            } catch (SQLException throwables) {
-                throwables.printStackTrace();
-            }
+        for (int i = 0 ; i < 5 ; i++) {
+            addContainerItems(containerTypes[i], allPanels[i], batchSerial, batchFormula);
         }
-        for (JPanel panel : drumsPanels) {
-            String sql = "INSERT INTO \"Storage\" values(DEFAULT, ?, ?, ?, ?, ?)";
-            try {
-                Array batchSerialsArray = databaseConnection.createArrayOf("INTEGER", batchSerials);
-                PreparedStatement query = databaseConnection.prepareStatement(sql);
-                query.setString(1, batchFormula);
-                query.setString(2, "Drum");
-                query.setDouble(3, Double.parseDouble(((JTextField)panel.getComponent(1)).getText()));
-                query.setDouble(4, Double.parseDouble(((JTextField)panel.getComponent(2)).getText()));
-                query.setArray(5, batchSerialsArray);
-                query.executeUpdate();
-            } catch (SQLException throwables) {
-                throwables.printStackTrace();
-            }
-        }
-        for (JPanel panel : cartonsPanels) {
-            String sql = "INSERT INTO \"Storage\" values(DEFAULT, ?, ?, ?, ?, ?)";
-            try {
-                Array batchSerialsArray = databaseConnection.createArrayOf("INTEGER", batchSerials);
-                PreparedStatement query = databaseConnection.prepareStatement(sql);
-                query.setString(1, batchFormula);
-                query.setString(2, "Carton");
-                query.setDouble(3, Double.parseDouble(((JTextField)panel.getComponent(1)).getText()));
-                query.setDouble(4, Double.parseDouble(((JTextField)panel.getComponent(2)).getText()));
-                query.setArray(5, batchSerialsArray);
-                query.executeUpdate();
-            } catch (SQLException throwables) {
-                throwables.printStackTrace();
-            }
-        }
-        for (JPanel panel : gallonsPanels) {
-            String sql = "INSERT INTO \"Storage\" values(DEFAULT, ?, ?, ?, ?, ?)";
-            try {
-                Array batchSerialsArray = databaseConnection.createArrayOf("INTEGER", batchSerials);
-                PreparedStatement query = databaseConnection.prepareStatement(sql);
-                query.setString(1, batchFormula);
-                query.setString(2, "Gallon");
-                query.setDouble(3, Double.parseDouble(((JTextField)panel.getComponent(1)).getText()));
-                query.setDouble(4, Double.parseDouble(((JTextField)panel.getComponent(2)).getText()));
-                query.setArray(5, batchSerialsArray);
-                query.executeUpdate();
-            } catch (SQLException throwables) {
-                throwables.printStackTrace();
-            }
-        }
+
         addBatchContainersView.dispatchEvent(new WindowEvent(addBatchContainersView, WindowEvent.WINDOW_CLOSING));
         viewStorage();
     }
 
-    void addTanks(ArrayList<JPanel> tanksPanels, String batchSerial, String batchFormula) {
-        for (JPanel panel : tanksPanels) {
+    void addContainerItems(String containerType, ArrayList<JPanel> panels, String batchSerial, String batchFormula) {
+        for (JPanel panel : panels) {
             double quantity = Double.parseDouble(((JTextField)panel.getComponent(1)).getText());
             double weight = Double.parseDouble(((JTextField)panel.getComponent(2)).getText());
             try {
-                String select = "SELECT * FROM \"Storage\" WHERE \"Product_name\" = ? AND \"Container_type\" = 'Tank' AND \"Weight\" = ?";
+                String select = "SELECT * FROM \"Storage\" WHERE \"Product_name\" = ? AND \"Container_type\" = ? AND \"Weight\" = ?";
                 PreparedStatement query1 = databaseConnection.prepareStatement(select);
                 query1.setString(1, batchFormula);
-                query1.setDouble(2, weight);
+                query1.setString(2, containerType);
+                query1.setDouble(3, weight);
                 ResultSet storageItem = query1.executeQuery();
 
                 if (storageItem.next()) {
@@ -1383,12 +1333,13 @@ public class SystemController implements ActionListener, TableModelListener {
                     objectSerials[objectSerials.length-1] = batchSerial;
                     Array batchSerialsArray = databaseConnection.createArrayOf("INTEGER", objectSerials);
 
-                    String update = "UPDATE \"Storage\" SET \"Quantity\" = ?, \"Batch_serials\" = ? WHERE \"Product_name\" = ? AND \"Container_type\" = 'Tank' AND \"Weight\" = ?";
+                    String update = "UPDATE \"Storage\" SET \"Quantity\" = ?, \"Batch_serials\" = ? WHERE \"Product_name\" = ? AND \"Container_type\" = ? AND \"Weight\" = ?";
                     PreparedStatement query2 = databaseConnection.prepareStatement(update);
                     query2.setDouble(1, newQuantity);
                     query2.setArray(2, batchSerialsArray);
                     query2.setString(3, batchFormula);
-                    query2.setDouble(4, weight);
+                    query2.setString(4, containerType);
+                    query2.setDouble(5, weight);
                     query2.executeUpdate();
                 } else {
                     Object [] batchSerials = {batchSerial};
@@ -1397,7 +1348,7 @@ public class SystemController implements ActionListener, TableModelListener {
                     String insert = "INSERT INTO \"Storage\" values(DEFAULT, ?, ?, ?, ?, ?)";
                     PreparedStatement query2 = databaseConnection.prepareStatement(insert);
                     query2.setString(1, batchFormula);
-                    query2.setString(2, "Tank");
+                    query2.setString(2, containerType);
                     query2.setDouble(3, Double.parseDouble(((JTextField)panel.getComponent(1)).getText()));
                     query2.setDouble(4, Double.parseDouble(((JTextField)panel.getComponent(2)).getText()));
                     query2.setArray(5, batchSerialsArray);
