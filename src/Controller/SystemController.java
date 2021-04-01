@@ -1324,14 +1324,14 @@ public class SystemController implements ActionListener, TableModelListener {
                     double newQuantity = oldQuantity + quantity;
 
                     Array array = storageItem.getArray(6);
-                    Integer[] intSerials = (Integer[])array.getArray();
+                    String[] stringSerials = (String[])array.getArray();
 
-                    Object[] objectSerials = new Object[intSerials.length + 1];
+                    Object[] objectSerials = new Object[stringSerials.length + 1];
                     for (int i = 0 ; i < objectSerials.length-1 ; i++) {
-                        objectSerials[i] = intSerials[i];
+                        objectSerials[i] = stringSerials[i];
                     }
-                    objectSerials[objectSerials.length-1] = batchSerial;
-                    Array batchSerialsArray = databaseConnection.createArrayOf("INTEGER", objectSerials);
+                    objectSerials[objectSerials.length-1] = "Batch " + batchSerial + ": " + quantity;
+                    Array batchSerialsArray = databaseConnection.createArrayOf("VARCHAR", objectSerials);
 
                     String update = "UPDATE \"Storage\" SET \"Quantity\" = ?, \"Batch_serials\" = ? WHERE \"Product_name\" = ? AND \"Container_type\" = ? AND \"Weight\" = ?";
                     PreparedStatement query2 = databaseConnection.prepareStatement(update);
@@ -1342,15 +1342,15 @@ public class SystemController implements ActionListener, TableModelListener {
                     query2.setDouble(5, weight);
                     query2.executeUpdate();
                 } else {
-                    Object [] batchSerials = {batchSerial};
-                    Array batchSerialsArray = databaseConnection.createArrayOf("INTEGER", batchSerials);
+                    Object [] batchSerials = {"Batch " + batchSerial + ": " + quantity};
+                    Array batchSerialsArray = databaseConnection.createArrayOf("VARCHAR", batchSerials);
 
                     String insert = "INSERT INTO \"Storage\" values(DEFAULT, ?, ?, ?, ?, ?)";
                     PreparedStatement query2 = databaseConnection.prepareStatement(insert);
                     query2.setString(1, batchFormula);
                     query2.setString(2, containerType);
-                    query2.setDouble(3, Double.parseDouble(((JTextField)panel.getComponent(1)).getText()));
-                    query2.setDouble(4, Double.parseDouble(((JTextField)panel.getComponent(2)).getText()));
+                    query2.setDouble(3, quantity);
+                    query2.setDouble(4, weight);
                     query2.setArray(5, batchSerialsArray);
                     query2.executeUpdate();
                 }
