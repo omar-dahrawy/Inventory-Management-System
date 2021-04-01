@@ -1,6 +1,7 @@
 package Controller;
 
 import Model.Constants;
+import View.HelperPanels.AddBatchContainersView;
 import View.HelperPanels.AddProductionView;
 import View.HelperPanels.CreateFormulaView;
 import View.HomeView;
@@ -703,80 +704,6 @@ public class SystemController implements ActionListener, TableModelListener {
         return true;
     }
 
-    boolean checkAddProductionFields() {
-//        AddProductionView ApView = productionPanel.getAddProductionView();
-//        int count = 0;
-//
-//        for (JPanel panel: ApView.getTanksPanels()) {
-//            count++;
-//            double quantity = parseDouble(((JTextField)panel.getComponent(1)).getText());
-//            double weight = parseDouble(((JTextField)panel.getComponent(2)).getText());
-//            if (quantity == 0 || weight == 0) {
-//                showMessage("Error adding production","All tanks fields must not be 0 or empty");
-//                return false;
-//            } else if (quantity == -13.11 || weight == -13.11) {
-//                showMessage("Error adding production","All tanks fields must contain numbers");
-//                return false;
-//            }
-//        }
-//        for (JPanel panel: ApView.getDrumsPanels()) {
-//            count++;
-//            double quantity = parseDouble(((JTextField)panel.getComponent(1)).getText());
-//            double weight = parseDouble(((JTextField)panel.getComponent(2)).getText());
-//            if (quantity == 0 || weight == 0) {
-//                showMessage("Error adding production","All drums fields must not be 0 or empty");
-//                return false;
-//            } else if (quantity == -13.11 || weight == -13.11) {
-//                showMessage("Error adding production","All drums fields must contain numbers");
-//                return false;
-//            }
-//        }
-//        for (JPanel panel: ApView.getPailsPanels()) {
-//            count++;
-//            double quantity = parseDouble(((JTextField)panel.getComponent(1)).getText());
-//            double weight = parseDouble(((JTextField)panel.getComponent(2)).getText());
-//            if (quantity == 0 || weight == 0) {
-//                showMessage("Error adding production","All pails fields must not be 0 or empty");
-//                return false;
-//            } else if (quantity == -13.11 || weight == -13.11) {
-//                showMessage("Error adding production","All pails fields must contain numbers");
-//                return false;
-//            }
-//        }
-//        for (JPanel panel: ApView.getCartonsPanels()) {
-//            count++;
-//            double quantity = parseDouble(((JTextField)panel.getComponent(1)).getText());
-//            double weight = parseDouble(((JTextField)panel.getComponent(2)).getText());
-//            if (quantity == 0 || weight == 0) {
-//                showMessage("Error adding production","All cartons fields must not be 0 or empty");
-//                return false;
-//            } else if (quantity == -13.11 || weight == -13.11) {
-//                showMessage("Error adding production","All cartons fields must contain numbers");
-//                return false;
-//            }
-//        }
-//        for (JPanel panel: ApView.getGallonsPanels()) {
-//            count++;
-//            double quantity = parseDouble(((JTextField)panel.getComponent(1)).getText());
-//            double weight = parseDouble(((JTextField)panel.getComponent(2)).getText());
-//            if (quantity == 0 || weight == 0) {
-//                showMessage("Error adding production","All gallons fields must not be 0 or empty");
-//                return false;
-//            } else if (quantity == -13.11 || weight == -13.11) {
-//                showMessage("Error adding production","All gallons fields must contain numbers");
-//                return false;
-//            }
-//        }
-//
-//        if (count > 0) {
-//            return true;
-//        } else {
-//            showMessage("Error adding production","You must add at least one container");
-//            return false;
-//        }
-        return true;
-    }
-
     double parseDouble(String string) {
         if (!string.equals("")) {
             try {
@@ -865,9 +792,9 @@ public class SystemController implements ActionListener, TableModelListener {
             int column = e.getColumn();
             String newValue = productionTable.getValueAt(row, column).toString();
             String columnName = productionTable.getColumnName(column);
-            String serial = "'" + productionTable.getValueAt(row, 0).toString() + "'";
+            String id = "'" + productionTable.getValueAt(row, 0).toString() + "'";
 
-            String query = "UPDATE \"Production\" SET \"" + columnName + "\" = '" + newValue + "' WHERE \"Production_ID\" = " + serial;
+            String query = "UPDATE \"Production\" SET \"" + columnName + "\" = '" + newValue + "' WHERE \"Production_ID\" = " + id;
 
             try {
                 sqlStatement.executeUpdate(query);
@@ -1353,81 +1280,83 @@ public class SystemController implements ActionListener, TableModelListener {
 
 
     void addItemsToStorage() {
-//        AddProductionView ApView = productionPanel.getAddProductionView();
-//
-//        String formulaName = ApView.getApFormula();
-//        ArrayList<JPanel> tanksPanels = ApView.getTanksPanels();
-//        ArrayList<JPanel> pailsPanels = ApView.getPailsPanels();
-//        ArrayList<JPanel> drumsPanels = ApView.getDrumsPanels();
-//        ArrayList<JPanel> cartonsPanels = ApView.getCartonsPanels();
-//        ArrayList<JPanel> gallonsPanels = ApView.getGallonsPanels();
-//
-//        for (JPanel panel : tanksPanels) {
-//            String sql = "INSERT INTO \"Storage\" values(DEFAULT, ?, ?, ?, ?)";
-//            try {
-//                PreparedStatement query = databaseConnection.prepareStatement(sql);
-//                query.setString(1, formulaName);
-//                query.setString(2, "Tank");
-//                query.setDouble(3, Double.parseDouble(((JTextField)panel.getComponent(1)).getText()));
-//                query.setDouble(4, Double.parseDouble(((JTextField)panel.getComponent(2)).getText()));
-//                query.executeUpdate();
-//            } catch (SQLException throwables) {
-//                throwables.printStackTrace();
-//            }
-//        }
-//        for (JPanel panel : pailsPanels) {
-//            String sql = "INSERT INTO \"Storage\" values(DEFAULT, ?, ?, ?, ?)";
-//            try {
-//                PreparedStatement query = databaseConnection.prepareStatement(sql);
-//                query.setString(1, formulaName);
-//                query.setString(2, "Pail");
-//                query.setDouble(3, Double.parseDouble(((JTextField)panel.getComponent(1)).getText()));
-//                query.setDouble(4, Double.parseDouble(((JTextField)panel.getComponent(2)).getText()));
-//                query.executeUpdate();
-//            } catch (SQLException throwables) {
-//                throwables.printStackTrace();
-//            }
-//        }
-//        for (JPanel panel : drumsPanels) {
-//            String sql = "INSERT INTO \"Storage\" values(DEFAULT, ?, ?, ?, ?)";
-//            try {
-//                PreparedStatement query = databaseConnection.prepareStatement(sql);
-//                query.setString(1, formulaName);
-//                query.setString(2, "Drum");
-//                query.setDouble(3, Double.parseDouble(((JTextField)panel.getComponent(1)).getText()));
-//                query.setDouble(4, Double.parseDouble(((JTextField)panel.getComponent(2)).getText()));
-//                query.executeUpdate();
-//            } catch (SQLException throwables) {
-//                throwables.printStackTrace();
-//            }
-//        }
-//        for (JPanel panel : cartonsPanels) {
-//            String sql = "INSERT INTO \"Storage\" values(DEFAULT, ?, ?, ?, ?)";
-//            try {
-//                PreparedStatement query = databaseConnection.prepareStatement(sql);
-//                query.setString(1, formulaName);
-//                query.setString(2, "Carton");
-//                query.setDouble(3, Double.parseDouble(((JTextField)panel.getComponent(1)).getText()));
-//                query.setDouble(4, Double.parseDouble(((JTextField)panel.getComponent(2)).getText()));
-//                query.executeUpdate();
-//            } catch (SQLException throwables) {
-//                throwables.printStackTrace();
-//            }
-//        }
-//        for (JPanel panel : gallonsPanels) {
-//            String sql = "INSERT INTO \"Storage\" values(DEFAULT, ?, ?, ?, ?)";
-//            try {
-//                PreparedStatement query = databaseConnection.prepareStatement(sql);
-//                query.setString(1, formulaName);
-//                query.setString(2, "Gallon");
-//                query.setDouble(3, Double.parseDouble(((JTextField)panel.getComponent(1)).getText()));
-//                query.setDouble(4, Double.parseDouble(((JTextField)panel.getComponent(2)).getText()));
-//                query.executeUpdate();
-//            } catch (SQLException throwables) {
-//                throwables.printStackTrace();
-//            }
-//        }
-//        viewStorage();
+        AddBatchContainersView addBatchContainersView = batchesPanel.getAddBatchContainersView();
+
+        String batchSerial = addBatchContainersView.getBatchSerial();
+        String batchFormula = addBatchContainersView.getBatchFormula();
+        ArrayList<JPanel> tanksPanels = addBatchContainersView.getTanksPanels();
+        ArrayList<JPanel> pailsPanels = addBatchContainersView.getPailsPanels();
+        ArrayList<JPanel> drumsPanels = addBatchContainersView.getDrumsPanels();
+        ArrayList<JPanel> cartonsPanels = addBatchContainersView.getCartonsPanels();
+        ArrayList<JPanel> gallonsPanels = addBatchContainersView.getGallonsPanels();
+
+        for (JPanel panel : tanksPanels) {
+            String sql = "INSERT INTO \"Storage\" values(DEFAULT, ?, ?, ?, ?)";
+            try {
+                PreparedStatement query = databaseConnection.prepareStatement(sql);
+                query.setString(1, batchFormula);
+                query.setString(2, "Tank");
+                query.setDouble(3, Double.parseDouble(((JTextField)panel.getComponent(1)).getText()));
+                query.setDouble(4, Double.parseDouble(((JTextField)panel.getComponent(2)).getText()));
+                query.executeUpdate();
+            } catch (SQLException throwables) {
+                throwables.printStackTrace();
+            }
+        }
+        for (JPanel panel : pailsPanels) {
+            String sql = "INSERT INTO \"Storage\" values(DEFAULT, ?, ?, ?, ?)";
+            try {
+                PreparedStatement query = databaseConnection.prepareStatement(sql);
+                query.setString(1, batchFormula);
+                query.setString(2, "Pail");
+                query.setDouble(3, Double.parseDouble(((JTextField)panel.getComponent(1)).getText()));
+                query.setDouble(4, Double.parseDouble(((JTextField)panel.getComponent(2)).getText()));
+                query.executeUpdate();
+            } catch (SQLException throwables) {
+                throwables.printStackTrace();
+            }
+        }
+        for (JPanel panel : drumsPanels) {
+            String sql = "INSERT INTO \"Storage\" values(DEFAULT, ?, ?, ?, ?)";
+            try {
+                PreparedStatement query = databaseConnection.prepareStatement(sql);
+                query.setString(1, batchFormula);
+                query.setString(2, "Drum");
+                query.setDouble(3, Double.parseDouble(((JTextField)panel.getComponent(1)).getText()));
+                query.setDouble(4, Double.parseDouble(((JTextField)panel.getComponent(2)).getText()));
+                query.executeUpdate();
+            } catch (SQLException throwables) {
+                throwables.printStackTrace();
+            }
+        }
+        for (JPanel panel : cartonsPanels) {
+            String sql = "INSERT INTO \"Storage\" values(DEFAULT, ?, ?, ?, ?)";
+            try {
+                PreparedStatement query = databaseConnection.prepareStatement(sql);
+                query.setString(1, batchFormula);
+                query.setString(2, "Carton");
+                query.setDouble(3, Double.parseDouble(((JTextField)panel.getComponent(1)).getText()));
+                query.setDouble(4, Double.parseDouble(((JTextField)panel.getComponent(2)).getText()));
+                query.executeUpdate();
+            } catch (SQLException throwables) {
+                throwables.printStackTrace();
+            }
+        }
+        for (JPanel panel : gallonsPanels) {
+            String sql = "INSERT INTO \"Storage\" values(DEFAULT, ?, ?, ?, ?)";
+            try {
+                PreparedStatement query = databaseConnection.prepareStatement(sql);
+                query.setString(1, batchFormula);
+                query.setString(2, "Gallon");
+                query.setDouble(3, Double.parseDouble(((JTextField)panel.getComponent(1)).getText()));
+                query.setDouble(4, Double.parseDouble(((JTextField)panel.getComponent(2)).getText()));
+                query.executeUpdate();
+            } catch (SQLException throwables) {
+                throwables.printStackTrace();
+            }
+        }
+        addBatchContainersView.dispatchEvent(new WindowEvent(addBatchContainersView, WindowEvent.WINDOW_CLOSING));
+        viewStorage();
     }
 
     void viewStorage() {
@@ -1602,6 +1531,9 @@ public class SystemController implements ActionListener, TableModelListener {
             try {
                 sqlStatement.executeUpdate(query);
                 showMessage("Update successful", "Batch updated successfully.");
+                if (columnName.equals("Batch_status") && newValue.equals(K.batchStatus_3)) {
+                    batchesPanel.showAddBatchContainersView(this, serial, batchesTable.getValueAt(row,2).toString());
+                }
             } catch (SQLException throwables) {
                 showErrorMessage("Error performing operation", "Could not update batch. Please review the new values.", throwables.getLocalizedMessage());
                 throwables.printStackTrace();
@@ -1628,6 +1560,79 @@ public class SystemController implements ActionListener, TableModelListener {
                 }
                 viewBatches();
             }
+        }
+    }
+
+    boolean checkAddBatchContainersFields() {
+        AddBatchContainersView addBatchContainersView = batchesPanel.getAddBatchContainersView();
+        int count = 0;
+
+        for (JPanel panel: addBatchContainersView.getTanksPanels()) {
+            count++;
+            double quantity = parseDouble(((JTextField)panel.getComponent(1)).getText());
+            double weight = parseDouble(((JTextField)panel.getComponent(2)).getText());
+            if (quantity == 0 || weight == 0) {
+                showMessage("Error adding production","All tanks fields must not be 0 or empty");
+                return false;
+            } else if (quantity == -13.11 || weight == -13.11) {
+                showMessage("Error adding production","All tanks fields must contain numbers");
+                return false;
+            }
+        }
+        for (JPanel panel: addBatchContainersView.getDrumsPanels()) {
+            count++;
+            double quantity = parseDouble(((JTextField)panel.getComponent(1)).getText());
+            double weight = parseDouble(((JTextField)panel.getComponent(2)).getText());
+            if (quantity == 0 || weight == 0) {
+                showMessage("Error adding production","All drums fields must not be 0 or empty");
+                return false;
+            } else if (quantity == -13.11 || weight == -13.11) {
+                showMessage("Error adding production","All drums fields must contain numbers");
+                return false;
+            }
+        }
+        for (JPanel panel: addBatchContainersView.getPailsPanels()) {
+            count++;
+            double quantity = parseDouble(((JTextField)panel.getComponent(1)).getText());
+            double weight = parseDouble(((JTextField)panel.getComponent(2)).getText());
+            if (quantity == 0 || weight == 0) {
+                showMessage("Error adding production","All pails fields must not be 0 or empty");
+                return false;
+            } else if (quantity == -13.11 || weight == -13.11) {
+                showMessage("Error adding production","All pails fields must contain numbers");
+                return false;
+            }
+        }
+        for (JPanel panel: addBatchContainersView.getCartonsPanels()) {
+            count++;
+            double quantity = parseDouble(((JTextField)panel.getComponent(1)).getText());
+            double weight = parseDouble(((JTextField)panel.getComponent(2)).getText());
+            if (quantity == 0 || weight == 0) {
+                showMessage("Error adding production","All cartons fields must not be 0 or empty");
+                return false;
+            } else if (quantity == -13.11 || weight == -13.11) {
+                showMessage("Error adding production","All cartons fields must contain numbers");
+                return false;
+            }
+        }
+        for (JPanel panel: addBatchContainersView.getGallonsPanels()) {
+            count++;
+            double quantity = parseDouble(((JTextField)panel.getComponent(1)).getText());
+            double weight = parseDouble(((JTextField)panel.getComponent(2)).getText());
+            if (quantity == 0 || weight == 0) {
+                showMessage("Error adding production","All gallons fields must not be 0 or empty");
+                return false;
+            } else if (quantity == -13.11 || weight == -13.11) {
+                showMessage("Error adding production","All gallons fields must contain numbers");
+                return false;
+            }
+        }
+
+        if (count > 0) {
+            return true;
+        } else {
+            showMessage("Error adding production","You must add at least one container");
+            return false;
         }
     }
 
@@ -1772,7 +1777,7 @@ public class SystemController implements ActionListener, TableModelListener {
 
     void showErrorMessage(String title, String message, String exception) {
         String[] options = {"Ok", "More info"};
-        int x = JOptionPane.showOptionDialog(null, message, title, JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE, null, options, options[0]);
+        int x = JOptionPane.showOptionDialog(null, message, title, JOptionPane.DEFAULT_OPTION, JOptionPane.ERROR_MESSAGE, null, options, options[0]);
         if (x == 1) {
             showMessage(title, exception);
         }
@@ -1888,6 +1893,8 @@ public class SystemController implements ActionListener, TableModelListener {
             viewBatches();
         } else if (e.getSource() == batchesPanel.getDeleteBatchButton()) {
             deleteBatch();
+        } else if (e.getActionCommand().equals("Add batch containers")) {
+            addItemsToStorage();
         }
 
         //  BATCHES SPECIFICATIONS

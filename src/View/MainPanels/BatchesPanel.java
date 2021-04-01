@@ -2,16 +2,19 @@ package View.MainPanels;
 
 import Controller.SystemController;
 import Model.Constants;
+import View.HelperPanels.AddBatchContainersView;
 import View.HomeView;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-public class BatchesPanel extends JPanel implements MainPanel, ActionListener {
+public class BatchesPanel extends JPanel implements MainPanel, ActionListener, PropertyChangeListener {
 
     private JPanel batchesPanel;
     private HomeView homeView;
@@ -36,6 +39,8 @@ public class BatchesPanel extends JPanel implements MainPanel, ActionListener {
     private JButton viewBatchesButton;
     private JButton deleteBatchButton;
     private JButton clearFiltersButton;
+
+    private AddBatchContainersView addBatchContainersView;
 
     public BatchesPanel(HomeView homeView) {
         this.homeView = homeView;
@@ -80,11 +85,20 @@ public class BatchesPanel extends JPanel implements MainPanel, ActionListener {
         setTableFont(batchesTable);
         tablePanel.remove(0);
         tablePanel.add(new JScrollPane(batchesTable));
+
         batchesTable.getModel().addTableModelListener(controller);
+        batchesTable.addPropertyChangeListener(this);
 
         this.validate();
     }
 
+    public void showAddBatchContainersView(SystemController controller, String batchSerial, String formulaName) {
+        addBatchContainersView = new AddBatchContainersView(controller, homeView, batchSerial, formulaName);
+    }
+
+    public AddBatchContainersView getAddBatchContainersView() {
+        return addBatchContainersView;
+    }
 
     //  VIEW BATCHES GETTERS
 
@@ -147,6 +161,17 @@ public class BatchesPanel extends JPanel implements MainPanel, ActionListener {
         for (int i = 0 ; i < rowCount ; i++) {
             filterFormulasComboBox.addItem(formulasTable.getValueAt(i, 0).toString());
         }
+    }
+
+    void showDropBoxMessage() {
+        String[] options = {"Select Status", K.batchStatus_1, K.batchStatus_2, K.batchStatus_3};
+
+        String selectedStatus = (String)JOptionPane.showInputDialog(null, " \nChange batch status:\n ",
+                "Update status", JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
+
+        int row = batchesTable.getSelectedRow();
+        int column = batchesTable.getSelectedColumn();
+        batchesTable.setValueAt(selectedStatus, row, column);
     }
 
     @Override
@@ -214,6 +239,17 @@ public class BatchesPanel extends JPanel implements MainPanel, ActionListener {
             filterProductionField.setEnabled(filterProductionButton.isSelected());
             filterFormulasComboBox.setEnabled(filterFormulaButton.isSelected());
             filterStatusComboBox.setEnabled(filterStatusButton.isSelected());
+        }
+    }
+
+    @Override
+    public void propertyChange(PropertyChangeEvent evt) {
+        if (evt.getSource() == batchesTable) {
+            if (evt.getPropertyName().equals("tableCellEditor")) {
+                if (batchesTable.getColumnName(batchesTable.getSelectedColumn()).equals("Batch_status")) {
+                    showDropBoxMessage();
+                }
+            }
         }
     }
 }

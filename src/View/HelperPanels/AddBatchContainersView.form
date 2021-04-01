@@ -15,30 +15,21 @@
         <properties>
           <enabled value="true"/>
           <font size="18" style="1"/>
-          <text value="Add a New Production"/>
+          <text value="Add Batch Containers"/>
         </properties>
       </component>
-      <vspacer id="e6d85">
+      <component id="97551" class="javax.swing.JLabel" binding="batchSerialLabel">
         <constraints>
-          <grid row="2" column="2" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
-          <gridbag weightx="0.0" weighty="0.05"/>
-        </constraints>
-      </vspacer>
-      <component id="97551" class="javax.swing.JLabel">
-        <constraints>
-          <grid row="3" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+          <grid row="3" column="2" row-span="1" col-span="3" vsize-policy="0" hsize-policy="0" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
           <gridbag weightx="0.0" weighty="0.0"/>
         </constraints>
         <properties>
-          <text value="Choose a Formula"/>
+          <font size="14"/>
+          <horizontalAlignment value="0"/>
+          <horizontalTextPosition value="0"/>
+          <text value="Batch serial:"/>
         </properties>
       </component>
-      <vspacer id="17b1d">
-        <constraints>
-          <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
-          <gridbag weightx="0.0" weighty="0.005"/>
-        </constraints>
-      </vspacer>
       <hspacer id="500b3">
         <constraints>
           <grid row="2" column="1" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
@@ -51,27 +42,9 @@
           <gridbag weightx="0.3" weighty="0.0"/>
         </constraints>
       </hspacer>
-      <hspacer id="10b00">
-        <constraints>
-          <grid row="3" column="3" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
-          <gridbag weightx="0.1" weighty="0.0"/>
-        </constraints>
-      </hspacer>
-      <vspacer id="5a9bc">
-        <constraints>
-          <grid row="4" column="2" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
-          <gridbag weightx="0.0" weighty="0.05"/>
-        </constraints>
-      </vspacer>
-      <vspacer id="93752">
-        <constraints>
-          <grid row="12" column="2" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
-          <gridbag weightx="0.0" weighty="0.05"/>
-        </constraints>
-      </vspacer>
       <scrollpane id="a2fd">
         <constraints>
-          <grid row="13" column="1" row-span="1" col-span="5" vsize-policy="7" hsize-policy="7" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+          <grid row="7" column="1" row-span="1" col-span="5" vsize-policy="7" hsize-policy="7" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
           <gridbag weightx="0.0" weighty="0.3"/>
         </constraints>
         <properties>
@@ -158,129 +131,69 @@
       </scrollpane>
       <hspacer id="41a09">
         <constraints>
-          <grid row="13" column="0" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+          <grid row="7" column="0" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
           <gridbag weightx="0.0" weighty="0.0"/>
         </constraints>
       </hspacer>
       <hspacer id="a38da">
         <constraints>
-          <grid row="13" column="6" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+          <grid row="7" column="6" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
           <gridbag weightx="0.0" weighty="0.0"/>
         </constraints>
       </hspacer>
       <vspacer id="44a6e">
         <constraints>
-          <grid row="14" column="0" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
-          <gridbag weightx="0.0" weighty="0.1"/>
+          <grid row="8" column="0" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
+          <gridbag weightx="0.0" weighty="0.03"/>
         </constraints>
       </vspacer>
       <vspacer id="b3239">
         <constraints>
-          <grid row="16" column="0" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
-          <gridbag weightx="0.0" weighty="0.1"/>
+          <grid row="10" column="0" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
+          <gridbag weightx="0.0" weighty="0.03"/>
         </constraints>
       </vspacer>
       <component id="4f35f" class="javax.swing.JButton" binding="ApAddButton" default-binding="true">
         <constraints>
-          <grid row="15" column="2" row-span="1" col-span="3" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+          <grid row="9" column="2" row-span="1" col-span="3" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
           <gridbag weightx="0.0" weighty="0.0"/>
         </constraints>
         <properties>
           <preferredSize width="50" height="35"/>
-          <text value="Add Production"/>
-        </properties>
-      </component>
-      <component id="7ff56" class="javax.swing.JComboBox" binding="ApFormulasComboBox">
-        <constraints>
-          <grid row="3" column="4" row-span="1" col-span="1" vsize-policy="0" hsize-policy="2" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
-          <gridbag weightx="0.5" weighty="0.0"/>
-        </constraints>
-        <properties/>
-      </component>
-      <component id="ee816" class="javax.swing.JLabel">
-        <constraints>
-          <grid row="5" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-          <gridbag weightx="0.0" weighty="0.0"/>
-        </constraints>
-        <properties>
-          <text value="Production quantity"/>
-        </properties>
-      </component>
-      <vspacer id="4a95">
-        <constraints>
-          <grid row="6" column="2" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
-          <gridbag weightx="0.0" weighty="0.05"/>
-        </constraints>
-      </vspacer>
-      <vspacer id="43f37">
-        <constraints>
-          <grid row="10" column="2" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
-          <gridbag weightx="0.0" weighty="0.05"/>
-        </constraints>
-      </vspacer>
-      <component id="5eef2" class="javax.swing.JLabel">
-        <constraints>
-          <grid row="9" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-          <gridbag weightx="0.0" weighty="0.0"/>
-        </constraints>
-        <properties>
-          <text value="Order IDs"/>
+          <text value="Add batch containers"/>
         </properties>
       </component>
       <component id="cad50" class="javax.swing.JSeparator">
         <constraints>
-          <grid row="11" column="1" row-span="1" col-span="5" vsize-policy="6" hsize-policy="6" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+          <grid row="5" column="1" row-span="1" col-span="5" vsize-policy="6" hsize-policy="6" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
           <gridbag weightx="0.0" weighty="0.0"/>
         </constraints>
         <properties/>
       </component>
-      <component id="46996" class="javax.swing.JTextField" binding="ApProductionQuantityField">
+      <vspacer id="65b3b">
         <constraints>
-          <grid row="5" column="4" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
-            <preferred-size width="150" height="-1"/>
-          </grid>
+          <grid row="6" column="0" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
           <gridbag weightx="0.0" weighty="0.0"/>
         </constraints>
-        <properties/>
-      </component>
-      <scrollpane id="56424">
+      </vspacer>
+      <vspacer id="7d86d">
         <constraints>
-          <grid row="9" column="4" row-span="1" col-span="1" vsize-policy="7" hsize-policy="7" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
-          <gridbag weightx="0.0" weighty="0.2"/>
-        </constraints>
-        <properties/>
-        <border type="none"/>
-        <children>
-          <component id="8c859" class="javax.swing.JTextArea" binding="ApOrdersArea">
-            <constraints/>
-            <properties/>
-          </component>
-        </children>
-      </scrollpane>
-      <component id="6d676" class="javax.swing.JTextField" binding="ApBatchQuantityField">
-        <constraints>
-          <grid row="7" column="4" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
-            <preferred-size width="150" height="-1"/>
-          </grid>
+          <grid row="4" column="0" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
           <gridbag weightx="0.0" weighty="0.0"/>
         </constraints>
-        <properties/>
-      </component>
-      <vspacer id="2c96">
+      </vspacer>
+      <vspacer id="448f2">
         <constraints>
-          <grid row="8" column="2" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
+          <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
           <gridbag weightx="0.0" weighty="0.05"/>
         </constraints>
       </vspacer>
-      <component id="2f87c" class="javax.swing.JLabel">
+      <vspacer id="8fd9b">
         <constraints>
-          <grid row="7" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-          <gridbag weightx="0.0" weighty="0.0"/>
+          <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
+          <gridbag weightx="0.0" weighty="0.005"/>
         </constraints>
-        <properties>
-          <text value="Batch quantity"/>
-        </properties>
-      </component>
+      </vspacer>
     </children>
   </grid>
 </form>

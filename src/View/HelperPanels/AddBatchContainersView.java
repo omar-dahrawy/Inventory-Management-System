@@ -19,10 +19,6 @@ public class AddBatchContainersView extends JFrame implements ActionListener {
 
     private JPanel ApPanel;
 
-    private JComboBox ApFormulasComboBox;
-    private JTextField ApProductionQuantityField;
-    private JTextField ApBatchQuantityField;
-    private JTextArea ApOrdersArea;
     private JButton ApAddButton;
 
     private JPanel packagingPanel;
@@ -32,6 +28,7 @@ public class AddBatchContainersView extends JFrame implements ActionListener {
     private JPanel pailsPanel;
     private JPanel cartonsPanel;
     private JPanel gallonsPanel;
+    private JLabel batchSerialLabel;
 
     private JLabel tanksLabel;
     private JLabel drumsLabel;
@@ -51,12 +48,17 @@ public class AddBatchContainersView extends JFrame implements ActionListener {
     private ArrayList<JPanel> cartonsPanels;
     private ArrayList<JPanel> gallonsPanels;
 
+    private String batchSerial;
+    private String batchFormula;
 
-    public AddBatchContainersView(SystemController controller, HomeView homeView) {
+    public AddBatchContainersView(SystemController controller, HomeView homeView, String batchSerial, String formulaName) {
         this.controller = controller;
         this.homeView = homeView;
+        batchSerialLabel.setText("Batch serial: " + batchSerial);
 
-        getFormulas();
+        this.batchSerial = batchSerial;
+        this.batchFormula = formulaName;
+
         add(ApPanel);
 
         initializeTanksPanel();
@@ -72,51 +74,6 @@ public class AddBatchContainersView extends JFrame implements ActionListener {
 
         setResizable(false);
         setVisible(true);
-    }
-
-    private void getFormulas() {
-        int formulasCount = homeView.getFormulasPanel().getFormulasTable().getRowCount();
-        ApFormulasComboBox.addItem("Select Formula");
-
-        for (int i = 0 ; i < formulasCount ; i++) {
-            ApFormulasComboBox.addItem(homeView.getFormulasPanel().getFormulasTable().getValueAt(i, 0));
-        }
-
-    }
-
-    public String getApFormula() {
-        return ApFormulasComboBox.getSelectedItem().toString();
-    }
-
-    public Double getApProductionQuantity() {
-        if (!ApProductionQuantityField.getText().equals("")) {
-            try {
-                return Double.parseDouble(ApProductionQuantityField.getText());
-            } catch (NumberFormatException e) {
-                e.printStackTrace();
-            }
-        } else {
-            return 0.0;
-        }
-        return -13.11;
-    }
-
-    public Double getApBatchQuantity() {
-        if (!ApBatchQuantityField.getText().equals("")) {
-            try {
-                return Double.parseDouble(ApBatchQuantityField.getText());
-            } catch (NumberFormatException e) {
-                e.printStackTrace();
-            }
-        } else {
-            return 0.0;
-        }
-        return -13.11;
-    }
-
-    public Object[] getApOrders() {
-        Object[] array = ApOrdersArea.getText().split("\n");
-        return array;
     }
 
     private void initializeTanksPanel() {
@@ -276,6 +233,14 @@ public class AddBatchContainersView extends JFrame implements ActionListener {
         packagingPanel.setPreferredSize(new Dimension(0,packagingPanel.getHeight()+70));
 
         return newPanel;
+    }
+
+    public String getBatchFormula() {
+        return batchFormula;
+    }
+
+    public String getBatchSerial() {
+        return batchSerial;
     }
 
     @Override

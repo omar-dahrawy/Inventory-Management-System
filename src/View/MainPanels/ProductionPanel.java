@@ -178,7 +178,8 @@ public class ProductionPanel extends JPanel implements MainPanel, PropertyChange
 
     void showDropBoxMessage() {
         String[] options = {"Select Status", K.productionStatus_1, K.productionStatus_2, K.productionStatus_3, K.productionStatus_4};
-        String selectedStatus = (String)JOptionPane.showInputDialog(null, " \nChange order status:\n ",
+
+        String selectedStatus = (String)JOptionPane.showInputDialog(null, " \nChange production status:\n ",
                 "Update status", JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
 
         int row = productionTable.getSelectedRow();
@@ -221,10 +222,11 @@ public class ProductionPanel extends JPanel implements MainPanel, PropertyChange
 
     @Override
     public void setTableFont(JTable table) {
-        Font font = new Font(table.getFont().getName(), table.getFont().getStyle(), 15);
-        table.setFont(font);
+        Font tableFont = new Font(table.getFont().getName(), table.getFont().getStyle(), 15);
+        Font headerFont = new Font(table.getFont().getName(), table.getFont().getStyle(), 14);
+        table.setFont(tableFont);
         table.setRowHeight(25);
-        table.getTableHeader().setFont(font);
+        table.getTableHeader().setFont(headerFont);
     }
 
     @Override
