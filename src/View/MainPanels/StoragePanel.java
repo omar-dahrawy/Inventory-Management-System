@@ -2,16 +2,19 @@ package View.MainPanels;
 
 import Controller.SystemController;
 import Model.Constants;
+import View.HelperPanels.ShowItemBatches;
 import View.HomeView;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-public class StoragePanel extends JPanel implements MainPanel, ActionListener {
+public class StoragePanel extends JPanel implements MainPanel, ActionListener, PropertyChangeListener {
 
     private final HomeView homeView;
     private JPanel storagePanel;
@@ -77,8 +80,9 @@ public class StoragePanel extends JPanel implements MainPanel, ActionListener {
         setTableFont(storageTable);
         tablePanel.remove(0);
         tablePanel.add(new JScrollPane(storageTable));
-        storageTable.getModel().addTableModelListener(controller);
 
+        storageTable.getModel().addTableModelListener(controller);
+        storageTable.addPropertyChangeListener(this);
         this.validate();
     }
 
@@ -128,6 +132,14 @@ public class StoragePanel extends JPanel implements MainPanel, ActionListener {
         for (int i = 0 ; i < rowCount ; i++) {
             filterProductsComboBox.addItem(formulasTable.getValueAt(i, 0).toString());
         }
+    }
+
+    void showBatchSerials() {
+        int row = storageTable.getSelectedRow();
+        int column = storageTable.getSelectedColumn();
+
+        String itemBatches = storageTable.getValueAt(row, column).toString();
+        ShowItemBatches showItemBatches = new ShowItemBatches(itemBatches);
     }
 
     @Override
@@ -189,6 +201,20 @@ public class StoragePanel extends JPanel implements MainPanel, ActionListener {
         } else {
             filterContainerComboBox.setEnabled(filterContainerButton.isSelected());
             filterProductsComboBox.setEnabled(filterProductButton.isSelected());
+        }
+    }
+
+    @Override
+    public void propertyChange(PropertyChangeEvent evt) {
+        if (evt.getSource() == storageTable) {
+            if (evt.getPropertyName().equals("tableCellEditor")) {
+                if (storageTable.getColumnName(storageTable.getSelectedColumn()).equals("Batch_serials")) {
+                    storageTable.getCellEditor().stopCellEditing();
+                    storageTable.getCellEditor().cancelCellEditing();
+                    storageTable.setFocusable(false);
+                    showBatchSerials();
+                }
+            }
         }
     }
 }
