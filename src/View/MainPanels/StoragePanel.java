@@ -2,13 +2,14 @@ package View.MainPanels;
 
 import Controller.SystemController;
 import Model.Constants;
-import View.HelperPanels.ShowItemBatches;
+import View.HelperPanels.ShowItemBatchesView;
 import View.HomeView;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.sql.ResultSet;
@@ -35,6 +36,8 @@ public class StoragePanel extends JPanel implements MainPanel, ActionListener, P
     private JButton viewStorageButton;
     private JButton clearFiltersButton;
     private JButton deleteStorageButton;
+
+    private ShowItemBatchesView showItemBatchesView;
 
 
     public StoragePanel(HomeView homeView) {
@@ -139,7 +142,25 @@ public class StoragePanel extends JPanel implements MainPanel, ActionListener, P
         int column = storageTable.getSelectedColumn();
 
         String itemBatches = storageTable.getValueAt(row, column).toString();
-        ShowItemBatches showItemBatches = new ShowItemBatches(itemBatches);
+        showItemBatchesView = new ShowItemBatchesView(itemBatches, row, column);
+        showItemBatchesView.getUpdateButton().addActionListener(this);
+    }
+
+    void updateBatchSerials() {
+        showItemBatchesView.dispatchEvent(new WindowEvent(showItemBatchesView, WindowEvent.WINDOW_CLOSING));
+        if (!showItemBatchesView.getTextArea().equals(showItemBatchesView.getTextAreaText())) {
+            String[] lines = showItemBatchesView.getTextArea().split("\n");
+            String updated = "";
+            for (int i = 0 ; i < lines.length ; i++) {
+                if (i == lines.length-1) {
+                    updated += "\"" + lines[i] + "\"";
+                } else {
+                    updated += "\"" + lines[i] + "\",";
+                }
+            }
+            updated = "{" + updated + "}";
+            storageTable.setValueAt(updated, showItemBatchesView.getRow(), 5);
+        }
     }
 
     @Override
@@ -198,6 +219,8 @@ public class StoragePanel extends JPanel implements MainPanel, ActionListener, P
             filterProductsComboBox.setEnabled(false);
             filterContainerComboBox.setEnabled(false);
             buttonGroup.clearSelection();
+        } else if (e.getActionCommand().equals("Update")) {
+            updateBatchSerials();
         } else {
             filterContainerComboBox.setEnabled(filterContainerButton.isSelected());
             filterProductsComboBox.setEnabled(filterProductButton.isSelected());

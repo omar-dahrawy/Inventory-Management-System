@@ -3,12 +3,16 @@ package View.HelperPanels;
 import javax.swing.*;
 import java.awt.*;
 
-public class ShowItemBatches extends JDialog{
+public class ShowItemBatchesView extends JDialog {
     private JPanel itemBatchesPanel;
     private JTextArea textArea;
-    private JButton okButton;
+    private JButton updateButton;
+    private String textAreaText;
 
-    public ShowItemBatches(String itemBatches) {
+    private int row;
+    private int column;
+
+    public ShowItemBatchesView(String itemBatches, int row, int column) {
         setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 
         setSize(350,250);
@@ -31,7 +35,29 @@ public class ShowItemBatches extends JDialog{
             textArea.append("\n" + array[i].substring(1, array[i].length()-1));
         }
 
+        textAreaText = textArea.getText();
+
         Font font = new Font(textArea.getFont().getName(), textArea.getFont().getStyle(), 18);
         textArea.setFont(font);
+    }
+
+    public JButton getUpdateButton() {
+        return updateButton;
+    }
+
+    public String getTextArea() {
+        return textArea.getText();
+    }
+
+    public String getTextAreaText() {
+        return textAreaText;
+    }
+
+    public int getRow() {
+        return row;
+    }
+
+    public int getColumn() {
+        return column;
     }
 }
