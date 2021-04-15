@@ -1,15 +1,21 @@
 package View.MainPanels;
 
 import Controller.SystemController;
+import View.HelperPanels.ShowTextAreaView;
 import View.HomeView;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.WindowEvent;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 
-public class RawMaterialsPanel extends JPanel implements MainPanel {
+public class RawMaterialsPanel extends JPanel implements MainPanel, PropertyChangeListener, ActionListener {
 
     private HomeView homeView;
     private JPanel rawMaterialsPanel;
@@ -29,6 +35,8 @@ public class RawMaterialsPanel extends JPanel implements MainPanel {
 
     private JButton refreshMaterialsButton;
     private JButton deleteMaterialButton;
+
+    private ShowTextAreaView showTextAreaView;
 
     public RawMaterialsPanel(HomeView homeView) {
         this.homeView = homeView;
@@ -63,8 +71,9 @@ public class RawMaterialsPanel extends JPanel implements MainPanel {
         setTableFont(materialsTable);
         tablePanel.remove(0);
         tablePanel.add(new JScrollPane(materialsTable));
-        materialsTable.getModel().addTableModelListener(controller);
 
+        materialsTable.getModel().addTableModelListener(controller);
+        materialsTable.addPropertyChangeListener(this);
         this.validate();
         homeView.getMaterialPurchasesPanel().getMaterials();
     }
@@ -113,6 +122,28 @@ public class RawMaterialsPanel extends JPanel implements MainPanel {
 
     //  OTHER METHODS
 
+    void showBookedQuantities() {
+        int row = materialsTable.getSelectedRow();
+        int column = materialsTable.getSelectedColumn();
+
+        String bookedQuantities = materialsTable.getValueAt(row, column).toString();
+        showTextAreaView = new ShowTextAreaView(bookedQuantities, row);
+        showTextAreaView.getUpdateButton().addActionListener(this);
+    }
+
+    void updateBookedQuantities() {
+        showTextAreaView.dispatchEvent(new WindowEvent(showTextAreaView, WindowEvent.WINDOW_CLOSING));
+        String[] lines = showTextAreaView.getTextArea().split("\n");
+        String updated = "";
+        for (int i = 0 ; i < lines.length ; i++) {
+            if (i == lines.length - 1) {
+                updated += lines[i];
+            } else {
+                updated += lines[i] + ",";
+            }
+        }
+        materialsTable.setValueAt(updated, showTextAreaView.getRow(), 2);
+    }
 
     @Override
     public int getRowCount(ResultSet set) {
@@ -160,5 +191,26 @@ public class RawMaterialsPanel extends JPanel implements MainPanel {
         addMaterialButton.addActionListener(controller);
         refreshMaterialsButton.addActionListener(controller);
         deleteMaterialButton.addActionListener(controller);
+    }
+
+    @Override
+    public void propertyChange(PropertyChangeEvent evt) {
+        if (evt.getSource() == materialsTable) {
+            if (evt.getPropertyName().equals("tableCellEditor")) {
+                if (materialsTable.getColumnName(materialsTable.getSelectedColumn()).equals("Booked_quantity")) {
+                    materialsTable.getCellEditor().stopCellEditing();
+                    materialsTable.getCellEditor().cancelCellEditing();
+                    materialsTable.setFocusable(false);
+                    showBookedQuantities();
+                }
+            }
+        }
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        if (e.getActionCommand().equals("Update")) {
+            updateBookedQuantities();
+        }
     }
 }

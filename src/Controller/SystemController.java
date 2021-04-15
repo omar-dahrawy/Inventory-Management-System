@@ -591,7 +591,7 @@ public class SystemController implements ActionListener, TableModelListener {
 
 
     void getMaterials() {
-        String query = "SELECT * FROM public.\"Materials\"";
+        String query = "SELECT * FROM \"Materials\" ORDER BY \"Material_name\"";
         try {
             PreparedStatement materialsQuery = databaseConnection.prepareStatement(query, ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
             ResultSet materials = materialsQuery.executeQuery();
@@ -644,7 +644,7 @@ public class SystemController implements ActionListener, TableModelListener {
     //  ADD PRODUCTION
 
 
-    void addProduction() {
+    void addProduction()  {
         AddProductionView ApView = productionPanel.getAddProductionView();
 
         if (checkAddProduction()) {
@@ -652,7 +652,6 @@ public class SystemController implements ActionListener, TableModelListener {
             double productionQuantity = ApView.getApProductionQuantity();
             double batchQuantity = ApView.getApBatchQuantity();
             int batchesNumber = (int) (productionQuantity/batchQuantity);
-
 
             String sql = "INSERT INTO \"Production\" values (DEFAULT, ?, ?, ?, ?, ?, ?, ?)";
 
@@ -668,10 +667,12 @@ public class SystemController implements ActionListener, TableModelListener {
                 query.setString(7, K.productionStatus_1);
                 query.executeUpdate();
                 query.close();
+
                 showMessage("Operation successful", "New production added.");
-                viewProductions();
                 ApView.dispatchEvent(new WindowEvent(ApView, WindowEvent.WINDOW_CLOSING));
+                viewProductions();
                 createBatches(batchesNumber, formula, batchQuantity);
+                bookMaterials(formula, productionQuantity);
             } catch (SQLException throwables) {
                 showErrorMessage("Error performing operation", "New production could not be added.", throwables.getLocalizedMessage());
                 throwables.printStackTrace();
@@ -715,6 +716,77 @@ public class SystemController implements ActionListener, TableModelListener {
             return 0.0;
         }
         return -13.11;
+    }
+
+    void bookMaterials(String formula, double quantity) {
+        try {
+            ResultSet formulaInfo = sqlStatement.executeQuery("SELECT * FROM \"Formulas\" WHERE \"Formula_ID\" = '" + formula + "'");
+            formulaInfo.next();
+            String formulaDescription = formulaInfo.getString(2);
+            double formulaQuantity = Double.parseDouble(formulaInfo.getString(3).substring(0, formulaInfo.getString(3).indexOf(" ")));
+
+            String[] materialNames = formulaDescription.split(" - ");
+            String[] materialQuantities = new String[materialNames.length];
+
+            for (int i = 0 ; i < materialNames.length ; i++) {
+                materialQuantities[i] = materialNames[i].split(":")[1].substring(1);
+                materialNames[i] = materialNames[i].split(":")[0];
+            }
+            for (int i = 0 ; i < materialQuantities.length ; i++) {
+                materialQuantities[i] = materialQuantities[i].substring(0, materialQuantities[i].indexOf(" "));
+            }
+
+            double factor = quantity/formulaQuantity;
+            double[] materialDeduct = new double[materialNames.length];
+
+            for (int i = 0 ; i < materialDeduct.length ; i++) {
+                materialDeduct[i] = factor * Double.parseDouble(materialQuantities[i]);
+            }
+
+            if (checkMaterialQuantities(materialNames, materialDeduct)) {
+                ResultSet productionInfo = sqlStatement.executeQuery("SELECT \"Production_ID\" FROM \"Production\" ORDER BY \"Production_ID\" DESC LIMIT 1");
+                productionInfo.next();
+                int productionID = productionInfo.getInt(1);
+                for (int i = 0 ; i < materialNames.length ; i++) {
+                    ResultSet materialInfo = sqlStatement.executeQuery("SELECT * FROM \"Materials\" WHERE \"Material_name\" = '" + materialNames[i] + "'");
+                    materialInfo.next();
+                    String bookedQuantity = materialInfo.getString(3);
+                    if (!bookedQuantity.equals("")) {
+                        bookedQuantity = bookedQuantity + ",Production order " + productionID + ": " + materialDeduct[i];
+                    } else {
+                        bookedQuantity = "Production order " + productionID + ": " + materialDeduct[i];
+                    }
+                    String sql = "UPDATE \"Materials\" SET \"Booked_quantity\" = ? WHERE \"Material_name\" = ?";
+                    PreparedStatement query = databaseConnection.prepareStatement(sql);
+                    query.setString(1, bookedQuantity);
+                    query.setString(2, materialNames[i]);
+                    query.executeUpdate();
+                    query.close();
+                }
+            } else {
+                showMessage("Error booking materials", "Not enough material quantities available");
+            }
+            getMaterials();
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+    }
+
+    boolean checkMaterialQuantities(String[] materialNames, double[] materialDeduct) {
+        for (int i = 0 ; i < materialNames.length ; i++) {
+            ResultSet materialInfo = null;
+            try {
+                materialInfo = sqlStatement.executeQuery("SELECT * FROM \"Materials\" WHERE \"Material_name\" = '" + materialNames[i] + "'");
+                materialInfo.next();
+                if (materialInfo.getDouble(2) < materialDeduct[i]) {
+                    return false;
+                }
+            } catch (SQLException throwables) {
+                throwables.printStackTrace();
+            }
+
+        }
+        return true;
     }
 
 
@@ -792,13 +864,16 @@ public class SystemController implements ActionListener, TableModelListener {
             int column = e.getColumn();
             String newValue = productionTable.getValueAt(row, column).toString();
             String columnName = productionTable.getColumnName(column);
-            String id = "'" + productionTable.getValueAt(row, 0).toString() + "'";
+            String id = productionTable.getValueAt(row, 0).toString();
 
             String query = "UPDATE \"Production\" SET \"" + columnName + "\" = '" + newValue + "' WHERE \"Production_ID\" = " + id;
 
             try {
                 sqlStatement.executeUpdate(query);
                 showMessage("Update successful", "Production order updated successfully.");
+                if (columnName.equals("Production_status") && newValue.equals("Preparing for Delivery")) {
+                    deductMaterialQuantities(id);
+                }
             } catch (SQLException throwables) {
                 showMessage("Error performing operation", "Could not update production order. Please review the new values.");
                 throwables.printStackTrace();
@@ -807,48 +882,47 @@ public class SystemController implements ActionListener, TableModelListener {
         viewProductions();
     }
 
-    private void deductMaterialQuantity(String formulaName, double formulaQuantity) {
-        int row = 0;
-        for (int i = 0 ; i < productionPanel.getProductionTable().getRowCount() ; i++) {
-            if (productionPanel.getProductionTable().getValueAt(i, 0).toString().equals(formulaName)) {
-                row = i;
-                break;
-            }
+    void deductMaterialQuantities(String productionID) {
+        String formulaDescription = "";
+        try {
+            ResultSet productionInfo = sqlStatement.executeQuery("SELECT \"Production_formula\" FROM \"Production\" WHERE \"Production_ID\" = " + productionID);
+            productionInfo.next();
+            String formulaName = productionInfo.getString(1);
+            ResultSet formulaInfo = sqlStatement.executeQuery("SELECT \"Formula_description\" FROM \"Formulas\" WHERE \"Formula_ID\" = '" + formulaName + "'");
+            formulaInfo.next();
+            formulaDescription = formulaInfo.getString(1);
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
         }
 
-        String formulaDescription = formulasPanel.getFormulasTable().getValueAt(row, 1).toString();
-        String [] materials = formulaDescription.split(" - ");
+        String[] materialNames = formulaDescription.split(" - ");
+        for (int i = 0 ; i < materialNames.length ; i++) {
+            materialNames[i] = materialNames[i].split(":")[0];
+        }
 
-        for (String material : materials) {
-            String materialName = material.split(":")[0];
-            double materialQuantity = Double.parseDouble(material.split(":")[1].substring(1, material.split(":")[1].lastIndexOf(" ")));
-            double availableQuantity = 0.0;
-
-            for (int i = 0 ; i < rawMaterialsPanel.getMaterialsTable().getRowCount() ; i++) {
-                if (rawMaterialsPanel.getMaterialsTable().getValueAt(i, 1).toString().equals(materialName)) {
-                    availableQuantity = Double.parseDouble(rawMaterialsPanel.getMaterialsTable().getValueAt(i, 2).toString());
+        for (String material : materialNames) {
+            try {
+                ResultSet materialInfo = sqlStatement.executeQuery("SELECT \"Booked_quantity\", \"Available_quantity\" FROM \"Materials\" WHERE \"Material_name\" = '" + material + "'");
+                materialInfo.next();
+                String bookedQuantity = materialInfo.getString(1);
+                Double availableQuantity = Double.parseDouble(materialInfo.getString(2));
+                String[] bookedQuantities = bookedQuantity.split(",");
+                String newBookedQuantity = "";
+                for (String quantity : bookedQuantities) {
+                    if (quantity.contains("Production order " + productionID + ":")) {
+                        double deductQuantity = Double.parseDouble(quantity.split(": ")[1]);
+                        availableQuantity -= deductQuantity;
+                        sqlStatement.executeUpdate("UPDATE \"Materials\" SET \"Available_quantity\" = " + availableQuantity + " WHERE \"Material_name\" = '" + material + "'");
+                    } else {
+                        newBookedQuantity += quantity + ",";
+                    }
                 }
-            }
-
-            double newQuantity = availableQuantity - (materialQuantity * formulaQuantity);
-
-            if (newQuantity >= 0) {
-                String sql = "UPDATE \"Materials\" SET \"Available_quantity\" = ? WHERE \"Material_name\" = ?";
-                try {
-                    PreparedStatement query = databaseConnection.prepareStatement(sql);
-                    query.setDouble(1, newQuantity);
-                    query.setString(2, materialName);
-                    query.executeUpdate();
-                    query.close();
-                } catch (SQLException throwables) {
-                    throwables.printStackTrace();
-                }
-            } else {
-                showMessage("Error updating material quantities","Not enough material quantities to deduct production materials");
-                break;
+                newBookedQuantity = newBookedQuantity.substring(0, newBookedQuantity.length()-1);
+                sqlStatement.executeUpdate("UPDATE \"Materials\" SET \"Booked_quantity\" = '" + newBookedQuantity + "' WHERE \"Material_name\" = '" + material + "'");
+            } catch (SQLException throwables) {
+                throwables.printStackTrace();
             }
         }
-        getMaterials();
     }
 
     void deleteProduction() {
@@ -1323,27 +1397,20 @@ public class SystemController implements ActionListener, TableModelListener {
                     double oldQuantity = storageItem.getDouble(4);
                     double newQuantity = oldQuantity + quantity;
 
-                    Array array = storageItem.getArray(6);
-                    String[] stringSerials = (String[])array.getArray();
+                    String serials = storageItem.getString(6);
 
-                    Object[] objectSerials = new Object[stringSerials.length + 1];
-                    for (int i = 0 ; i < objectSerials.length-1 ; i++) {
-                        objectSerials[i] = stringSerials[i];
-                    }
-                    objectSerials[objectSerials.length-1] = "Batch " + batchSerial + ": " + quantity;
-                    Array batchSerialsArray = databaseConnection.createArrayOf("VARCHAR", objectSerials);
+                    serials += ",Batch " + batchSerial + ": " + quantity;
 
                     String update = "UPDATE \"Storage\" SET \"Quantity\" = ?, \"Batch_serials\" = ? WHERE \"Product_name\" = ? AND \"Container_type\" = ? AND \"Weight\" = ?";
                     PreparedStatement query2 = databaseConnection.prepareStatement(update);
                     query2.setDouble(1, newQuantity);
-                    query2.setArray(2, batchSerialsArray);
+                    query2.setString(2, serials);
                     query2.setString(3, batchFormula);
                     query2.setString(4, containerType);
                     query2.setDouble(5, weight);
                     query2.executeUpdate();
                 } else {
-                    Object [] batchSerials = {"Batch " + batchSerial + ": " + quantity};
-                    Array batchSerialsArray = databaseConnection.createArrayOf("VARCHAR", batchSerials);
+                    String serials = "Batch " + batchSerial + ": " + quantity;
 
                     String insert = "INSERT INTO \"Storage\" values(DEFAULT, ?, ?, ?, ?, ?)";
                     PreparedStatement query2 = databaseConnection.prepareStatement(insert);
@@ -1351,7 +1418,7 @@ public class SystemController implements ActionListener, TableModelListener {
                     query2.setString(2, containerType);
                     query2.setDouble(3, quantity);
                     query2.setDouble(4, weight);
-                    query2.setArray(5, batchSerialsArray);
+                    query2.setString(5, serials);
                     query2.executeUpdate();
                 }
             } catch (SQLException throwables) {
@@ -1359,6 +1426,8 @@ public class SystemController implements ActionListener, TableModelListener {
             }
         }
     }
+
+    //--
 
     void viewStorage() {
         if (checkViewStorage()) {
@@ -1399,6 +1468,8 @@ public class SystemController implements ActionListener, TableModelListener {
         }
         return true;
     }
+
+    //--
 
     void updateStorageItem(TableModelEvent e) {
         if (checkUpdatePrivilege()) {

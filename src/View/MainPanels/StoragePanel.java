@@ -2,7 +2,7 @@ package View.MainPanels;
 
 import Controller.SystemController;
 import Model.Constants;
-import View.HelperPanels.ShowItemBatchesView;
+import View.HelperPanels.ShowTextAreaView;
 import View.HomeView;
 
 import javax.swing.*;
@@ -37,7 +37,7 @@ public class StoragePanel extends JPanel implements MainPanel, ActionListener, P
     private JButton clearFiltersButton;
     private JButton deleteStorageButton;
 
-    private ShowItemBatchesView showItemBatchesView;
+    private ShowTextAreaView showTextAreaView;
 
 
     public StoragePanel(HomeView homeView) {
@@ -142,25 +142,22 @@ public class StoragePanel extends JPanel implements MainPanel, ActionListener, P
         int column = storageTable.getSelectedColumn();
 
         String itemBatches = storageTable.getValueAt(row, column).toString();
-        showItemBatchesView = new ShowItemBatchesView(itemBatches, row, column);
-        showItemBatchesView.getUpdateButton().addActionListener(this);
+        showTextAreaView = new ShowTextAreaView(itemBatches, row);
+        showTextAreaView.getUpdateButton().addActionListener(this);
     }
 
     void updateBatchSerials() {
-        showItemBatchesView.dispatchEvent(new WindowEvent(showItemBatchesView, WindowEvent.WINDOW_CLOSING));
-        if (!showItemBatchesView.getTextArea().equals(showItemBatchesView.getTextAreaText())) {
-            String[] lines = showItemBatchesView.getTextArea().split("\n");
-            String updated = "";
-            for (int i = 0 ; i < lines.length ; i++) {
-                if (i == lines.length-1) {
-                    updated += "\"" + lines[i] + "\"";
-                } else {
-                    updated += "\"" + lines[i] + "\",";
-                }
+        showTextAreaView.dispatchEvent(new WindowEvent(showTextAreaView, WindowEvent.WINDOW_CLOSING));
+        String[] lines = showTextAreaView.getTextArea().split("\n");
+        String updated = "";
+        for (int i = 0 ; i < lines.length ; i++) {
+            if (i == lines.length-1) {
+                updated += lines[i];
+            } else {
+                updated += lines[i] + ",";
             }
-            updated = "{" + updated + "}";
-            storageTable.setValueAt(updated, showItemBatchesView.getRow(), 5);
         }
+        storageTable.setValueAt(updated, showTextAreaView.getRow(), 5);
     }
 
     @Override
