@@ -120,7 +120,7 @@ public class SystemController implements ActionListener, TableModelListener {
     }
 
 
-    // ADD GENERAL EXPENSE
+    // ADD GENERAL PURCHASE
 
 
     void addGeneralExpense() {
@@ -130,7 +130,7 @@ public class SystemController implements ActionListener, TableModelListener {
             java.sql.Date DOP = java.sql.Date.valueOf(generalPurchasesPanel.getAddDop());
             java.sql.Date DOE = java.sql.Date.valueOf(new SimpleDateFormat("yyyy-MM-dd").format(new Date()));
 
-            String sql = "INSERT INTO \"General_Expenses\" VALUES (DEFAULT, ?, ?, ?, ?, ?)";
+            String sql = "INSERT INTO \"General_Purchases\" VALUES (DEFAULT, ?, ?, ?, ?, ?)";
             try {
                 PreparedStatement query = databaseConnection.prepareStatement(sql);
                 query.setString(1, itemName);
@@ -168,7 +168,7 @@ public class SystemController implements ActionListener, TableModelListener {
     }
 
 
-    //  ADD MATERIAL EXPENSE
+    //  ADD MATERIAL PURCHASE
 
 
     void addMaterialExpense() {
@@ -180,7 +180,7 @@ public class SystemController implements ActionListener, TableModelListener {
             java.sql.Date DOP = java.sql.Date.valueOf(materialPurchasesPanel.getAddDop());
             java.sql.Date DOE = java.sql.Date.valueOf(new SimpleDateFormat("yyyy-MM-dd").format(new Date()));
 
-            String sql = "INSERT INTO \"Material_Expenses\" VALUES (DEFAULT, ?, ?, ?, ?, ?, ?, ?, ?)";
+            String sql = "INSERT INTO \"Material_Purchases\" VALUES (DEFAULT, ?, ?, ?, ?, ?, ?, ?, ?)";
 
             try {
                 PreparedStatement query = databaseConnection.prepareStatement(sql);
@@ -224,7 +224,7 @@ public class SystemController implements ActionListener, TableModelListener {
     }
 
 
-    //  VIEW GENERAL EXPENSES
+    //  VIEW GENERAL PURCHASES
 
 
     void viewGeneralExpenses() {
@@ -235,7 +235,7 @@ public class SystemController implements ActionListener, TableModelListener {
         String VeDoeSelected = (generalPurchasesPanel.getFilterDoeSelected()) ? ((" WHERE \"Date_of_entry\" >= '" + fromDate + "'" ) + (toDate != null ? " AND \"Date_of_entry\" <= '" + toDate + "'" : "")) : "";
         String VeDopSelected = (generalPurchasesPanel.getFilterDopSelected()) ? ((" WHERE \"Date_of_purchase\" >= '" + fromDate + "'" ) + (toDate != null ? " AND \"Date_of_purchase\" <= '" + toDate + "'" : "")) : "";
 
-        String query = "SELECT * FROM public.\"General_Expenses\"" + VeDoeSelected + VeDopSelected;
+        String query = "SELECT * FROM public.\"General_Purchases\"" + VeDoeSelected + VeDopSelected;
 
         if (checkViewGeneralExpenses()) {
             try {
@@ -272,7 +272,7 @@ public class SystemController implements ActionListener, TableModelListener {
             String columnName = generalPurchasesTable.getColumnName(column);
             String id = generalPurchasesTable.getValueAt(row, 0).toString();
 
-            String query = "UPDATE \"General_Expenses\" SET \"" + columnName + "\" = '" + newValue + "' WHERE \"Purchase_ID\" = " + id;
+            String query = "UPDATE \"General_Purchases\" SET \"" + columnName + "\" = '" + newValue + "' WHERE \"Purchase_ID\" = " + id;
 
             try {
                 sqlStatement.executeUpdate(query);
@@ -292,21 +292,21 @@ public class SystemController implements ActionListener, TableModelListener {
 
         for (int i: rows) {
             String id = generalPurchasesTable.getValueAt(i, 0).toString();
-            String query = "DELETE FROM \"General_Expenses\" WHERE \"Purchase_ID\" = " + id;
+            String query = "DELETE FROM \"General_Purchases\" WHERE \"Purchase_ID\" = " + id;
 
             try {
                 sqlStatement.executeUpdate(query);
                 showMessage("Delete successful","Item deleted successfully.");
             } catch (SQLException throwables) {
                 throwables.printStackTrace();
-                showMessage("Error performing operation", "Could not delete item.");
+                showErrorMessage("Error performing operation", "Could not delete item.", throwables.getLocalizedMessage());
             }
         }
         viewGeneralExpenses();
     }
 
 
-    //  VIEW MATERIAL EXPENSES
+    //  VIEW MATERIAL PURCHASES
 
 
     void viewMaterialExpenses() {
@@ -316,7 +316,7 @@ public class SystemController implements ActionListener, TableModelListener {
         String VeDoeSelected = (materialPurchasesPanel.getFilterDoeSelected()) ? ((" WHERE \"Date_of_entry\" >= '" + fromDate + "'" ) + (toDate != null ? " AND \"Date_of_entry\" <= '" + toDate + "'" : "")) : "";
         String VeDopSelected = (materialPurchasesPanel.getFilterDopSelected()) ? ((" WHERE \"Date_of_purchase\" >= '" + fromDate + "'" ) + (toDate != null ? " AND \"Date_of_purchase\" <= '" + toDate + "'" : "")) : "";
 
-        String query = "SELECT * FROM \"Material_Expenses\"" + VeDoeSelected + VeDopSelected;
+        String query = "SELECT * FROM \"Material_Purchases\"" + VeDoeSelected + VeDopSelected;
 
         if (checkViewMaterialExpenses()) {
             try {
@@ -352,7 +352,7 @@ public class SystemController implements ActionListener, TableModelListener {
             String columnName = purchasesTable.getColumnName(column);
             String id = purchasesTable.getValueAt(row, 0).toString();
 
-            String query = "UPDATE \"Material_Expenses\" SET \"" + columnName + "\" = '" + newValue + "' WHERE \"Material_ID\" = " + id;
+            String query = "UPDATE \"Material_Purchases\" SET \"" + columnName + "\" = '" + newValue + "' WHERE \"Material_ID\" = " + id;
 
             try {
                 sqlStatement.executeUpdate(query);
@@ -371,14 +371,14 @@ public class SystemController implements ActionListener, TableModelListener {
 
         for (int i: rows) {
             String id = purchasesTable.getValueAt(i, 0).toString();
-            String query = "DELETE FROM \"Material_Expenses\" WHERE \"Purchase_ID\" = " + id;
+            String query = "DELETE FROM \"Material_Purchases\" WHERE \"Purchase_ID\" = " + id;
 
             try {
                 sqlStatement.executeUpdate(query);
                 showMessage("Delete successful","Item deleted successfully.");
             } catch (SQLException throwables) {
                 throwables.printStackTrace();
-                showMessage("Error performing operation", "Could not delete item.");
+                showErrorMessage("Error performing operation", "Could not delete item.", throwables.getLocalizedMessage());
             }
         }
         viewGeneralExpenses();
@@ -535,17 +535,20 @@ public class SystemController implements ActionListener, TableModelListener {
     }
 
     void deleteOrder() {
-        int row = ordersPanel.getOrdersTable().getSelectedRow();
-        String id = ordersPanel.getOrdersTable().getValueAt(row, 0).toString();
+        JTable ordersTable = ordersPanel.getOrdersTable();
+        int[] rows = ordersTable.getSelectedRows();
 
-        String query = "DELETE FROM \"Orders\" WHERE \"Order_ID\" = " + id;
+        for (int i: rows) {
+            String id = ordersTable.getValueAt(i, 0).toString();
+            String query = "DELETE FROM \"Orders\" WHERE \"Order_ID\" = " + id;
 
-        try {
-            sqlStatement.executeUpdate(query);
-            showMessage("Delete successful","Item deleted successfully.");
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
-            showMessage("Error performing operation", "Could not delete item.");
+            try {
+                sqlStatement.executeUpdate(query);
+                showMessage("Delete successful","Item deleted successfully.");
+            } catch (SQLException throwables) {
+                throwables.printStackTrace();
+                showErrorMessage("Error performing operation", "Could not delete item.", throwables.getLocalizedMessage());
+            }
         }
         viewOrders();
     }
@@ -625,17 +628,20 @@ public class SystemController implements ActionListener, TableModelListener {
     }
 
     void deleteMaterial() {
-        int row = rawMaterialsPanel.getMaterialsTable().getSelectedRow();
-        String id = rawMaterialsPanel.getMaterialsTable().getValueAt(row, 0).toString();
+        JTable materialsTable = rawMaterialsPanel.getMaterialsTable();
+        int[] rows = materialsTable.getSelectedRows();
 
-        String query = "DELETE FROM \"Materials\" WHERE \"Material_ID\" = " + id;
+        for (int i: rows) {
+            String id = materialsTable.getValueAt(i, 0).toString();
+            String query = "DELETE FROM \"Materials\" WHERE \"Material_name\" = '" + id + "'";
 
-        try {
-            sqlStatement.executeUpdate(query);
-            showMessage("Delete successful","Item deleted successfully.");
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
-            showMessage("Error performing operation", "Could not delete item.");
+            try {
+                sqlStatement.executeUpdate(query);
+                showMessage("Delete successful","Item deleted successfully.");
+            } catch (SQLException throwables) {
+                throwables.printStackTrace();
+                showErrorMessage("Error performing operation", "Could not delete item.", throwables.getLocalizedMessage());
+            }
         }
         getMaterials();
     }
@@ -927,24 +933,21 @@ public class SystemController implements ActionListener, TableModelListener {
 
     void deleteProduction() {
         JTable productionTable = productionPanel.getProductionTable();
+        int[] rows = productionTable.getSelectedRows();
 
-        if (productionTable != null) {
-            if (productionTable.getModel() != null) {
-                int row = productionTable.getSelectedRow();
-                String id = "'" + productionTable.getValueAt(row, 0).toString() + "'";
+        for (int i: rows) {
+            String id = productionTable.getValueAt(i, 0).toString();
+            String query = "DELETE FROM \"Production\" WHERE \"Production_ID\" = " + id;
 
-                String query = "DELETE FROM \"Production\" WHERE \"Production_ID\" = " + id;
-
-                try {
-                    sqlStatement.executeUpdate(query);
-                    showMessage("Delete successful","Batch deleted successfully.");
-                } catch (SQLException throwables) {
-                    showMessage("Error performing operation", "Could not delete batch.");
-                    throwables.printStackTrace();
-                }
-                viewProductions();
+            try {
+                sqlStatement.executeUpdate(query);
+                showMessage("Delete successful","Item deleted successfully.");
+            } catch (SQLException throwables) {
+                throwables.printStackTrace();
+                showErrorMessage("Error performing operation", "Could not delete item.", throwables.getLocalizedMessage());
             }
         }
+        viewProductions();
     }
 
 
@@ -1128,23 +1131,21 @@ public class SystemController implements ActionListener, TableModelListener {
 
     void deleteFormula() {
         JTable formulasTable = formulasPanel.getFormulasTable();
-        if (formulasTable != null) {
-            if (formulasTable.getModel() != null) {
-                int row = formulasTable.getSelectedRow();
-                String id = "'" + formulasTable.getValueAt(row, 0).toString() + "'";
+        int[] rows = formulasTable.getSelectedRows();
 
-                String query = "DELETE FROM \"Formulas\" WHERE \"Formula_ID\" = " + id;
+        for (int i: rows) {
+            String id = formulasTable.getValueAt(i, 0).toString();
+            String query = "DELETE FROM \"Formulas\" WHERE \"Formula_ID\" = '" + id + "'";
 
-                try {
-                    sqlStatement.executeUpdate(query);
-                    showMessage("Delete successful","Formula deleted successfully.");
-                } catch (SQLException throwables) {
-                    showErrorMessage("Error performing operation", "Could not delete formula.", throwables.getLocalizedMessage());
-                    throwables.printStackTrace();
-                }
-                getFormulas();
+            try {
+                sqlStatement.executeUpdate(query);
+                showMessage("Delete successful","Item deleted successfully.");
+            } catch (SQLException throwables) {
+                throwables.printStackTrace();
+                showErrorMessage("Error performing operation", "Could not delete item.", throwables.getLocalizedMessage());
             }
         }
+        getFormulas();
     }
 
 
@@ -1330,23 +1331,21 @@ public class SystemController implements ActionListener, TableModelListener {
 
     void deleteVendor() {
         JTable vendorsTable = vendorsPanel.getVendorsTable();
-        if (vendorsTable != null) {
-            if (vendorsTable.getModel() != null) {
-                int row = vendorsTable.getSelectedRow();
-                String id = vendorsTable.getValueAt(row, 0).toString();
+        int[] rows = vendorsTable.getSelectedRows();
 
-                String query = "DELETE FROM \"Vendors\" WHERE \"Vendor_ID\" = " + id;
+        for (int i: rows) {
+            String id = vendorsTable.getValueAt(i, 0).toString();
+            String query = "DELETE FROM \"Vendors\" WHERE \"Vendor_ID\" = " + id;
 
-                try {
-                    sqlStatement.executeUpdate(query);
-                    showMessage("Delete successful","Vendor deleted successfully.");
-                } catch (SQLException throwables) {
-                    showErrorMessage("Error performing operation", "Could not delete vendor.", throwables.getLocalizedMessage());
-                    throwables.printStackTrace();
-                }
-                viewVendors();
+            try {
+                sqlStatement.executeUpdate(query);
+                showMessage("Delete successful","Item deleted successfully.");
+            } catch (SQLException throwables) {
+                throwables.printStackTrace();
+                showErrorMessage("Error performing operation", "Could not delete item.", throwables.getLocalizedMessage());
             }
         }
+        viewVendors();
     }
 
 
@@ -1495,23 +1494,21 @@ public class SystemController implements ActionListener, TableModelListener {
 
     void deleteStorageItem() {
         JTable storageTable = storagePanel.getStorageTable();
-        if (storageTable != null) {
-            if (storageTable.getModel() != null) {
-                int row = storageTable.getSelectedRow();
-                String id = storageTable.getValueAt(row, 0).toString();
+        int[] rows = storageTable.getSelectedRows();
 
-                String query = "DELETE FROM \"Storage\" WHERE \"Item_ID\" = " + id;
+        for (int i: rows) {
+            String id = storageTable.getValueAt(i, 0).toString();
+            String query = "DELETE FROM \"Storage\" WHERE \"Item_ID\" = " + id;
 
-                try {
-                    sqlStatement.executeUpdate(query);
-                    showMessage("Delete successful","Storage item deleted successfully.");
-                } catch (SQLException throwables) {
-                    showErrorMessage("Error performing operation", "Could not delete storage item.", throwables.getLocalizedMessage());
-                    throwables.printStackTrace();
-                }
-                viewStorage();
+            try {
+                sqlStatement.executeUpdate(query);
+                showMessage("Delete successful","Item deleted successfully.");
+            } catch (SQLException throwables) {
+                throwables.printStackTrace();
+                showErrorMessage("Error performing operation", "Could not delete item.", throwables.getLocalizedMessage());
             }
         }
+        viewStorage();
     }
 
 
@@ -1616,21 +1613,18 @@ public class SystemController implements ActionListener, TableModelListener {
 
     void deleteBatch() {
         JTable batchesTable = batchesPanel.getBatchesTable();
-        if (batchesTable != null) {
-            if (batchesTable.getModel() != null) {
-                int row = batchesTable.getSelectedRow();
-                String serial = batchesTable.getValueAt(row, 0).toString();
+        int[] rows = batchesTable.getSelectedRows();
 
-                String query = "DELETE FROM \"Batches\" WHERE \"Batch_serial\" = " + serial;
+        for (int i: rows) {
+            String id = batchesTable.getValueAt(i, 0).toString();
+            String query = "DELETE FROM \"Batches\" WHERE \"Batch_serial\" = " + id;
 
-                try {
-                    sqlStatement.executeUpdate(query);
-                    showMessage("Delete successful","Batch deleted successfully.");
-                } catch (SQLException throwables) {
-                    showErrorMessage("Error performing operation", "Could not delete batch.", throwables.getLocalizedMessage());
-                    throwables.printStackTrace();
-                }
-                viewBatches();
+            try {
+                sqlStatement.executeUpdate(query);
+                showMessage("Delete successful","Item deleted successfully.");
+            } catch (SQLException throwables) {
+                throwables.printStackTrace();
+                showErrorMessage("Error performing operation", "Could not delete item.", throwables.getLocalizedMessage());
             }
         }
     }
