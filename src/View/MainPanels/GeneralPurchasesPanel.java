@@ -7,11 +7,13 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
 
-public class GeneralPurchasesPanel extends JPanel implements MainPanel, ActionListener {
+public class GeneralPurchasesPanel extends JPanel implements MainPanel, ActionListener, PropertyChangeListener {
 
     private JPanel generalPurchasesPanel;
 
@@ -92,6 +94,7 @@ public class GeneralPurchasesPanel extends JPanel implements MainPanel, ActionLi
         tablePanel.add(new JScrollPane(purchasesTable));
 
         purchasesTable.getModel().addTableModelListener(controller);
+        purchasesTable.addPropertyChangeListener(this);
 
         this.validate();
     }
@@ -165,6 +168,11 @@ public class GeneralPurchasesPanel extends JPanel implements MainPanel, ActionLi
     //  OTHER METHODS
 
 
+    void showMessage(String title, String message) {
+        JOptionPane.showMessageDialog(null, message, title, JOptionPane.INFORMATION_MESSAGE);
+        viewPurchasesButton.doClick();
+    }
+
     @Override
     public int getRowCount(ResultSet set) {
         int rowCount = 0;
@@ -228,4 +236,14 @@ public class GeneralPurchasesPanel extends JPanel implements MainPanel, ActionLi
         }
     }
 
+    @Override
+    public void propertyChange(PropertyChangeEvent evt) {
+        if (evt.getSource() == purchasesTable) {
+            if (evt.getPropertyName().equals("tableCellEditor")) {
+                if (purchasesTable.getColumnName(purchasesTable.getSelectedColumn()).equals("User_ID")) {
+                    showMessage("Error updating item","User ID cannot be edited.");
+                }
+            }
+        }
+    }
 }

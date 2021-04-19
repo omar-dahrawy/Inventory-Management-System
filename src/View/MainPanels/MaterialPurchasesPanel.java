@@ -8,11 +8,13 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
 
-public class MaterialPurchasesPanel extends JPanel implements MainPanel, ActionListener {
+public class MaterialPurchasesPanel extends JPanel implements MainPanel, ActionListener, PropertyChangeListener {
 
     private JPanel materialPurchasesPanel;
     private HomeView homeView;
@@ -97,6 +99,7 @@ public class MaterialPurchasesPanel extends JPanel implements MainPanel, ActionL
         tablePanel.add(new JScrollPane(purchasesTable));
 
         purchasesTable.getModel().addTableModelListener(controller);
+        purchasesTable.addPropertyChangeListener(this);
 
         this.validate();
     }
@@ -183,6 +186,11 @@ public class MaterialPurchasesPanel extends JPanel implements MainPanel, ActionL
     //  OTHER METHODS
 
 
+    void showMessage(String title, String message) {
+        JOptionPane.showMessageDialog(null, message, title, JOptionPane.INFORMATION_MESSAGE);
+        viewPurchasesButton.doClick();
+    }
+
     public void getVendors() {
         JTable vendorsTable = homeView.getVendorsPanel().getVendorsTable();
         int rowCount = vendorsTable.getRowCount();
@@ -267,6 +275,17 @@ public class MaterialPurchasesPanel extends JPanel implements MainPanel, ActionL
         } else {
             filterFromDatePicker.setEnabled(true);
             filterToDatePicker.setEnabled(true);
+        }
+    }
+
+    @Override
+    public void propertyChange(PropertyChangeEvent evt) {
+        if (evt.getSource() == purchasesTable) {
+            if (evt.getPropertyName().equals("tableCellEditor")) {
+                if (purchasesTable.getColumnName(purchasesTable.getSelectedColumn()).equals("User_ID")) {
+                    showMessage("Error updating item","User ID cannot be edited.");
+                }
+            }
         }
     }
 }

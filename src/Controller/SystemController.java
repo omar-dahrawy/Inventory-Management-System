@@ -207,8 +207,11 @@ public class SystemController implements ActionListener, TableModelListener {
     }
 
     boolean checkMaterialExpenses() {
-        if (materialPurchasesPanel.getAddMaterial().equals("")) {
+        if (materialPurchasesPanel.getAddMaterial().equals("Select Material")) {
             showMessage("Error adding expense", "Please select a Material.");
+            return false;
+        } else if (materialPurchasesPanel.getAddVendor() == 0) {
+            showMessage("Error adding expense", "Please select a Vendor.");
             return false;
         } else if (materialPurchasesPanel.getAddQuantity() == -13.11) {
             showMessage("Error adding expense", "Material quantity must be in numbers only.");
@@ -218,6 +221,9 @@ public class SystemController implements ActionListener, TableModelListener {
             return false;
         } else if (materialPurchasesPanel.getAddDop() == null) {
             showMessage("Error adding expense.", "Date of purchase cannot be empty.");
+            return false;
+        } else if (materialPurchasesPanel.getAddInvoice().equals("")) {
+            showMessage("Error adding expense.", "Invoice number cannot be empty.");
             return false;
         }
         return true;
@@ -279,7 +285,7 @@ public class SystemController implements ActionListener, TableModelListener {
                 showMessage("Update successful", "Item updated successfully.");
             } catch (SQLException throwables) {
                 throwables.printStackTrace();
-                showMessage("Error performing operation", "Could not update item. Please review the new values.");
+                showErrorMessage("Error performing operation", "Could not update item. Please review the new values.", throwables.getLocalizedMessage());
             }
         }
         viewGeneralExpenses();
@@ -352,14 +358,14 @@ public class SystemController implements ActionListener, TableModelListener {
             String columnName = purchasesTable.getColumnName(column);
             String id = purchasesTable.getValueAt(row, 0).toString();
 
-            String query = "UPDATE \"Material_Purchases\" SET \"" + columnName + "\" = '" + newValue + "' WHERE \"Material_ID\" = " + id;
+            String query = "UPDATE \"Material_Purchases\" SET \"" + columnName + "\" = '" + newValue + "' WHERE \"Purchase_ID\" = " + id;
 
             try {
                 sqlStatement.executeUpdate(query);
                 showMessage("Update successful", "Item updated successfully.");
             } catch (SQLException throwables) {
                 throwables.printStackTrace();
-                showMessage("Error performing operation", "Could not update item. Please review the new values.");
+                showErrorMessage("Error performing operation", "Could not update item. Please review the new values.", throwables.getLocalizedMessage());
             }
         }
         viewMaterialExpenses();

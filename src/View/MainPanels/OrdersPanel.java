@@ -219,6 +219,11 @@ public class OrdersPanel extends JPanel implements MainPanel, ActionListener, Pr
     //  OTHER METHODS
 
 
+    void showMessage(String title, String message) {
+        JOptionPane.showMessageDialog(null, message, title, JOptionPane.INFORMATION_MESSAGE);
+        viewOrdersButton.doClick();
+    }
+
     void showDropBoxMessage() {
         String[] options = {"Select Status", K.productionStatus_1, K.productionStatus_2, K.productionStatus_3, K.productionStatus_4};
         String selectedStatus = (String)JOptionPane.showInputDialog(null, " \nChange order status:\n ",
@@ -309,6 +314,8 @@ public class OrdersPanel extends JPanel implements MainPanel, ActionListener, Pr
             if (evt.getPropertyName().equals("tableCellEditor")) {
                 if (ordersTable.getColumnName(ordersTable.getSelectedColumn()).equals("Status")) {
                     showDropBoxMessage();
+                } else if (ordersTable.getColumnName(ordersTable.getSelectedColumn()).equals("Order_ID")) {
+                    showMessage("Error updating item","User ID cannot be edited.");
                 }
             }
         }
