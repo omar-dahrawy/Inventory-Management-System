@@ -312,7 +312,7 @@ public class OrdersPanel extends JPanel implements MainPanel, ActionListener, Pr
             if (evt.getPropertyName().equals("tableCellEditor")) {
                 if (ordersTable.getColumnName(ordersTable.getSelectedColumn()).equals("Status")) {
                     showDropBoxMessage();
-                } else if (ordersTable.getColumnName(ordersTable.getSelectedColumn()).equals("Order_ID")) {
+                } else if (ordersTable.getColumnName(ordersTable.getSelectedColumn()).equals("User_ID")) {
                     showMessage("Error updating item","User ID cannot be edited.");
                 }
             }
