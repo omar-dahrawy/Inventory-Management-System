@@ -193,16 +193,29 @@ public class SystemController implements ActionListener, TableModelListener {
                 query.setInt(7, vendorID);
                 query.setString(8, materialInvoice);
                 query.executeUpdate();
-                String updateQuery = "UPDATE \"Materials\" SET \"Available_quantity\" = " + materialQuantity + " WHERE \"Material_name\" = '" + materialName + "'";
-                sqlStatement.executeUpdate(updateQuery);
                 showMessage("Operation successful", "Material Expense added.");
-                getMaterials();
+                updateMaterialQuantities(materialName, materialQuantity);
                 materialPurchasesPanel.clearAddFields();
                 viewMaterialExpenses();
             } catch (SQLException throwables) {
                 showMessage("Error performing operation", "Material Expense could not be added.");
                 throwables.printStackTrace();
             }
+        }
+    }
+
+    void updateMaterialQuantities(String materialName, double materialQuantity) {
+        try {
+            ResultSet materialInfo = sqlStatement.executeQuery("SELECT \"Available_quantity\" FROM \"Materials\" WHERE \"Material_name\" = '" + materialName + "'");
+            materialInfo.next();
+            double oldQuantity = materialInfo.getDouble(1);
+            double newQuantity = oldQuantity + materialQuantity;
+            sqlStatement.executeUpdate("UPDATE \"Materials\" SET \"Available_quantity\" = " + newQuantity + " WHERE \"Material_name\" = '" + materialName + "'");
+            showMessage("Material quantity updated",materialName + " available quantity updated successfully.");
+            getMaterials();
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+            showErrorMessage("Error updating material quantity", materialName + " available quantity could not be updated.\nPlease update the quantity manually.", throwables.getLocalizedMessage());
         }
     }
 
@@ -432,9 +445,6 @@ public class SystemController implements ActionListener, TableModelListener {
         if (ordersPanel.getAddCustomer().equals("")) {
             flag = false;
             showMessage("Error adding order", "Order customer cannot be empty.");
-        } else if (ordersPanel.getAddBatchSerial().equals("")) {
-            flag = false;
-            showMessage("Error adding order", "Batch serial cannot be empty.");
         } else if (ordersPanel.getAddDetails().equals("")) {
             flag = false;
             showMessage("Error adding order", "Order details cannot be empty.");
@@ -457,7 +467,6 @@ public class SystemController implements ActionListener, TableModelListener {
             boolean customerSelected = ordersPanel.getFilterCustomerButton().isSelected();
             boolean DateSelected = ordersPanel.getFilterDateButton().isSelected();
             boolean statusSelected = ordersPanel.getFilterStatusButton().isSelected();
-            boolean batchSerialSelected = ordersPanel.getFilterBatchSerialButton().isSelected();
 
             String query;
 
@@ -473,8 +482,6 @@ public class SystemController implements ActionListener, TableModelListener {
                 }
             } else if (statusSelected) {
                 query = "SELECT * FROM public.\"Orders\" WHERE \"Status\" = '" + ordersPanel.getFilterStatus() + "'";
-            } else if (batchSerialSelected) {
-                query = "SELECT * FROM public.\"Orders\" WHERE \"Batch_serial\" = '" + ordersPanel.getFilterSerial() + "'";
             } else {
                 query = "SELECT * FROM public.\"Orders\"";
             }
@@ -501,11 +508,6 @@ public class SystemController implements ActionListener, TableModelListener {
             if (ordersPanel.getFilterStatus().equals("Select Status")) {
                 flag = false;
                 showMessage("Error viewing orders", "Please select a status to filter by.");
-            }
-        } else if (ordersPanel.getFilterBatchSerialButton().isSelected()) {
-            if (ordersPanel.getFilterSerial().equals("")) {
-                flag = false;
-                showMessage("Error viewing orders", "Please enter a batch serial to filter by.");
             }
         } else if (ordersPanel.getFilterDateButton().isSelected()) {
             if (ordersPanel.getFilterDateType().equals("Select date type")) {

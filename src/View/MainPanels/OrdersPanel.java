@@ -6,6 +6,8 @@ import View.HomeView;
 import com.github.lgooddatepicker.components.DatePicker;
 
 import javax.swing.*;
+import javax.swing.table.TableCellRenderer;
+import javax.swing.table.TableColumnModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -24,7 +26,6 @@ public class OrdersPanel extends JPanel implements MainPanel, ActionListener, Pr
     //  ADD ORDER
 
     private JTextField addCustomerField;
-    private JTextField addBatchSerialField;
     private JTextArea addDetailsArea;
     private DatePicker addDopPicker;
     private DatePicker addDodPicker;
@@ -38,7 +39,6 @@ public class OrdersPanel extends JPanel implements MainPanel, ActionListener, Pr
     private JPanel tablePanel;
 
     private JTextField filterCustomerField;
-    private JTextField filterSerialField;
     private JComboBox<String> filterStatusComboBox;
     private JComboBox<String> filterDateComboBox;
     private DatePicker filterToDatePicker;
@@ -49,7 +49,6 @@ public class OrdersPanel extends JPanel implements MainPanel, ActionListener, Pr
     private JRadioButton filterDateButton;
     private JRadioButton filterCustomerButton;
     private JRadioButton filterStatusButton;
-    private JRadioButton filterBatchSerialButton;
     private ButtonGroup buttonGroup;
 
     private JButton viewOrdersButton;
@@ -82,7 +81,6 @@ public class OrdersPanel extends JPanel implements MainPanel, ActionListener, Pr
 
         buttonGroup = new ButtonGroup();
         buttonGroup.add(filterDateButton);
-        buttonGroup.add(filterBatchSerialButton);
         buttonGroup.add(filterCustomerButton);
         buttonGroup.add(filterStatusButton);
 
@@ -118,6 +116,7 @@ public class OrdersPanel extends JPanel implements MainPanel, ActionListener, Pr
         setTableFont(ordersTable);
         tablePanel.remove(0);
         tablePanel.add(new JScrollPane(ordersTable));
+        resizeColumnWidth(ordersTable);
 
         ordersTable.getModel().addTableModelListener(controller);
         ordersTable.addPropertyChangeListener(this);
@@ -127,7 +126,6 @@ public class OrdersPanel extends JPanel implements MainPanel, ActionListener, Pr
 
     public void clearAddFields() {
         addCustomerField.setText("");
-        addBatchSerialField.setText("");
         addDetailsArea.setText("");
     }
 
@@ -137,10 +135,6 @@ public class OrdersPanel extends JPanel implements MainPanel, ActionListener, Pr
 
     public String getAddCustomer() {
         return addCustomerField.getText();
-    }
-
-    public String getAddBatchSerial() {
-        return addBatchSerialField.getText();
     }
 
     public String getAddDetails() {
@@ -179,16 +173,8 @@ public class OrdersPanel extends JPanel implements MainPanel, ActionListener, Pr
         return filterStatusButton;
     }
 
-    public JRadioButton getFilterBatchSerialButton() {
-        return filterBatchSerialButton;
-    }
-
     public String getFilterCustomer() {
         return filterCustomerField.getText();
-    }
-
-    public String getFilterSerial() {
-        return filterSerialField.getText();
     }
 
     public String getFilterStatus() {
@@ -232,6 +218,21 @@ public class OrdersPanel extends JPanel implements MainPanel, ActionListener, Pr
         int row = ordersTable.getSelectedRow();
         int column = ordersTable.getSelectedColumn();
         ordersTable.setValueAt(selectedStatus, row, column);
+    }
+
+    void resizeColumnWidth(JTable table) {
+        TableColumnModel columnModel = table.getColumnModel();
+        for (int column = 0; column < table.getColumnCount(); column++) {
+            int width = 15;
+            for (int row = 0; row < table.getRowCount(); row++) {
+                TableCellRenderer renderer = table.getCellRenderer(row, column);
+                Component comp = table.prepareRenderer(renderer, row, column);
+                width = Math.max(comp.getPreferredSize().width +1 , width);
+            }
+            if(width > 300)
+                width=300;
+            columnModel.getColumn(column).setPreferredWidth(width);
+        }
     }
 
     @Override
@@ -285,7 +286,6 @@ public class OrdersPanel extends JPanel implements MainPanel, ActionListener, Pr
         filterDateButton.addActionListener(this);
         filterCustomerButton.addActionListener(this);
         filterStatusButton.addActionListener(this);
-        filterBatchSerialButton.addActionListener(this);
     }
 
     @Override
@@ -296,7 +296,6 @@ public class OrdersPanel extends JPanel implements MainPanel, ActionListener, Pr
             filterToDatePicker.setEnabled(false);
             filterFromDatePicker.setEnabled(false);
             filterStatusComboBox.setEnabled(false);
-            filterSerialField.setEnabled(false);
             buttonGroup.clearSelection();
         } else {
             filterDateComboBox.setEnabled(filterDateButton.isSelected());
@@ -304,7 +303,6 @@ public class OrdersPanel extends JPanel implements MainPanel, ActionListener, Pr
             filterFromDatePicker.setEnabled(filterDateButton.isSelected());
             filterCustomerField.setEnabled(filterCustomerButton.isSelected());
             filterStatusComboBox.setEnabled(filterStatusButton.isSelected());
-            filterSerialField.setEnabled(filterBatchSerialButton.isSelected());
         }
     }
 
